@@ -16,7 +16,7 @@ public class SubmissionController {
 
     private final SubmissionApi submissionApi;
 
-    @PostMapping("/quotes/{id}/submit")
+    @PostMapping(value = "/quotes/{id}/submit", version = "1.0")
     public QuoteView submit(@PathVariable UUID id) {
         log.debug("Submitting quote {}", id);
         return submissionApi.submit(id);

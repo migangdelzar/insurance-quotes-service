@@ -5,6 +5,7 @@ import com.clara.libs.i18n.SupportedLocale;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,6 +37,14 @@ public class GlobalExceptionHandler {
         var locale = SupportedLocale.fromHeader(request.getHeader("Accept-Language"));
         var message = messages.resolve("error.VALIDATION_FAILED", locale);
         return ResponseEntity.badRequest().body(ApiError.validation(fieldErrors, message));
+    }
+
+    @ExceptionHandler(InvalidApiVersionException.class)
+    public ResponseEntity<ApiError> handleInvalidApiVersion(
+            InvalidApiVersionException exception, HttpServletRequest request) {
+        var locale = SupportedLocale.fromHeader(request.getHeader("Accept-Language"));
+        var message = messages.resolve("error.API_VERSION_INVALID", locale);
+        return ResponseEntity.badRequest().body(ApiError.of(400, "API_VERSION_INVALID", message));
     }
 
     @ExceptionHandler(Exception.class)

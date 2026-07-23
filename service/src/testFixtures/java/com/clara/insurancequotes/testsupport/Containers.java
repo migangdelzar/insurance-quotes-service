@@ -1,13 +1,13 @@
 package com.clara.insurancequotes.testsupport;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 public final class Containers {
 
-    public static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>("postgres:16-alpine").withDatabaseName("quotes");
+    public static final PostgreSQLContainer POSTGRES =
+            new PostgreSQLContainer("postgres:16-alpine").withDatabaseName("quotes");
 
     public static final KafkaContainer KAFKA = new KafkaContainer("apache/kafka:3.8.1");
 

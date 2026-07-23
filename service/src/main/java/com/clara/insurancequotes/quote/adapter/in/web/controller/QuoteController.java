@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/quotes")
+@RequestMapping(value = "/quotes", version = "1.0")
 @RequiredArgsConstructor
 @Slf4j
 public class QuoteController {

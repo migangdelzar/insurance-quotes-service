@@ -4,7 +4,10 @@ CREATE TABLE IF NOT EXISTS event_publication (
     event_type       TEXT        NOT NULL,
     serialized_event TEXT        NOT NULL,
     publication_date TIMESTAMPTZ NOT NULL,
-    completion_date  TIMESTAMPTZ
+    completion_date  TIMESTAMPTZ,
+    status           VARCHAR(32)  NOT NULL DEFAULT 'PUBLISHED',
+    completion_attempts INTEGER   NOT NULL DEFAULT 0,
+    last_resubmission_date TIMESTAMPTZ
 );
 
 CREATE INDEX IF NOT EXISTS event_publication_serialized_event_hash_idx

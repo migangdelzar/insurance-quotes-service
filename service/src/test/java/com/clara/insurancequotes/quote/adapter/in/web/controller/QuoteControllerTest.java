@@ -2,6 +2,7 @@ package com.clara.insurancequotes.quote.adapter.in.web.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,14 +23,15 @@ import com.clara.insurancequotes.shared.configuration.I18nConfig;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(QuoteController.class)
@@ -46,7 +48,7 @@ class QuoteControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private QuoteApi quoteApi;
 
     private static final UUID QUOTE_ID = UUID.fromString("f7d9a1c2-0000-0000-0000-000000000001");
@@ -139,5 +141,25 @@ class QuoteControllerTest {
     @Test
     void getQuotes_withoutJwt_returns401() throws Exception {
         mockMvc.perform(get("/quotes")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void unsupportedApiVersion_isRejected() throws Exception {
+        mockMvc.perform(get("/quotes")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .header("API-Version", "9.0"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void supportedApiVersion_routesToController() throws Exception {
+        doReturn(List.of()).when(quoteApi).listQuotes();
+
+        mockMvc.perform(get("/quotes")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .header("API-Version", "1.0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }

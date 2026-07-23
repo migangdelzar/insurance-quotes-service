@@ -20,6 +20,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 class QuoteJourneyE2E {
 
     private static final String BASE_URL = System.getenv().getOrDefault("E2E_BASE_URL", "http://localhost:8080");
+    private static final String API_VERSION = "1.0";
     private static final MediaType JSON = MediaType.get("application/json");
     private static final OkHttpClient CLIENT = new OkHttpClient();
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -42,7 +43,10 @@ class QuoteJourneyE2E {
     }
 
     private static Request.Builder authorized(String path) {
-        return new Request.Builder().url(BASE_URL + path).header("Authorization", "Bearer " + accessToken);
+        return new Request.Builder()
+                .url(BASE_URL + path)
+                .header("Authorization", "Bearer " + accessToken)
+                .header("API-Version", API_VERSION);
     }
 
     @Test
@@ -50,6 +54,7 @@ class QuoteJourneyE2E {
     void loginIssuesTokens() {
         var request = new Request.Builder()
                 .url(BASE_URL + "/auth/login")
+                .header("API-Version", API_VERSION)
                 .post(RequestBody.create("{\"username\":\"demo\",\"password\":\"demo-password\"}", JSON))
                 .build();
 
@@ -63,7 +68,10 @@ class QuoteJourneyE2E {
     @Test
     @Order(2)
     void unauthenticatedRequestIs401() throws Exception {
-        var request = new Request.Builder().url(BASE_URL + "/quotes").build();
+        var request = new Request.Builder()
+                .url(BASE_URL + "/quotes")
+                .header("API-Version", API_VERSION)
+                .build();
         try (Response response = CLIENT.newCall(request).execute()) {
             assertThat(response.code()).isEqualTo(401);
         }
