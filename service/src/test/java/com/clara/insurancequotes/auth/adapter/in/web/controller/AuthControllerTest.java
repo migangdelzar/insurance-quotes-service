@@ -14,6 +14,7 @@ import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.auth.application.service.LoginService;
 import com.clara.insurancequotes.auth.application.service.RefreshTokenService;
 import com.clara.insurancequotes.auth.application.service.TokenService;
+import com.clara.insurancequotes.auth.application.service.WebAuthnService;
 import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
@@ -53,6 +54,9 @@ class AuthControllerTest {
 
     @org.springframework.boot.test.mock.mockito.MockBean
     private TokenService tokenService;
+
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private WebAuthnService webAuthnService;
 
     @org.springframework.boot.test.mock.mockito.MockBean
     private UserRepository users;

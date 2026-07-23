@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,10 +18,12 @@ import org.springframework.stereotype.Service;
 public class TokenService {
 
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
     private final Duration ttl;
 
-    public TokenService(JwtEncoder jwtEncoder, @Value("${auth.jwt.ttl}") Duration ttl) {
+    public TokenService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, @Value("${auth.jwt.ttl}") Duration ttl) {
         this.jwtEncoder = jwtEncoder;
+        this.jwtDecoder = jwtDecoder;
         this.ttl = ttl;
     }
 
@@ -31,6 +35,14 @@ public class TokenService {
 
     public String issueMfaToken(String username) {
         return issue(username, "mfa-pending", Duration.ofMinutes(5)).accessToken();
+    }
+
+    public String scopeOf(String token) {
+        try {
+            return jwtDecoder.decode(token).getClaimAsString("scope");
+        } catch (JwtException exception) {
+            throw new com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException();
+        }
     }
 
     private IssuedAccess issue(String username, String scope, Duration tokenTtl) {

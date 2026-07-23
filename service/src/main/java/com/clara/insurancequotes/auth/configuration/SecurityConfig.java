@@ -28,10 +28,13 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**", "/actuator/health")
-                        .permitAll()
-                        .anyRequest()
-                        .hasAuthority("SCOPE_api"))
+                .authorizeHttpRequests(
+                        auth -> auth.requestMatchers("/auth/webauthn/register-options", "/auth/webauthn/register")
+                                .authenticated()
+                                .requestMatchers("/auth/**", "/actuator/health")
+                                .permitAll()
+                                .anyRequest()
+                                .hasAuthority("SCOPE_api"))
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> {}).authenticationEntryPoint(entryPoint))
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(entryPoint))
                 .build();

@@ -2,6 +2,8 @@ package com.clara.insurancequotes.auth.adapter.out.persistence;
 
 import com.clara.insurancequotes.auth.application.port.out.CredentialRepository;
 import com.clara.insurancequotes.auth.domain.model.PasskeyCredential;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,4 +15,10 @@ public interface JpaPasskeyCredentialRepository extends JpaRepository<PasskeyCre
     }
 
     long countByUserId(UUID userId);
+
+    @Override
+    List<PasskeyCredential> findAllByUserId(UUID userId);
+
+    @Override
+    Optional<PasskeyCredential> findByCredentialId(String credentialId);
 }
