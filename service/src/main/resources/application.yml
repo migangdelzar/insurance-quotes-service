@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: insurance-quotes-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:quotes}
+    username: ${DB_USER:quotes_app}
+    password: ${DB_PASSWORD:quotes_app}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  cache:
+    type: caffeine
+    cache-names: quotes
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=10m
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+
+insurer:
+  base-url: ${INSURER_BASE_URL:https://httpstat.us/200?sleep=500}
+  connect-timeout: 2s
+  read-timeout: 5s
+
+auth:
+  jwt:
+    secret: ${JWT_SECRET:local-dev-secret-change-me-32-bytes!!}
+    ttl: 30m
+  demo:
+    username: ${AUTH_DEMO_USERNAME:demo}
+    password: ${AUTH_DEMO_PASSWORD:demo-password}
+
+quote:
+  expiration:
+    draft-ttl: ${QUOTE_DRAFT_TTL:30m}
+    check-interval: ${QUOTE_EXPIRATION_CHECK_INTERVAL:PT5M}

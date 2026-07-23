@@ -1,0 +1,21 @@
+[tools]
+java = "temurin-17"
+maven = "3.9"
+
+[env]
+SPRING_PROFILES_ACTIVE = "local"
+INSURER_BASE_URL = "https://httpstat.us/200?sleep=500"
+JWT_SECRET = "local-dev-secret-change-me-32-bytes!!"
+AUTH_DEMO_USERNAME = "demo"
+AUTH_DEMO_PASSWORD = "demo-password"
+
+[tasks.build]
+run = "mvn -q clean verify"
+[tasks.test]
+run = "mvn -q test"
+[tasks.itest]
+run = "mvn -q verify"
+[tasks.run]
+run = "mvn -q -pl service spring-boot:run"
+[tasks.format]
+run = "mvn -q spotless:apply"
