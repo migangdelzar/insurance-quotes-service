@@ -19,3 +19,19 @@ run = "mvn -q verify"
 run = "mvn -q -pl service spring-boot:run"
 [tasks.format]
 run = "mvn -q spotless:apply"
+[tasks.up]
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+runtime="${1:-jvm}"
+cd deployment/compose
+if docker compose version >/dev/null 2>&1; then
+  compose=(docker compose)
+elif command -v docker-compose >/dev/null 2>&1; then
+  compose=(docker-compose)
+else
+  echo "Docker Compose is required" >&2
+  exit 1
+fi
+"${compose[@]}" -f docker-compose.yml -f "docker-compose.${runtime}.yml" up -d --build
+'''
