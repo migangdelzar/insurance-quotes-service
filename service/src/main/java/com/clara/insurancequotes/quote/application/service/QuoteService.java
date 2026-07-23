@@ -1,5 +1,6 @@
 package com.clara.insurancequotes.quote.application.service;
 
+import com.clara.insurancequotes.config.CacheConfig;
 import com.clara.insurancequotes.pricing.api.model.PricingInput;
 import com.clara.insurancequotes.pricing.api.port.in.PremiumCalculator;
 import com.clara.insurancequotes.quote.api.model.CreateQuoteCommand;
@@ -17,6 +18,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +46,7 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id")
     public QuoteView updateCoverage(UUID id, UpdateCoverageCommand command) {
         var quote = load(id);
         rejectHealthDataForNonSeniors(quote, command);
@@ -53,6 +57,7 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id")
     public QuoteView getQuote(UUID id) {
         return QuoteView.from(load(id));
     }
@@ -73,12 +78,14 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id")
     public QuoteView markSubmitted(UUID id) {
         return transition(id, quote -> quote.markSubmitted(clock.instant()));
     }
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id")
     public QuoteView markSubmissionFailed(UUID id) {
         return transition(id, quote -> quote.markSubmissionFailed(clock.instant()));
     }
