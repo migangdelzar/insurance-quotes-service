@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.pricing.api;
+package com.clara.insurancequotes.pricing.api.model;
 
 import java.math.BigDecimal;
 

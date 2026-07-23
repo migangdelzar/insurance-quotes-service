@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.quote.api;
+package com.clara.insurancequotes.quote.api.model;
 
 public enum HealthCondition {
     DIABETES,

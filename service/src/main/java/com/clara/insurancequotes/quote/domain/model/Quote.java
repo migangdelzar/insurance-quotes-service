@@ -1,8 +1,8 @@
 package com.clara.insurancequotes.quote.domain.model;
 
-import com.clara.insurancequotes.pricing.api.CoverageType;
-import com.clara.insurancequotes.quote.api.IncompleteQuoteException;
-import com.clara.insurancequotes.quote.api.InvalidStateTransitionException;
+import com.clara.insurancequotes.pricing.api.model.CoverageType;
+import com.clara.insurancequotes.quote.domain.exception.IncompleteQuoteException;
+import com.clara.insurancequotes.quote.domain.exception.InvalidStateTransitionException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;

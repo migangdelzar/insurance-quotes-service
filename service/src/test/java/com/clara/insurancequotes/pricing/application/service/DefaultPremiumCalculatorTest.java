@@ -2,8 +2,8 @@ package com.clara.insurancequotes.pricing.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.clara.insurancequotes.pricing.api.CoverageType;
-import com.clara.insurancequotes.pricing.api.PricingInput;
+import com.clara.insurancequotes.pricing.api.model.CoverageType;
+import com.clara.insurancequotes.pricing.api.model.PricingInput;
 import com.clara.insurancequotes.pricing.domain.policy.AgeFactor;
 import com.clara.insurancequotes.pricing.domain.policy.ConditionsFactor;
 import com.clara.insurancequotes.pricing.domain.policy.SpouseFactor;

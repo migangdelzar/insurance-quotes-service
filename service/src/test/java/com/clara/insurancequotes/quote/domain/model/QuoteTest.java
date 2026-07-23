@@ -3,10 +3,9 @@ package com.clara.insurancequotes.quote.domain.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.clara.insurancequotes.pricing.api.CoverageType;
-import com.clara.insurancequotes.quote.QuoteMother;
-import com.clara.insurancequotes.quote.api.IncompleteQuoteException;
-import com.clara.insurancequotes.quote.api.InvalidStateTransitionException;
+import com.clara.insurancequotes.pricing.api.model.CoverageType;
+import com.clara.insurancequotes.quote.domain.exception.IncompleteQuoteException;
+import com.clara.insurancequotes.quote.domain.exception.InvalidStateTransitionException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;

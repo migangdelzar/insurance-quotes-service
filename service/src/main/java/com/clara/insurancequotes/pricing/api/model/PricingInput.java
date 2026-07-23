@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.pricing.api;
+package com.clara.insurancequotes.pricing.api.model;
 
 public record PricingInput(
         CoverageType coverageType,

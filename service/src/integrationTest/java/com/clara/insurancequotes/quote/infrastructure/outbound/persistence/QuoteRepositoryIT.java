@@ -1,8 +1,8 @@
-package com.clara.insurancequotes.quote.infrastructure.persistence;
+package com.clara.insurancequotes.quote.infrastructure.outbound.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.clara.insurancequotes.quote.QuoteMother;
+import com.clara.insurancequotes.quote.domain.model.QuoteMother;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.testsupport.Containers;
 import java.time.Duration;

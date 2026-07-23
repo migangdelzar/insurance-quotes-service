@@ -1,6 +1,6 @@
 package com.clara.insurancequotes.quote.domain.model;
 
-import com.clara.insurancequotes.quote.api.HealthCondition;
+import com.clara.insurancequotes.quote.api.model.HealthCondition;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
