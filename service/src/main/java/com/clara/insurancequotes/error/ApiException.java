@@ -2,6 +2,7 @@ package com.clara.insurancequotes.error;
 
 import org.springframework.http.HttpStatus;
 
+/** HTTP-only exception for transport concerns; domain and application exceptions do not extend it. */
 public abstract class ApiException extends RuntimeException {
 
     private final String code;
