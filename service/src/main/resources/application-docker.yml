@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/quotes
+  kafka:
+    bootstrap-servers: kafka:9092
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
