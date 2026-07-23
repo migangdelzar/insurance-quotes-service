@@ -8,17 +8,17 @@ import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedExce
 import com.clara.insurancequotes.quote.domain.exception.IncompleteQuoteException;
 import com.clara.insurancequotes.quote.domain.exception.InvalidStateTransitionException;
 import com.clara.insurancequotes.quote.domain.exception.QuoteException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.clara.insurancequotes.submission.application.exception.InsurerUnavailableException;
+import com.clara.insurancequotes.submission.application.exception.SubmissionException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApiException(ApiException exception) {
@@ -26,7 +26,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(exception.status()).body(error);
     }
 
-    @ExceptionHandler({QuoteException.class, QuoteApplicationException.class, AuthException.class})
+    @ExceptionHandler({
+        QuoteException.class,
+        QuoteApplicationException.class,
+        AuthException.class,
+        SubmissionException.class
+    })
     public ResponseEntity<ApiError> handleModuleException(RuntimeException exception) {
         var mapped = mapModuleException(exception);
         return ResponseEntity.status(mapped.status())
@@ -63,6 +68,9 @@ public class GlobalExceptionHandler {
         }
         if (exception instanceof InvalidCredentialsException) {
             return new MappedError(401, "AUTH_INVALID_CREDENTIALS");
+        }
+        if (exception instanceof InsurerUnavailableException) {
+            return new MappedError(502, "INSURER_UNAVAILABLE");
         }
         return new MappedError(500, "INTERNAL_ERROR");
     }
