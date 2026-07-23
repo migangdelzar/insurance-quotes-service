@@ -31,7 +31,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth -> auth.requestMatchers("/auth/webauthn/register-options", "/auth/webauthn/register")
                                 .authenticated()
-                                .requestMatchers("/auth/**", "/actuator/health")
+                                .requestMatchers(
+                                        "/auth/**",
+                                        "/actuator/health",
+                                        "/v3/api-docs/**",
+                                        "/v3/api-docs.yaml",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html")
                                 .permitAll()
                                 .anyRequest()
                                 .hasAuthority("SCOPE_api"))

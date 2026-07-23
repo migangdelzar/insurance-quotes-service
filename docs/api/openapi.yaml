@@ -1,0 +1,398 @@
+openapi: 3.0.1
+info:
+  title: Insurance Quotes API
+  description: "Multi-step insurance quote flow: create, coverage, submit."
+  version: 1.0.0
+servers:
+- url: http://localhost
+  description: Generated server url
+security:
+- bearerAuth: []
+paths:
+  /quotes:
+    get:
+      tags:
+      - quote-controller
+      operationId: listQuotes
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuoteView"
+    post:
+      tags:
+      - quote-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQuoteRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuoteView"
+  /quotes/{id}/submit:
+    post:
+      tags:
+      - submission-controller
+      operationId: submit
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuoteView"
+  /auth/webauthn/register:
+    post:
+      tags:
+      - auth-controller
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebAuthnRegisterRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+  /auth/webauthn/register-options:
+    post:
+      tags:
+      - auth-controller
+      operationId: registerOptions
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/WebAuthnChallengeResponse"
+  /auth/webauthn/assertion-options:
+    post:
+      tags:
+      - auth-controller
+      operationId: assertionOptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssertionOptionsRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/WebAuthnChallengeResponse"
+  /auth/webauthn/assert:
+    post:
+      tags:
+      - auth-controller
+      operationId: assertPasskey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebAuthnAssertRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TokenPairResponse"
+  /auth/refresh:
+    post:
+      tags:
+      - auth-controller
+      operationId: refresh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TokenPairResponse"
+  /auth/logout:
+    post:
+      tags:
+      - auth-controller
+      operationId: logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+  /auth/login:
+    post:
+      tags:
+      - auth-controller
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+  /quotes/{id}/coverage:
+    patch:
+      tags:
+      - quote-controller
+      operationId: updateCoverage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCoverageRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuoteView"
+  /quotes/{id}:
+    get:
+      tags:
+      - quote-controller
+      operationId: getQuote
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuoteView"
+components:
+  schemas:
+    CreateQuoteRequest:
+      required:
+      - age
+      - email
+      - name
+      - zipCode
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        age:
+          maximum: 120
+          minimum: 18
+          type: integer
+          format: int32
+        zipCode:
+          pattern: "\\d{5}"
+          type: string
+    QuoteView:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        age:
+          type: integer
+          format: int32
+        zipCode:
+          type: string
+        coverageType:
+          type: string
+          enum:
+          - BASIC
+          - STANDARD
+          - PREMIUM
+        hasPreexistingConditions:
+          type: boolean
+        conditions:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - DIABETES
+            - HEART_DISEASE
+            - HYPERTENSION
+            - CANCER_HISTORY
+            - OTHER
+        takesPrescriptionMedication:
+          type: boolean
+        usesTobacco:
+          type: boolean
+        needsSpouseCoverage:
+          type: boolean
+        monthlyPremium:
+          type: number
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - SUBMISSION_FAILED
+          - EXPIRED
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    WebAuthnRegisterRequest:
+      required:
+      - challengeId
+      - credentialJson
+      type: object
+      properties:
+        challengeId:
+          type: string
+        credentialJson:
+          type: string
+    WebAuthnChallengeResponse:
+      type: object
+      properties:
+        challengeId:
+          type: string
+        publicKeyOptionsJson:
+          type: string
+    AssertionOptionsRequest:
+      type: object
+      properties:
+        username:
+          type: string
+    WebAuthnAssertRequest:
+      required:
+      - challengeId
+      - credentialJson
+      type: object
+      properties:
+        challengeId:
+          type: string
+        credentialJson:
+          type: string
+        mfaToken:
+          type: string
+    TokenPairResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresInSeconds:
+          type: integer
+          format: int64
+    RefreshRequest:
+      required:
+      - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    LoginRequest:
+      required:
+      - password
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        mfaToken:
+          type: string
+        tokens:
+          $ref: "#/components/schemas/TokenPairResponse"
+    UpdateCoverageRequest:
+      required:
+      - coverageType
+      type: object
+      properties:
+        coverageType:
+          type: string
+          enum:
+          - BASIC
+          - STANDARD
+          - PREMIUM
+        hasPreexistingConditions:
+          type: boolean
+        conditions:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - DIABETES
+            - HEART_DISEASE
+            - HYPERTENSION
+            - CANCER_HISTORY
+            - OTHER
+        takesPrescriptionMedication:
+          type: boolean
+        usesTobacco:
+          type: boolean
+        needsSpouseCoverage:
+          type: boolean
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
