@@ -2,9 +2,9 @@ package com.clara.insurancequotes.quote.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.clara.insurancequotes.pricing.api.model.CoverageType;
-import com.clara.insurancequotes.quote.api.model.CreateQuoteCommand;
-import com.clara.insurancequotes.quote.api.model.UpdateCoverageCommand;
+import com.clara.insurancequotes.pricing.api.type.CoverageType;
+import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
+import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.testsupport.Containers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

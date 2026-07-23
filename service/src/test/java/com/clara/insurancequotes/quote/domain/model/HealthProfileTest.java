@@ -2,7 +2,7 @@ package com.clara.insurancequotes.quote.domain.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.clara.insurancequotes.quote.api.model.HealthCondition;
+import com.clara.insurancequotes.quote.api.type.HealthCondition;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 

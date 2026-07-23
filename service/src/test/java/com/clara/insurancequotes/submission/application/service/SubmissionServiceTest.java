@@ -8,10 +8,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.clara.insurancequotes.quote.api.model.QuoteView;
-import com.clara.insurancequotes.quote.api.port.QuoteApi;
+import com.clara.insurancequotes.quote.api.result.QuoteView;
+import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
-import com.clara.insurancequotes.submission.application.exception.InsurerUnavailableException;
+import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableException;
 import com.clara.insurancequotes.submission.application.port.out.InsurerGateway;
 import java.math.BigDecimal;
 import java.time.Instant;

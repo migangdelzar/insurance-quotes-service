@@ -1,8 +1,8 @@
 package com.clara.insurancequotes.submission.application.service;
 
-import com.clara.insurancequotes.quote.api.model.QuoteView;
-import com.clara.insurancequotes.quote.api.port.QuoteApi;
-import com.clara.insurancequotes.submission.events.QuoteSubmitted;
+import com.clara.insurancequotes.quote.api.result.QuoteView;
+import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
+import com.clara.insurancequotes.submission.api.event.QuoteSubmitted;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

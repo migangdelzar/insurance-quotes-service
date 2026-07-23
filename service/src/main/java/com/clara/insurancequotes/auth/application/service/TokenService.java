@@ -1,7 +1,7 @@
 package com.clara.insurancequotes.auth.application.service;
 
-import com.clara.insurancequotes.auth.api.model.TokenResponse;
-import com.clara.insurancequotes.auth.application.exception.InvalidCredentialsException;
+import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
+import com.clara.insurancequotes.auth.api.result.TokenResponse;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;

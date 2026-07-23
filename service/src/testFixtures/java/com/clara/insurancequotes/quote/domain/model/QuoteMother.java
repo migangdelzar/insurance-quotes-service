@@ -1,7 +1,7 @@
 package com.clara.insurancequotes.quote.domain.model;
 
-import com.clara.insurancequotes.pricing.api.model.CoverageType;
-import com.clara.insurancequotes.quote.api.model.HealthCondition;
+import com.clara.insurancequotes.pricing.api.type.CoverageType;
+import com.clara.insurancequotes.quote.api.type.HealthCondition;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Set;

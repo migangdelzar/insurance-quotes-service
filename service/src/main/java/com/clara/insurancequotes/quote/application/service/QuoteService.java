@@ -1,14 +1,14 @@
 package com.clara.insurancequotes.quote.application.service;
 
-import com.clara.insurancequotes.config.CacheConfig;
-import com.clara.insurancequotes.pricing.api.model.PricingInput;
-import com.clara.insurancequotes.pricing.api.port.in.PremiumCalculator;
-import com.clara.insurancequotes.quote.api.model.CreateQuoteCommand;
-import com.clara.insurancequotes.quote.api.model.QuoteView;
-import com.clara.insurancequotes.quote.api.model.UpdateCoverageCommand;
-import com.clara.insurancequotes.quote.api.port.QuoteApi;
-import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.pricing.api.command.PricingInput;
+import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
+import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
+import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
+import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.api.result.QuoteView;
+import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
+import com.clara.insurancequotes.quote.configuration.CacheConfig;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.model.HealthProfile;
 import com.clara.insurancequotes.quote.domain.model.Quote;

@@ -1,9 +1,9 @@
 package com.clara.insurancequotes.submission.application.service;
 
-import com.clara.insurancequotes.quote.api.model.QuoteView;
-import com.clara.insurancequotes.quote.api.port.QuoteApi;
-import com.clara.insurancequotes.submission.api.port.SubmissionApi;
-import com.clara.insurancequotes.submission.application.exception.InsurerUnavailableException;
+import com.clara.insurancequotes.quote.api.result.QuoteView;
+import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
+import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableException;
+import com.clara.insurancequotes.submission.api.usecase.SubmissionApi;
 import com.clara.insurancequotes.submission.application.port.out.InsurerGateway;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

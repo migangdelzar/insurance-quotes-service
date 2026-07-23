@@ -1,9 +1,9 @@
 package com.clara.insurancequotes.pricing.application.service;
 
-import com.clara.insurancequotes.pricing.api.model.Premium;
-import com.clara.insurancequotes.pricing.api.model.PricingInput;
-import com.clara.insurancequotes.pricing.api.port.in.PremiumCalculator;
-import com.clara.insurancequotes.pricing.domain.policy.PremiumFactor;
+import com.clara.insurancequotes.pricing.api.command.PricingInput;
+import com.clara.insurancequotes.pricing.api.result.Premium;
+import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
+import com.clara.insurancequotes.pricing.domain.service.PremiumFactor;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;

@@ -2,12 +2,12 @@ package com.clara.insurancequotes.pricing.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.clara.insurancequotes.pricing.api.model.CoverageType;
-import com.clara.insurancequotes.pricing.api.model.PricingInput;
-import com.clara.insurancequotes.pricing.domain.policy.AgeFactor;
-import com.clara.insurancequotes.pricing.domain.policy.ConditionsFactor;
-import com.clara.insurancequotes.pricing.domain.policy.SpouseFactor;
-import com.clara.insurancequotes.pricing.domain.policy.TobaccoFactor;
+import com.clara.insurancequotes.pricing.api.command.PricingInput;
+import com.clara.insurancequotes.pricing.api.type.CoverageType;
+import com.clara.insurancequotes.pricing.domain.service.AgeFactor;
+import com.clara.insurancequotes.pricing.domain.service.ConditionsFactor;
+import com.clara.insurancequotes.pricing.domain.service.SpouseFactor;
+import com.clara.insurancequotes.pricing.domain.service.TobaccoFactor;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
