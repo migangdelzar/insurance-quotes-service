@@ -19,6 +19,8 @@ run = "mvn -q verify"
 run = "mvn -q -pl service spring-boot:run"
 [tasks.format]
 run = "mvn -q spotless:apply"
+[tasks.native]
+run = "mvn -Pnative spring-boot:build-image -pl service -am -DskipTests"
 [tasks.up]
 run = '''
 #!/usr/bin/env bash
