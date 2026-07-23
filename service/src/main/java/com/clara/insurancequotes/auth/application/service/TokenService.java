@@ -1,7 +1,5 @@
 package com.clara.insurancequotes.auth.application.service;
 
-import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
-import com.clara.insurancequotes.auth.api.result.TokenResponse;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
@@ -19,34 +17,33 @@ public class TokenService {
 
     private final JwtEncoder jwtEncoder;
     private final Duration ttl;
-    private final String demoUsername;
-    private final String demoPassword;
 
-    public TokenService(
-            JwtEncoder jwtEncoder,
-            @Value("${auth.jwt.ttl}") Duration ttl,
-            @Value("${auth.demo.username}") String demoUsername,
-            @Value("${auth.demo.password}") String demoPassword) {
+    public TokenService(JwtEncoder jwtEncoder, @Value("${auth.jwt.ttl}") Duration ttl) {
         this.jwtEncoder = jwtEncoder;
         this.ttl = ttl;
-        this.demoUsername = demoUsername;
-        this.demoPassword = demoPassword;
     }
 
-    public TokenResponse issueFor(String username, String password) {
-        if (!demoUsername.equals(username) || !demoPassword.equals(password)) {
-            throw new InvalidCredentialsException();
-        }
+    public record IssuedAccess(String accessToken, long expiresInSeconds) {}
+
+    public IssuedAccess issueApiToken(String username) {
+        return issue(username, "api", ttl);
+    }
+
+    public String issueMfaToken(String username) {
+        return issue(username, "mfa-pending", Duration.ofMinutes(5)).accessToken();
+    }
+
+    private IssuedAccess issue(String username, String scope, Duration tokenTtl) {
         var now = Instant.now();
         var claims = JwtClaimsSet.builder()
                 .subject(username)
                 .issuedAt(now)
-                .expiresAt(now.plus(ttl))
-                .claim("scope", "api")
+                .expiresAt(now.plus(tokenTtl))
+                .claim("scope", scope)
                 .build();
         var header = JwsHeader.with(MacAlgorithm.HS256).build();
         var token = jwtEncoder.encode(JwtEncoderParameters.from(header, claims));
         log.debug("Issued JWT for {}", username);
-        return new TokenResponse(token.getTokenValue(), ttl.toSeconds());
+        return new IssuedAccess(token.getTokenValue(), tokenTtl.toSeconds());
     }
 }

@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -75,7 +76,7 @@ class QuoteControllerTest {
 
         mockMvc.perform(
                         post("/quotes")
-                                .with(jwt())
+                                .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
                                 .contentType("application/json")
                                 .content(
                                         "{\"name\":\"Jane Roe\",\"email\":\"jane@example.com\",\"age\":34,\"zipCode\":\"06600\"}"))
@@ -87,7 +88,7 @@ class QuoteControllerTest {
     @Test
     void createQuote_missingFields_returns400WithFieldErrors() throws Exception {
         mockMvc.perform(post("/quotes")
-                        .with(jwt())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
                         .contentType("application/json")
                         .content("{\"name\":\"\",\"email\":\"not-an-email\",\"age\":0,\"zipCode\":\"\"}"))
                 .andExpect(status().isBadRequest())
@@ -100,7 +101,7 @@ class QuoteControllerTest {
         when(quoteApi.updateCoverage(eq(QUOTE_ID), any())).thenThrow(new HealthDataNotAllowedException(34));
 
         mockMvc.perform(patch("/quotes/{id}/coverage", QUOTE_ID)
-                        .with(jwt())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
                         .contentType("application/json")
                         .content("{\"coverageType\":\"STANDARD\",\"usesTobacco\":true}"))
                 .andExpect(status().isUnprocessableEntity())
@@ -128,7 +129,7 @@ class QuoteControllerTest {
         when(quoteApi.updateCoverage(eq(QUOTE_ID), any())).thenReturn(view);
 
         mockMvc.perform(patch("/quotes/{id}/coverage", QUOTE_ID)
-                        .with(jwt())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
                         .contentType("application/json")
                         .content("{\"coverageType\":\"STANDARD\"}"))
                 .andExpect(status().isOk())

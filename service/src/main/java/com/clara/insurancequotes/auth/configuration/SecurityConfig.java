@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -29,10 +31,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**", "/actuator/health")
                         .permitAll()
                         .anyRequest()
-                        .authenticated())
+                        .hasAuthority("SCOPE_api"))
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> {}).authenticationEntryPoint(entryPoint))
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(entryPoint))
                 .build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
