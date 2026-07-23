@@ -1,5 +1,6 @@
 package com.clara.insurancequotes.quote.application.service;
 
+import com.clara.insurancequotes.config.BusinessMetrics;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.domain.event.QuoteExpired;
 import java.time.Clock;
@@ -18,16 +19,19 @@ public class DraftExpirationJob {
     private final ApplicationEventPublisher events;
     private final Clock clock;
     private final Duration draftTtl;
+    private final BusinessMetrics metrics;
 
     public DraftExpirationJob(
             QuoteRepository repository,
             ApplicationEventPublisher events,
             Clock clock,
-            @Value("${quote.expiration.draft-ttl}") Duration draftTtl) {
+            @Value("${quote.expiration.draft-ttl}") Duration draftTtl,
+            BusinessMetrics metrics) {
         this.repository = repository;
         this.events = events;
         this.clock = clock;
         this.draftTtl = draftTtl;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -39,6 +43,7 @@ public class DraftExpirationJob {
         }
         var expired = repository.markExpired(staleIds, now);
         staleIds.forEach(id -> events.publishEvent(new QuoteExpired(id)));
+        metrics.quotesExpired(expired);
         log.info("Expired {} stale draft quotes", expired);
         return expired;
     }

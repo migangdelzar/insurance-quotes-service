@@ -24,6 +24,7 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 runtime="${1:-jvm}"
+overlay="${2:-}"
 cd deployment/compose
 if docker compose version >/dev/null 2>&1; then
   compose=(docker compose)
@@ -33,5 +34,8 @@ else
   echo "Docker Compose is required" >&2
   exit 1
 fi
-"${compose[@]}" -f docker-compose.yml -f "docker-compose.${runtime}.yml" up -d --build
+files=(-f docker-compose.yml -f "docker-compose.${runtime}.yml")
+if [ "$overlay" = "observability" ]; then files+=(-f compose.observability.yml); fi
+if [ "$overlay" = "full" ]; then files+=(-f compose.fullstack.yml); fi
+"${compose[@]}" "${files[@]}" up -d --build
 '''

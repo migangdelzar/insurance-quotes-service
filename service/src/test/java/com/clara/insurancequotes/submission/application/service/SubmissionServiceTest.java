@@ -8,11 +8,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.clara.insurancequotes.config.BusinessMetrics;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableException;
 import com.clara.insurancequotes.submission.application.port.out.InsurerGateway;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
@@ -23,7 +25,8 @@ class SubmissionServiceTest {
     private final QuoteApi quoteApi = mock(QuoteApi.class);
     private final InsurerGateway insurerGateway = mock(InsurerGateway.class);
     private final SubmissionFinalizer finalizer = mock(SubmissionFinalizer.class);
-    private final SubmissionService service = new SubmissionService(quoteApi, insurerGateway, finalizer);
+    private final SubmissionService service =
+            new SubmissionService(quoteApi, insurerGateway, finalizer, new BusinessMetrics(new SimpleMeterRegistry()));
 
     private static final UUID QUOTE_ID = UUID.randomUUID();
 

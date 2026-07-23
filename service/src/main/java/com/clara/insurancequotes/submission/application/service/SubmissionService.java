@@ -1,5 +1,6 @@
 package com.clara.insurancequotes.submission.application.service;
 
+import com.clara.insurancequotes.config.BusinessMetrics;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableException;
@@ -19,6 +20,7 @@ public class SubmissionService implements SubmissionApi {
     private final QuoteApi quoteApi;
     private final InsurerGateway insurerGateway;
     private final SubmissionFinalizer finalizer;
+    private final BusinessMetrics metrics;
 
     @Override
     public QuoteView submit(UUID quoteId) {
@@ -29,13 +31,19 @@ public class SubmissionService implements SubmissionApi {
         }
         quoteApi.ensureSubmittable(quoteId);
         callInsurerRecordingFailure(quoteId);
-        return finalizer.completeSubmission(quoteId);
+        var completed = finalizer.completeSubmission(quoteId);
+        metrics.submissionSucceeded();
+        return completed;
     }
 
     private void callInsurerRecordingFailure(UUID quoteId) {
         try {
-            insurerGateway.submit(quoteId);
+            metrics.timeInsurerCall(() -> {
+                insurerGateway.submit(quoteId);
+                return null;
+            });
         } catch (InsurerUnavailableException exception) {
+            metrics.submissionFailed();
             quoteApi.markSubmissionFailed(quoteId);
             throw exception;
         }

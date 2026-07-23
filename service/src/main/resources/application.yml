@@ -36,3 +36,13 @@ quote:
   expiration:
     draft-ttl: ${QUOTE_DRAFT_TTL:30m}
     check-interval: ${QUOTE_EXPIRATION_CHECK_INTERVAL:PT5M}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,modulith
+  endpoint:
+    health:
+      probes:
+        enabled: true

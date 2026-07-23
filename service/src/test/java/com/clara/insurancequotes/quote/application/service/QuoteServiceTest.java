@@ -3,6 +3,7 @@ package com.clara.insurancequotes.quote.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.clara.insurancequotes.config.BusinessMetrics;
 import com.clara.insurancequotes.pricing.api.result.Premium;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
@@ -13,6 +14,7 @@ import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundExcept
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.testsupport.InMemoryQuoteRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -27,7 +29,8 @@ class QuoteServiceTest {
 
     private final InMemoryQuoteRepository repository = new InMemoryQuoteRepository();
     private final PremiumCalculator calculator = input -> new Premium(new BigDecimal("100.00"));
-    private final QuoteService service = new QuoteService(repository, calculator, Clock.fixed(NOW, ZoneOffset.UTC));
+    private final QuoteService service = new QuoteService(
+            repository, calculator, Clock.fixed(NOW, ZoneOffset.UTC), new BusinessMetrics(new SimpleMeterRegistry()));
 
     private static final CreateQuoteCommand ADULT = new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600");
     private static final CreateQuoteCommand SENIOR =

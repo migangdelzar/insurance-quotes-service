@@ -1,5 +1,6 @@
 package com.clara.insurancequotes.quote.application.service;
 
+import com.clara.insurancequotes.config.BusinessMetrics;
 import com.clara.insurancequotes.pricing.api.command.PricingInput;
 import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
@@ -33,6 +34,7 @@ public class QuoteService implements QuoteApi {
     private final QuoteRepository repository;
     private final PremiumCalculator premiumCalculator;
     private final Clock clock;
+    private final BusinessMetrics metrics;
 
     @Override
     @Transactional
@@ -40,6 +42,7 @@ public class QuoteService implements QuoteApi {
         var quote =
                 Quote.createDraft(command.name(), command.email(), command.age(), command.zipCode(), clock.instant());
         var saved = repository.save(quote);
+        metrics.quoteCreated();
         log.debug("Created quote {}", saved.id());
         return QuoteView.from(saved);
     }
