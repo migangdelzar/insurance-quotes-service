@@ -9,6 +9,7 @@
   <packaging>pom</packaging>
   <modules>
     <module>platform</module>
+    <module>libraries/throwing-functions</module>
     <module>service</module>
   </modules>
 </project>
