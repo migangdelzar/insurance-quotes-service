@@ -18,6 +18,7 @@ import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
+import com.clara.insurancequotes.shared.configuration.I18nConfig;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -31,7 +32,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(QuoteController.class)
-@Import({SecurityConfig.class, JwtConfig.class, GlobalExceptionHandler.class, QuoteExceptionHandler.class})
+@Import({
+    SecurityConfig.class,
+    JwtConfig.class,
+    I18nConfig.class,
+    GlobalExceptionHandler.class,
+    QuoteExceptionHandler.class
+})
 @TestPropertySource(properties = {"auth.jwt.secret=test-secret-that-is-32-bytes-long!!"})
 class QuoteControllerTest {
 

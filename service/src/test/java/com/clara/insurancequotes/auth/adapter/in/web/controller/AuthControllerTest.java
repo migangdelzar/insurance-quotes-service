@@ -9,6 +9,7 @@ import com.clara.insurancequotes.auth.adapter.in.web.advice.AuthExceptionHandler
 import com.clara.insurancequotes.auth.application.service.TokenService;
 import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
+import com.clara.insurancequotes.shared.configuration.I18nConfig;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
     SecurityConfig.class,
     JwtConfig.class,
     TokenService.class,
+    I18nConfig.class,
     GlobalExceptionHandler.class,
     AuthExceptionHandler.class
 })

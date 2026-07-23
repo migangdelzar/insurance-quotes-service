@@ -10,6 +10,7 @@
   <modules>
     <module>platform</module>
     <module>libraries/throwing-functions</module>
+    <module>libraries/service-i18n</module>
     <module>service</module>
   </modules>
 </project>

@@ -20,8 +20,11 @@ public record ApiError(
     }
 
     public static ApiError validation(List<FieldValidationError> fieldErrors) {
-        return new ApiError(
-                Instant.now(), 400, "VALIDATION_FAILED", "Request validation failed", fieldErrors, currentTraceId());
+        return validation(fieldErrors, "Request validation failed");
+    }
+
+    public static ApiError validation(List<FieldValidationError> fieldErrors, String message) {
+        return new ApiError(Instant.now(), 400, "VALIDATION_FAILED", message, fieldErrors, currentTraceId());
     }
 
     private static String currentTraceId() {
