@@ -1,0 +1,8 @@
+#!/bin/sh
+
+echo "pre-commit: spotless check"
+
+mise exec -- mvn -q -pl service -am spotless:check || {
+  echo "Formatting violations. Run: mise run format"
+  exit 1
+}

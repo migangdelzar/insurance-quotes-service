@@ -18,7 +18,9 @@ run = "mvn -q verify"
 [tasks.run]
 run = "mvn -q -pl service spring-boot:run"
 [tasks.format]
-run = "mvn -q spotless:apply"
+run = "mvn -q -pl service -am spotless:apply"
+[tasks.setup]
+run = "git config core.hooksPath .githooks && mise install"
 [tasks.native]
 run = "mvn -Pnative spring-boot:build-image -pl service -am -DskipTests"
 [tasks.up]
