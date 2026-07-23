@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.quote.api.exception;
+package com.clara.insurancequotes.quote.application.exception;
 
 public abstract class QuoteApplicationException extends RuntimeException {
 

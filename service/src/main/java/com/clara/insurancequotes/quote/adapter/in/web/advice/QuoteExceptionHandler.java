@@ -1,7 +1,7 @@
 package com.clara.insurancequotes.quote.adapter.in.web.advice;
 
-import com.clara.insurancequotes.quote.api.exception.QuoteApplicationException;
-import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.application.exception.QuoteApplicationException;
+import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.exception.IncompleteQuoteException;
 import com.clara.insurancequotes.quote.domain.exception.InvalidStateTransitionException;
