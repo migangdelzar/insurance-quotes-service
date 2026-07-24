@@ -16,9 +16,9 @@ The backend now follows the responsibility-based package structure defined by th
 - [x] Verify backend unit, integration, formatting, and coverage checks.
 - [x] Verify frontend unit tests, build, lint, and targeted responsive browser checks.
 - [x] Validate Compose configuration and Redis health.
-- [ ] Commit and push all intended backend changes.
-- [ ] Commit and push all intended frontend changes.
-- [ ] Verify remote branch tips and clean working trees.
+- [x] Commit and push all intended backend changes.
+- [x] Commit and push all intended frontend changes.
+- [x] Verify remote branch tips and clean working trees.
 
 ### Acceptance criteria
 

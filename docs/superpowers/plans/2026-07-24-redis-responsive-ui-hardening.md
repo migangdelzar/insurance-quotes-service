@@ -7,7 +7,7 @@
 | **Backend branch** | `feat-backend-core` |
 | **Frontend branch** | `feat-frontend` |
 | **Date** | 2026-07-24 |
-| **Status** | In progress |
+| **Status** | Complete |
 
 ## 1. Summary
 
@@ -105,5 +105,5 @@ The backend Redis container/configuration must exist before ceremony and quote-c
 - [x] Keyboard focus, heading focus, labels, errors, and tab order remain usable.
 - [x] ADR, README, Compose, and verification documentation are updated.
 - [x] Backend and frontend tests/builds pass, or environmental limitations are documented with evidence.
-- [ ] All changed files are committed and pushed to their existing feature branches.
+- [x] All changed files are committed and pushed to their existing feature branches.
 - [x] The plan status is `Complete` only after final verification.
