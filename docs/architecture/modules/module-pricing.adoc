@@ -1,0 +1,9 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.clara.insurancequotes.pricing`
+|Spring components
+|_Services_
+
+* `c.c.i.p.api.usecase.PremiumCalculator` (via `c.c.i.p.application.service.DefaultPremiumCalculator`)
+|===

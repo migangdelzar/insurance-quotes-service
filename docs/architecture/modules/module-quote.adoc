@@ -1,0 +1,16 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.clara.insurancequotes.quote`
+|Spring components
+|_Services_
+
+* `c.c.i.q.api.usecase.QuoteApi` (via `c.c.i.q.application.service.QuoteService`)
+|Bean references
+|* `c.c.i.c.BusinessMetrics` (in Config)
+* `c.c.i.p.api.usecase.PremiumCalculator` (in Pricing)
+|Aggregate roots
+|* `c.c.i.q.domain.model.Quote`
+|Events listened to
+|* `c.c.i.q.domain.event.QuoteExpired` 
+|===

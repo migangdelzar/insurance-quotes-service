@@ -1,0 +1,27 @@
+== Application
+plantuml::components.puml[,,format=svg]
+
+== Config
+plantuml::module-config.puml[,,format=svg]
+include::module-config.adoc[]
+
+== Pricing
+plantuml::module-pricing.puml[,,format=svg]
+include::module-pricing.adoc[]
+
+== Shared
+plantuml::module-shared.puml[,,format=svg]
+include::module-shared.adoc[]
+
+== Auth
+plantuml::module-auth.puml[,,format=svg]
+include::module-auth.adoc[]
+
+== Quote
+plantuml::module-quote.puml[,,format=svg]
+include::module-quote.adoc[]
+
+== Submission
+plantuml::module-submission.puml[,,format=svg]
+include::module-submission.adoc[]
+
