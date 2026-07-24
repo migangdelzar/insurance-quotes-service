@@ -29,6 +29,7 @@ run = '''
 set -euo pipefail
 runtime="${1:-jvm}"
 overlay="${2:-}"
+extra="${3:-}"
 cd deployment/compose
 if docker compose version >/dev/null 2>&1; then
   compose=(docker compose)
@@ -41,5 +42,6 @@ fi
 files=(-f docker-compose.yml -f "docker-compose.${runtime}.yml")
 if [ "$overlay" = "observability" ]; then files+=(-f compose.observability.yml); fi
 if [ "$overlay" = "full" ]; then files+=(-f compose.fullstack.yml); fi
+if [ "$extra" = "e2e" ] || [ "$overlay" = "e2e" ]; then files+=(-f compose.e2e.yml); fi
 "${compose[@]}" "${files[@]}" up -d --build
 '''
