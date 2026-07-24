@@ -31,6 +31,10 @@ docker-compose \
 
 The repository’s `mise run up` task uses `docker compose` when available and falls back to the legacy `docker-compose` binary.
 
+## GitHub Actions
+
+Backend CI and the full-stack JVM smoke workflow run on every push and pull request. Runs are grouped by source branch and cancel older in-progress runs when a newer commit arrives. The backend workflow verifies Java 17, Testcontainers, the JVM API image, Compose configuration, and the sibling frontend baseline. Native-image compilation remains an explicit/manual path because of its documented memory requirements.
+
 ## Tests
 
 ```bash

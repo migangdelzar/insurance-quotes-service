@@ -1,0 +1,86 @@
+---
+name: Full-stack JVM Smoke
+
+on:  # yamllint disable-line rule:truthy
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: >-
+    full-stack-smoke-${{ github.event.pull_request.head.repo.full_name ||
+    github.repository }}-${{ github.event.pull_request.head.ref ||
+    github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Compose API and web smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out backend
+        uses: actions/checkout@v4
+        with:
+          path: insurance-quotes-service
+
+      - name: Check out frontend baseline
+        uses: actions/checkout@v4
+        with:
+          repository: migangdelzar/insurance-quotes-web
+          ref: main
+          path: insurance-quotes-web
+
+      - name: Validate full-stack Compose configuration
+        working-directory: insurance-quotes-service
+        run: >-
+          docker compose
+          -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.jvm.yml
+          -f deployment/compose/compose.fullstack.yml
+          config
+
+      - name: Start full JVM stack
+        working-directory: insurance-quotes-service
+        run: >-
+          docker compose
+          -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.jvm.yml
+          -f deployment/compose/compose.fullstack.yml
+          up -d --build
+
+      - name: Wait for API and web
+        working-directory: insurance-quotes-service
+        run: |
+          set -euo pipefail
+          health_url=http://localhost:8080/actuator/health
+          compose=(
+            docker compose
+            -f deployment/compose/docker-compose.yml
+            -f deployment/compose/docker-compose.jvm.yml
+            -f deployment/compose/compose.fullstack.yml
+          )
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent "$health_url" |
+              grep -q '"status":"UP"'; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              "${compose[@]}" logs
+              exit 1
+            fi
+            sleep 2
+          done
+          curl --fail --silent http://localhost:3100/ > /dev/null
+
+      - name: Tear down full stack
+        if: ${{ always() }}
+        working-directory: insurance-quotes-service
+        run: >-
+          docker compose
+          -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.jvm.yml
+          -f deployment/compose/compose.fullstack.yml
+          down --volumes --remove-orphans

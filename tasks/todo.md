@@ -35,8 +35,15 @@ The backend now follows the responsibility-based package structure defined by th
 
 ## GitHub Actions CI checkpoint
 
-- [ ] Add backend quality and Docker workflow.
-- [ ] Add backend full-stack JVM smoke workflow.
-- [ ] Add frontend quality and responsive-browser workflow.
-- [ ] Verify cancellation groups and workflow syntax.
-- [ ] Commit and push workflow changes.
+- [x] Add backend quality and Docker workflow.
+- [x] Add backend full-stack JVM smoke workflow.
+- [x] Add frontend quality and responsive-browser workflow.
+- [x] Verify cancellation groups and workflow syntax.
+- [x] Commit and push workflow changes.
+
+### Final verification notes
+
+- The API CORS defaults and JVM Compose environment include the insurance web port `3100`, covered by a MockMvc preflight regression test.
+- Local E2E verification required resetting only the demo user's passkeys and refresh tokens; the durable user and quote records were preserved.
+- The API image was rebuilt after the Redis Java-time serializer fix so the running Docker stack matched source.
+- `QuoteView` now copies health-condition collections before exposing them to API responses and Redis cache values, preventing detached Hibernate collections from escaping the persistence boundary.
