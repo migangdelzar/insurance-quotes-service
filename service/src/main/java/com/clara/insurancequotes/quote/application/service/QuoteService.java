@@ -49,7 +49,7 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id")
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id", beforeInvocation = true)
     public QuoteView updateCoverage(UUID id, UpdateCoverageCommand command) {
         var quote = load(id);
         rejectHealthDataForNonSeniors(quote, command);
@@ -81,14 +81,14 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id")
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id", beforeInvocation = true)
     public QuoteView markSubmitted(UUID id) {
         return transition(id, quote -> quote.markSubmitted(clock.instant()));
     }
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id")
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id", beforeInvocation = true)
     public QuoteView markSubmissionFailed(UUID id) {
         return transition(id, quote -> quote.markSubmissionFailed(clock.instant()));
     }
