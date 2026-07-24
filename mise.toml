@@ -22,7 +22,7 @@ run = "mvn -q -pl service -am spotless:apply"
 [tasks.setup]
 run = "git config core.hooksPath .githooks && mise install"
 [tasks.native]
-run = "mvn -Pnative spring-boot:build-image -pl service -am -DskipTests"
+run = "mvn -q -pl service -am install -DskipTests && mvn -Pnative -pl service -DskipTests package spring-boot:build-image"
 [tasks.up]
 run = '''
 #!/usr/bin/env bash

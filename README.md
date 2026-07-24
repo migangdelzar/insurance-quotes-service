@@ -72,12 +72,17 @@ This repository was built with AI pair-programming: design brainstorming, writte
 ## Challenges / unfinished
 
 - WebAuthn and stateless JWT required a Yubico integration because the ceremony state and refresh-token lifecycle need explicit application control.
-- Native compilation is an optional profile and is intentionally slower than the JVM path; the final measured comparison is recorded below when the native verification is available in the current environment.
+- Native compilation is an optional profile and is intentionally slower than the JVM path. Spring Boot 4’s Paketo native builder requires Java 25 as build tooling, while the application and default runtime remain Java 17.
 - The local environment used the legacy `docker-compose` executable because the Docker Compose plugin was unavailable; the mise task supports both forms.
 
 ## JVM vs native
 
-The JVM image is the default reviewer path. Native-image availability and measured startup/RSS results are environment-dependent; they must be recorded from an actual `mise run native`/Compose run rather than estimated. Current verification status is tracked by the final Plan 4 checks.
+The JVM image is the default reviewer path. The native image build reached GraalVM executable generation with optimization level 2, but the local Colima builder terminated it with exit status 137 after exhausting its memory. No native runtime number is fabricated; run the native build with a larger Docker/Colima memory allocation before comparing runtime behavior.
+
+| Runtime | Startup | Memory | Result |
+| --- | ---: | ---: | --- |
+| JVM | 9.823 s | 438.3 MiB | Verified with the Java 17 Compose API container; image size 207,720,155 bytes |
+| Native | Not measured | Not measured | Build stopped by local builder OOM (exit 137); Java 25 Paketo builder is build-only, application baseline remains Java 17 |
 
 ## Running both repositories
 
