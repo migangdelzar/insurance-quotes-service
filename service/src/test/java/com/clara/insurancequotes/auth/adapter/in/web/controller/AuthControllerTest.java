@@ -1,8 +1,11 @@
 package com.clara.insurancequotes.auth.adapter.in.web.controller;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,7 +43,8 @@ import org.springframework.test.web.servlet.MockMvc;
             "auth.jwt.secret=test-secret-that-is-32-bytes-long!!",
             "auth.jwt.ttl=30m",
             "auth.demo.username=demo",
-            "auth.demo.password=demo-password"
+            "auth.demo.password=demo-password",
+            "web.cors.allowed-origins=http://localhost:5173,http://localhost:3000"
         })
 class AuthControllerTest {
 
@@ -91,5 +95,16 @@ class AuthControllerTest {
         mockMvc.perform(get("/quotes"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"));
+    }
+
+    @Test
+    void frontendOrigin_allowsApiVersionHeader() throws Exception {
+        mockMvc.perform(options("/auth/login")
+                        .header("Origin", "http://localhost:3000")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "content-type,api-version"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:3000"))
+                .andExpect(header().string("Access-Control-Allow-Headers", containsString("api-version")));
     }
 }
