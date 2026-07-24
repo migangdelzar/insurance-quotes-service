@@ -12,7 +12,7 @@ Install the pinned tools and hooks, then start the default JVM stack:
 mise run setup
 mise run up                         # PostgreSQL + Kafka + Redis + JVM API
 mise run up jvm observability       # add Prometheus :9090 and Grafana :3001
-mise run up jvm full                # add the frontend at http://localhost:3000
+mise run up jvm full                # add the frontend at http://localhost:3100
 mise run up jvm full e2e            # add WireMock at http://localhost:8089
 ```
 
@@ -44,7 +44,7 @@ The domain/application coverage gate is 80%. The frontend repository owns the Pl
 
 ```bash
 cd ../insurance-quotes-web
-E2E_BASE_URL=http://localhost:3000 bun run e2e
+E2E_BASE_URL=http://localhost:3100 bun run e2e
 ```
 
 ## How I approached it
@@ -102,4 +102,4 @@ From this repository, one command starts the API and frontend:
 mise run up jvm full
 ```
 
-Then use `cd ../insurance-quotes-web && E2E_BASE_URL=http://localhost:3000 bun run e2e` for the browser journeys. The web app detects `navigator.languages`/`navigator.language`, normalizes to `en-US` or `es-MX`, and sends that locale as `Accept-Language` on API requests; unsupported browser locales fall back to `en-US`.
+Then use `cd ../insurance-quotes-web && E2E_BASE_URL=http://localhost:3100 bun run e2e` for the browser journeys. The web app detects `navigator.languages`/`navigator.language`, normalizes to `en-US` or `es-MX`, and sends that locale as `Accept-Language` on API requests; unsupported browser locales fall back to `en-US`.
