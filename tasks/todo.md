@@ -47,3 +47,10 @@ The backend now follows the responsibility-based package structure defined by th
 - Local E2E verification required resetting only the demo user's passkeys and refresh tokens; the durable user and quote records were preserved.
 - The API image was rebuilt after the Redis Java-time serializer fix so the running Docker stack matched source.
 - `QuoteView` now copies health-condition collections before exposing them to API responses and Redis cache values, preventing detached Hibernate collections from escaping the persistence boundary.
+
+### Observability verification
+
+- [x] Expose `/actuator/prometheus` to the internal scraper while keeping the rest of the API security boundary protected.
+- [x] Validate Prometheus target health and an `up{job="insurance-quotes-api"}` sample.
+- [x] Validate Grafana's provisioned Prometheus datasource and six-panel dashboard.
+- [x] Correct the dashboard JSON syntax error that prevented Grafana provisioning.

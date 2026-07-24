@@ -40,4 +40,12 @@ class OpenApiExportIT {
         Files.writeString(target, yaml);
         assertThat(Files.size(target)).isGreaterThan(1000);
     }
+
+    @Test
+    void exposesPrometheusMetricsWithoutAuthentication() throws Exception {
+        var result = mockMvc.perform(get("/actuator/prometheus")).andReturn();
+
+        assertThat(result.getResponse().getStatus()).isEqualTo(200);
+        assertThat(result.getResponse().getContentAsString()).contains("jvm_memory_used_bytes");
+    }
 }
