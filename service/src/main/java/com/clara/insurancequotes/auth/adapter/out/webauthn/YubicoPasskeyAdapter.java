@@ -3,9 +3,10 @@ package com.clara.insurancequotes.auth.adapter.out.webauthn;
 import com.clara.insurancequotes.auth.api.exception.InvalidPasskeyException;
 import com.clara.insurancequotes.auth.application.port.out.CredentialRepository;
 import com.clara.insurancequotes.auth.application.port.out.PasskeyPort;
+import com.clara.insurancequotes.auth.application.port.out.StoredCeremony;
+import com.clara.insurancequotes.auth.application.port.out.WebAuthnCeremonyStore;
 import com.clara.insurancequotes.auth.domain.model.PasskeyCredential;
 import com.clara.insurancequotes.auth.domain.model.User;
-import com.github.benmanes.caffeine.cache.Cache;
 import com.yubico.webauthn.AssertionRequest;
 import com.yubico.webauthn.FinishAssertionOptions;
 import com.yubico.webauthn.FinishRegistrationOptions;
@@ -18,6 +19,7 @@ import com.yubico.webauthn.data.PublicKeyCredentialCreationOptions;
 import com.yubico.webauthn.data.ResidentKeyRequirement;
 import com.yubico.webauthn.data.UserIdentity;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -25,18 +27,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class YubicoPasskeyAdapter implements PasskeyPort {
 
+    private static final Duration CEREMONY_TTL = Duration.ofMinutes(5);
+
     private final RelyingParty relyingParty;
-    private final Cache<String, Object> ceremonies;
+    private final WebAuthnCeremonyStore ceremonies;
     private final CredentialRepository credentials;
     private final Clock clock;
 
     public YubicoPasskeyAdapter(
             RelyingParty relyingParty,
-            Cache<String, Object> webAuthnCeremonyCache,
+            WebAuthnCeremonyStore ceremonies,
             CredentialRepository credentials,
             Clock clock) {
         this.relyingParty = relyingParty;
-        this.ceremonies = webAuthnCeremonyCache;
+        this.ceremonies = ceremonies;
         this.credentials = credentials;
         this.clock = clock;
     }
@@ -54,12 +58,12 @@ public class YubicoPasskeyAdapter implements PasskeyPort {
                         .residentKey(ResidentKeyRequirement.PREFERRED)
                         .build())
                 .build());
-        return store(options, serializeCreation(options));
+        return store(StoredCeremony.CeremonyType.REGISTRATION, serialize(options), serializeCreation(options));
     }
 
     @Override
     public String finishRegistration(String challengeId, String credentialJson) {
-        var options = takeCeremony(challengeId, PublicKeyCredentialCreationOptions.class);
+        var options = takeRegistration(challengeId);
         try {
             var credential = PublicKeyCredential.parseRegistrationResponseJson(credentialJson);
             var result = relyingParty.finishRegistration(FinishRegistrationOptions.builder()
@@ -84,12 +88,12 @@ public class YubicoPasskeyAdapter implements PasskeyPort {
         var builder = StartAssertionOptions.builder();
         username.ifPresent(builder::username);
         var request = relyingParty.startAssertion(builder.build());
-        return store(request, serializeAssertion(request));
+        return store(StoredCeremony.CeremonyType.ASSERTION, serialize(request), serializeAssertion(request));
     }
 
     @Override
     public String finishAssertion(String challengeId, String credentialJson) {
-        var request = takeCeremony(challengeId, AssertionRequest.class);
+        var request = takeAssertion(challengeId);
         try {
             var credential = PublicKeyCredential.parseAssertionResponseJson(credentialJson);
             var result = relyingParty.finishAssertion(FinishAssertionOptions.builder()
@@ -113,19 +117,52 @@ public class YubicoPasskeyAdapter implements PasskeyPort {
         }
     }
 
-    private StartedCeremony store(Object ceremony, String optionsJson) {
+    private StartedCeremony store(StoredCeremony.CeremonyType type, String payload, String publicKeyOptionsJson) {
         var challengeId = UUID.randomUUID().toString();
-        ceremonies.put(challengeId, ceremony);
-        return new StartedCeremony(challengeId, optionsJson);
+        ceremonies.save(challengeId, new StoredCeremony(type, payload), CEREMONY_TTL);
+        return new StartedCeremony(challengeId, publicKeyOptionsJson);
     }
 
-    private <T> T takeCeremony(String challengeId, Class<T> type) {
-        var ceremony = ceremonies.getIfPresent(challengeId);
-        ceremonies.invalidate(challengeId);
-        if (!type.isInstance(ceremony)) {
+    private PublicKeyCredentialCreationOptions takeRegistration(String challengeId) {
+        var ceremony = take(challengeId, StoredCeremony.CeremonyType.REGISTRATION);
+        try {
+            return PublicKeyCredentialCreationOptions.fromJson(ceremony.payload());
+        } catch (Exception exception) {
+            throw new InvalidPasskeyException("malformed registration ceremony");
+        }
+    }
+
+    private AssertionRequest takeAssertion(String challengeId) {
+        var ceremony = take(challengeId, StoredCeremony.CeremonyType.ASSERTION);
+        try {
+            return AssertionRequest.fromJson(ceremony.payload());
+        } catch (Exception exception) {
+            throw new InvalidPasskeyException("malformed assertion ceremony");
+        }
+    }
+
+    private StoredCeremony take(String challengeId, StoredCeremony.CeremonyType expectedType) {
+        var ceremony = ceremonies.take(challengeId).orElse(null);
+        if (ceremony == null || ceremony.type() != expectedType) {
             throw new InvalidPasskeyException("unknown or expired challenge");
         }
-        return type.cast(ceremony);
+        return ceremony;
+    }
+
+    private static String serialize(PublicKeyCredentialCreationOptions options) {
+        try {
+            return options.toJson();
+        } catch (Exception exception) {
+            throw new InvalidPasskeyException("could not serialize registration ceremony");
+        }
+    }
+
+    private static String serialize(AssertionRequest request) {
+        try {
+            return request.toJson();
+        } catch (Exception exception) {
+            throw new InvalidPasskeyException("could not serialize assertion ceremony");
+        }
     }
 
     private static String serializeCreation(PublicKeyCredentialCreationOptions options) {

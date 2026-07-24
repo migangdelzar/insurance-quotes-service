@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Insurance Quotes API
   description: "Multi-step insurance quote flow: create, coverage, submit."
@@ -14,6 +14,14 @@ paths:
       tags:
       - quote-controller
       operationId: listQuotes
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       responses:
         "200":
           description: OK
@@ -27,6 +35,14 @@ paths:
       tags:
       - quote-controller
       operationId: create
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       requestBody:
         content:
           application/json:
@@ -52,6 +68,13 @@ paths:
         schema:
           type: string
           format: uuid
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       responses:
         "200":
           description: OK
@@ -64,6 +87,14 @@ paths:
       tags:
       - auth-controller
       operationId: register
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       requestBody:
         content:
           application/json:
@@ -78,6 +109,14 @@ paths:
       tags:
       - auth-controller
       operationId: registerOptions
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       responses:
         "200":
           description: OK
@@ -90,6 +129,14 @@ paths:
       tags:
       - auth-controller
       operationId: assertionOptions
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       requestBody:
         content:
           application/json:
@@ -107,6 +154,14 @@ paths:
       tags:
       - auth-controller
       operationId: assertPasskey
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       requestBody:
         content:
           application/json:
@@ -125,6 +180,14 @@ paths:
       tags:
       - auth-controller
       operationId: refresh
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       requestBody:
         content:
           application/json:
@@ -143,6 +206,14 @@ paths:
       tags:
       - auth-controller
       operationId: logout
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       requestBody:
         content:
           application/json:
@@ -157,6 +228,14 @@ paths:
       tags:
       - auth-controller
       operationId: login
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       requestBody:
         content:
           application/json:
@@ -182,6 +261,13 @@ paths:
         schema:
           type: string
           format: uuid
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       requestBody:
         content:
           application/json:
@@ -207,6 +293,13 @@ paths:
         schema:
           type: string
           format: uuid
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
       responses:
         "200":
           description: OK
@@ -217,25 +310,29 @@ paths:
 components:
   schemas:
     CreateQuoteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+        age:
+          type: integer
+          format: int32
+          maximum: 120
+          minimum: 18
+        zipCode:
+          type: string
+          minLength: 1
+          pattern: "\\d{5}"
       required:
       - age
       - email
       - name
       - zipCode
-      type: object
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-        age:
-          maximum: 120
-          minimum: 18
-          type: integer
-          format: int32
-        zipCode:
-          pattern: "\\d{5}"
-          type: string
     QuoteView:
       type: object
       properties:
@@ -260,7 +357,6 @@ components:
         hasPreexistingConditions:
           type: boolean
         conditions:
-          uniqueItems: true
           type: array
           items:
             type: string
@@ -270,6 +366,7 @@ components:
             - HYPERTENSION
             - CANCER_HISTORY
             - OTHER
+          uniqueItems: true
         takesPrescriptionMedication:
           type: boolean
         usesTobacco:
@@ -292,15 +389,17 @@ components:
           type: string
           format: date-time
     WebAuthnRegisterRequest:
-      required:
-      - challengeId
-      - credentialJson
       type: object
       properties:
         challengeId:
           type: string
+          minLength: 1
         credentialJson:
           type: string
+          minLength: 1
+      required:
+      - challengeId
+      - credentialJson
     WebAuthnChallengeResponse:
       type: object
       properties:
@@ -314,17 +413,19 @@ components:
         username:
           type: string
     WebAuthnAssertRequest:
-      required:
-      - challengeId
-      - credentialJson
       type: object
       properties:
         challengeId:
           type: string
+          minLength: 1
         credentialJson:
           type: string
+          minLength: 1
         mfaToken:
           type: string
+      required:
+      - challengeId
+      - credentialJson
     TokenPairResponse:
       type: object
       properties:
@@ -336,22 +437,25 @@ components:
           type: integer
           format: int64
     RefreshRequest:
-      required:
-      - refreshToken
       type: object
       properties:
         refreshToken:
           type: string
-    LoginRequest:
+          minLength: 1
       required:
-      - password
-      - username
+      - refreshToken
+    LoginRequest:
       type: object
       properties:
         username:
           type: string
+          minLength: 1
         password:
           type: string
+          minLength: 1
+      required:
+      - password
+      - username
     LoginResponse:
       type: object
       properties:
@@ -362,8 +466,6 @@ components:
         tokens:
           $ref: "#/components/schemas/TokenPairResponse"
     UpdateCoverageRequest:
-      required:
-      - coverageType
       type: object
       properties:
         coverageType:
@@ -375,7 +477,6 @@ components:
         hasPreexistingConditions:
           type: boolean
         conditions:
-          uniqueItems: true
           type: array
           items:
             type: string
@@ -385,12 +486,15 @@ components:
             - HYPERTENSION
             - CANCER_HISTORY
             - OTHER
+          uniqueItems: true
         takesPrescriptionMedication:
           type: boolean
         usesTobacco:
           type: boolean
         needsSpouseCoverage:
           type: boolean
+      required:
+      - coverageType
   securitySchemes:
     bearerAuth:
       type: http

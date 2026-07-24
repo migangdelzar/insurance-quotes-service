@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -19,6 +20,7 @@ class QuoteCachingIT {
     @DynamicPropertySource
     static void datasource(DynamicPropertyRegistry registry) {
         Containers.registerPostgres(registry);
+        Containers.registerRedis(registry);
     }
 
     @Autowired
@@ -27,6 +29,9 @@ class QuoteCachingIT {
     @Autowired
     private CacheManager cacheManager;
 
+    @Autowired
+    private StringRedisTemplate redis;
+
     @Test
     void getQuote_populatesCache_updateCoverageEvicts() {
         var id = service.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"))
@@ -34,6 +39,7 @@ class QuoteCachingIT {
         var cache = cacheManager.getCache("quotes");
 
         service.getQuote(id);
+        assertThat(redis.keys("*")).isNotEmpty();
         assertThat(cache.get(id)).isNotNull();
 
         service.updateCoverage(id, new UpdateCoverageCommand(CoverageType.BASIC, null, null, null, null, null));

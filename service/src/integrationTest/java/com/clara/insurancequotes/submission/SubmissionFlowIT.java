@@ -55,6 +55,7 @@ class SubmissionFlowIT {
     static void properties(DynamicPropertyRegistry registry) {
         Containers.registerPostgres(registry);
         Containers.registerKafka(registry);
+        Containers.registerRedis(registry);
         registry.add("insurer.base-url", () -> "http://localhost:" + INSURER.port() + "/submit");
     }
 

@@ -14,11 +14,17 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   cache:
-    type: caffeine
+    type: redis
     cache-names: quotes
-    caffeine:
-      spec: maximumSize=500,expireAfterWrite=10m
+    redis:
+      time-to-live: 10m
+      cache-null-values: false
+      enable-statistics: true
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
 

@@ -22,6 +22,7 @@ class QuoteRepositoryIT {
     @DynamicPropertySource
     static void datasource(DynamicPropertyRegistry registry) {
         Containers.registerPostgres(registry);
+        Containers.registerRedis(registry);
     }
 
     @Autowired

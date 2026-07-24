@@ -10,13 +10,15 @@ Install the pinned tools and hooks, then start the default JVM stack:
 
 ```bash
 mise run setup
-mise run up                         # PostgreSQL + Kafka + JVM API
+mise run up                         # PostgreSQL + Kafka + Redis + JVM API
 mise run up jvm observability       # add Prometheus :9090 and Grafana :3001
 mise run up jvm full                # add the frontend at http://localhost:3000
 mise run up jvm full e2e            # add WireMock at http://localhost:8089
 ```
 
 The full-stack command expects the sibling frontend directory shown above. The API is available at `http://localhost:8080`; Swagger UI is at `/swagger-ui.html`. Demo credentials are `demo` / `demo-password` for `POST /auth/login`.
+
+Redis is shared ephemeral infrastructure for horizontally scaled or serverless instances. It stores the ten-minute quote cache and five-minute WebAuthn ceremonies so a request can be completed by a different instance. PostgreSQL remains the source of truth for users, passkeys, refresh-token rotation, quotes, and business events; Redis is not used for durable state or distributed locks. Quote-cache failures fall back to PostgreSQL, while WebAuthn failures require restarting the ceremony. Redis is available at `localhost:6379` in the local Compose stack.
 
 Without mise, use the compose files directly:
 
@@ -100,4 +102,4 @@ From this repository, one command starts the API and frontend:
 mise run up jvm full
 ```
 
-Then use `cd ../insurance-quotes-web && bun run e2e` for the browser journeys.
+Then use `cd ../insurance-quotes-web && E2E_BASE_URL=http://localhost:3000 bun run e2e` for the browser journeys. The web app detects `navigator.languages`/`navigator.language`, normalizes to `en-US` or `es-MX`, and sends that locale as `Accept-Language` on API requests; unsupported browser locales fall back to `en-US`.
