@@ -32,3 +32,11 @@ The backend now follows the responsibility-based package structure defined by th
 - PostgreSQL remains the durable source of truth.
 - The existing full E2E journey suite needs a clean demo database because the shared database is already passkey/MFA-mutated.
 - Docker image rebuild is environment-limited by the local Buildx/Maven build stage; Maven and Compose checks are available.
+
+## GitHub Actions CI checkpoint
+
+- [ ] Add backend quality and Docker workflow.
+- [ ] Add backend full-stack JVM smoke workflow.
+- [ ] Add frontend quality and responsive-browser workflow.
+- [ ] Verify cancellation groups and workflow syntax.
+- [ ] Commit and push workflow changes.
