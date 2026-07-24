@@ -24,7 +24,11 @@ Redis is not the source of truth for users, passkeys, refresh-token rotation, qu
 
 ### Frontend responsibilities
 
-The frontend remains MUI-based and capability-organized. The pass is limited to responsive layout, visual hierarchy, overflow, focus visibility, and state presentation. It does not change business behavior, API contracts, or the public i18n API (`t()` and typed `tid()`).
+The frontend remains MUI-based and capability-organized. The pass is limited to responsive layout, visual hierarchy, overflow, focus visibility, state presentation, and locale selection/propagation. It does not change business behavior, quote API payloads, or the public i18n API (`t()` and typed `tid()`).
+
+### Locale detection and propagation
+
+The browser will select the initial locale from `navigator.languages`/`navigator.language`, normalized to the supported `en-US` and `es-MX` locales. Unsupported or unavailable browser preferences fall back to `en-US`. The selected locale initializes `i18next` and is sent on every service request as `Accept-Language`, so localized API errors use the same locale as the visible web UI. No locale is persisted as a new server-side session concern; a future language switcher may explicitly change and persist the client preference.
 
 ## 3. Backend architecture
 
@@ -111,6 +115,8 @@ Each state must be checked for horizontal overflow, clipped controls, wrapping, 
 | Ceremony TTL expires | `InvalidPasskeyException`; user restarts the ceremony. |
 | Ceremony is submitted twice | First `GETDEL` consumes it; subsequent request is rejected without a lock. |
 | Browser width below 768px | Controls stack/wrap, no horizontal document overflow, focus remains visible. |
+| Browser locale is unsupported or unavailable | Use `en-US` for both UI translations and the `Accept-Language` request header. |
+| Browser locale is `es`, `es-MX`, `en`, or `en-US` | Normalize to the supported `es-MX` or `en-US` locale and use it consistently in the UI and API requests. |
 
 ## 6. Test strategy
 
@@ -123,6 +129,7 @@ Backend:
 Frontend:
 
 - Keep existing component tests for behavior.
+- Unit-test locale normalization and request-header propagation, including unsupported and regional browser locale values.
 - Add Playwright responsive checks at the four viewport widths for document overflow and critical selectors.
 - Capture reviewed screenshots for each major state; do not add brittle pixel snapshots unless a stable baseline is intentionally chosen.
 
