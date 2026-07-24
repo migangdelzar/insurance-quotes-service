@@ -36,7 +36,7 @@ public record QuoteView(
                 quote.zipCode(),
                 quote.coverageType(),
                 health.hasPreexistingConditions(),
-                health.conditions(),
+                copyConditions(health.conditions()),
                 health.takesPrescriptionMedication(),
                 health.usesTobacco(),
                 health.needsSpouseCoverage(),
@@ -44,5 +44,9 @@ public record QuoteView(
                 quote.status(),
                 quote.createdAt(),
                 quote.updatedAt());
+    }
+
+    private static Set<HealthCondition> copyConditions(Set<HealthCondition> conditions) {
+        return conditions == null ? null : Set.copyOf(conditions);
     }
 }

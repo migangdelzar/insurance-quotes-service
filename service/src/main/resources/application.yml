@@ -41,9 +41,12 @@ auth:
     username: ${AUTH_DEMO_USERNAME:demo}
     password: ${AUTH_DEMO_PASSWORD:demo-password}
 
+  webauthn:
+    origins: ${AUTH_WEBAUTHN_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:3100}
+
 web:
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:3100}
 
 quote:
   expiration:

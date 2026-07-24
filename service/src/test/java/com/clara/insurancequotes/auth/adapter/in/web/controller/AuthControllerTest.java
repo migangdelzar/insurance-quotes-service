@@ -44,7 +44,7 @@ import org.springframework.test.web.servlet.MockMvc;
             "auth.jwt.ttl=30m",
             "auth.demo.username=demo",
             "auth.demo.password=demo-password",
-            "web.cors.allowed-origins=http://localhost:5173,http://localhost:3000"
+            "web.cors.allowed-origins=http://localhost:5173,http://localhost:3000,http://localhost:3100"
         })
 class AuthControllerTest {
 
@@ -105,6 +105,17 @@ class AuthControllerTest {
                         .header("Access-Control-Request-Headers", "content-type,api-version"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:3000"))
+                .andExpect(header().string("Access-Control-Allow-Headers", containsString("api-version")));
+    }
+
+    @Test
+    void insuranceFrontendOrigin_allowsApiVersionHeader() throws Exception {
+        mockMvc.perform(options("/auth/login")
+                        .header("Origin", "http://localhost:3100")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "content-type,api-version"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:3100"))
                 .andExpect(header().string("Access-Control-Allow-Headers", containsString("api-version")));
     }
 }
