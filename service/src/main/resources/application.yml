@@ -40,6 +40,13 @@ auth:
   demo:
     username: ${AUTH_DEMO_USERNAME:demo}
     password: ${AUTH_DEMO_PASSWORD:demo-password}
+    users:
+      - username: ${AUTH_DEMO_USERNAME:demo}
+        password: ${AUTH_DEMO_PASSWORD:demo-password}
+      - username: ${AUTH_DEMO_USERNAME_2:demo-two}
+        password: ${AUTH_DEMO_PASSWORD_2:demo-password-two}
+      - username: ${AUTH_DEMO_USERNAME_3:demo-three}
+        password: ${AUTH_DEMO_PASSWORD_3:demo-password-three}
 
   webauthn:
     origins: ${AUTH_WEBAUTHN_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:3100}

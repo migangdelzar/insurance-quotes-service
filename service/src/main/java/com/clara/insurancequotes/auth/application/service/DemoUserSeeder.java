@@ -1,28 +1,31 @@
 package com.clara.insurancequotes.auth.application.service;
 
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
+import com.clara.insurancequotes.auth.configuration.DemoUserProperties;
 import com.clara.insurancequotes.auth.domain.model.User;
 import java.time.Clock;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@EnableConfigurationProperties(DemoUserProperties.class)
 public class DemoUserSeeder {
 
     @Bean
-    public ApplicationRunner seedDemoUser(
-            UserRepository users,
-            PasswordEncoder passwordEncoder,
-            Clock clock,
-            @Value("${auth.demo.username}") String username,
-            @Value("${auth.demo.password}") String password) {
+    public ApplicationRunner seedDemoUsers(
+            UserRepository users, PasswordEncoder passwordEncoder, Clock clock, DemoUserProperties properties) {
         return args -> {
-            if (users.findByUsername(username).isEmpty()) {
-                users.save(User.create(username, passwordEncoder.encode(password), clock.instant()));
-            }
+            properties.users().forEach(user -> seedUser(users, passwordEncoder, clock, user));
         };
+    }
+
+    private void seedUser(
+            UserRepository users, PasswordEncoder passwordEncoder, Clock clock, DemoUserProperties.User user) {
+        if (users.findByUsername(user.username()).isEmpty()) {
+            users.save(User.create(user.username(), passwordEncoder.encode(user.password()), clock.instant()));
+        }
     }
 }

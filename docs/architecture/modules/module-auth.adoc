@@ -2,4 +2,6 @@
 |===
 |Base package
 |`com.clara.insurancequotes.auth`
+|Properties
+|* `auth.demo.users` -- `java.util.List<com.clara.insurancequotes.auth.configuration.DemoUserProperties$User>`
 |===

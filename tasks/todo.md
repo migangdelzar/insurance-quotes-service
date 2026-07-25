@@ -54,3 +54,10 @@ The backend now follows the responsibility-based package structure defined by th
 - [x] Validate Prometheus target health and an `up{job="insurance-quotes-api"}` sample.
 - [x] Validate Grafana's provisioned Prometheus datasource and six-panel dashboard.
 - [x] Correct the dashboard JSON syntax error that prevented Grafana provisioning.
+
+## Default demo users checkpoint
+
+- [x] Add a configurable, idempotent seed for three local password users.
+- [x] Preserve the existing `demo` credentials and add `demo-two` and `demo-three`.
+- [x] Add TDD coverage for seeding all users and skipping existing users.
+- [x] Document credentials and passkey/MFA behavior.

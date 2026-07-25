@@ -16,7 +16,15 @@ mise run up jvm full                # add the frontend at http://localhost:3100
 mise run up jvm full e2e            # add WireMock at http://localhost:8089
 ```
 
-The full-stack command expects the sibling frontend directory shown above. The API is available at `http://localhost:8080`; Swagger UI is at `/swagger-ui.html`. Demo credentials are `demo` / `demo-password` for `POST /auth/login`.
+The full-stack command expects the sibling frontend directory shown above. The API is available at `http://localhost:8080`; Swagger UI is at `/swagger-ui.html`. The local profile seeds three password users when they do not already exist:
+
+| Username | Password |
+| --- | --- |
+| `demo` | `demo-password` |
+| `demo-two` | `demo-password-two` |
+| `demo-three` | `demo-password-three` |
+
+Use `POST /auth/login` with any of these accounts. Passkey registration is optional on first login; an account that already has a passkey registered still requires it as MFA.
 
 Redis is shared ephemeral infrastructure for horizontally scaled or serverless instances. It stores the ten-minute quote cache and five-minute WebAuthn ceremonies so a request can be completed by a different instance. PostgreSQL remains the source of truth for users, passkeys, refresh-token rotation, quotes, and business events; Redis is not used for durable state or distributed locks. Quote-cache failures fall back to PostgreSQL, while WebAuthn failures require restarting the ceremony. Redis is available at `localhost:6379` in the local Compose stack.
 
