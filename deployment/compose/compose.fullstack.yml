@@ -3,7 +3,7 @@ services:
     build:
       context: ../../../insurance-quotes-web
       args:
-        VITE_API_BASE_URL: http://localhost:8080
+        VITE_API_BASE_URL: /api
     ports:
       - "3100:80"
     depends_on:
