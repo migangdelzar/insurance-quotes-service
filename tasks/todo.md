@@ -61,3 +61,11 @@ The backend now follows the responsibility-based package structure defined by th
 - [x] Preserve the existing `demo` credentials and add `demo-two` and `demo-three`.
 - [x] Add TDD coverage for seeding all users and skipping existing users.
 - [x] Document credentials and passkey/MFA behavior.
+
+## Metrics, Kafka, and full-stack CI checkpoint
+
+- [x] Document Micrometer → Prometheus → Grafana ownership for operational metrics.
+- [x] Document Kafka's boundary as durable domain-event transport, not a Prometheus metric aggregator.
+- [x] Preserve synchronous coverage pricing because the wizard needs the result immediately.
+- [x] Validate the same-origin Nginx `/api/actuator/health` proxy in the full-stack GitHub Actions smoke workflow.
+- [x] Keep push and pull-request workflows canceling superseded runs with `cancel-in-progress: true`.

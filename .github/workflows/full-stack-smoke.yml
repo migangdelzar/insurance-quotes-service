@@ -1,7 +1,7 @@
 ---
 name: Full-stack JVM Smoke
 
-on:  # yamllint disable-line rule:truthy
+on: # yamllint disable-line rule:truthy
   push:
   pull_request:
   workflow_dispatch:
@@ -74,6 +74,8 @@ jobs:
             sleep 2
           done
           curl --fail --silent http://localhost:3100/ > /dev/null
+          curl --fail --silent http://localhost:3100/api/actuator/health |
+            grep -q '"status":"UP"'
 
       - name: Tear down full stack
         if: ${{ always() }}
