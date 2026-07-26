@@ -16,7 +16,30 @@
 - Never use quote IDs, user IDs, emails, or trace IDs as Prometheus labels.
 - Keep structured logs free of passwords, tokens, and credential payloads.
 
-### Task 1: Application trace export and correlated Docker logs
+### Task 1: Business metrics and Redis rate limiting
+
+**Files:**
+- Create: `service/src/main/java/com/clara/insurancequotes/config/RateLimitProperties.java`
+- Create: `service/src/main/java/com/clara/insurancequotes/shared/ratelimit/RateLimiter.java`
+- Create: `service/src/main/java/com/clara/insurancequotes/shared/ratelimit/RedisRateLimiter.java`
+- Create: `service/src/main/java/com/clara/insurancequotes/shared/ratelimit/RateLimitInterceptor.java`
+- Modify: `service/src/main/java/com/clara/insurancequotes/config/BusinessMetrics.java`
+- Modify: `service/src/main/java/com/clara/insurancequotes/quote/application/service/QuoteService.java`
+- Modify: `service/src/main/java/com/clara/insurancequotes/submission/application/service/SubmissionService.java`
+- Modify: `service/src/main/java/com/clara/insurancequotes/shared/cache/RedisCacheErrorHandler.java`
+- Modify: `service/src/main/resources/application.yml`
+- Test: `service/src/test/java/com/clara/insurancequotes/config/BusinessMetricsTest.java`
+- Test: `service/src/test/java/com/clara/insurancequotes/shared/ratelimit/RedisRateLimiterTest.java`
+- Test: `service/src/test/java/com/clara/insurancequotes/shared/ratelimit/RateLimitInterceptorTest.java`
+
+- [ ] Write failing tests for bounded business meters and the atomic limiter decision contract.
+- [ ] Run the focused tests; expect failure because the new meters and limiter do not exist.
+- [ ] Implement the minimum Micrometer meters and Redis fixed-window limiter with structured 429 responses and headers.
+- [ ] Register the interceptor and wire quote/auth mutation buckets through configuration.
+- [ ] Run focused tests and the backend unit suite; expect all tests to pass.
+- [ ] Commit `feat(observability): add business metrics and redis rate limiting`.
+
+### Task 2: Application trace export and correlated Docker logs
 
 **Files:**
 - Modify: `service/pom.xml`
@@ -31,7 +54,7 @@
 - [ ] Run the focused test and `mvn -pl service test`; expect all tests to pass.
 - [ ] Commit `feat(observability): export correlated api traces and logs`.
 
-### Task 2: Loki, Tempo, and Alloy Compose services
+### Task 3: Loki, Tempo, and Alloy Compose services
 
 **Files:**
 - Create: `deployment/compose/observability/loki-config.yml`
@@ -46,7 +69,7 @@
 - [ ] Run `docker-compose -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.jvm.yml -f deployment/compose/compose.observability.yml config`; expect valid output.
 - [ ] Commit `build(observability): add loki tempo and alloy services`.
 
-### Task 3: Grafana data sources and correlated dashboard
+### Task 4: Grafana data sources and correlated dashboard
 
 **Files:**
 - Modify: `deployment/compose/observability/grafana/provisioning/datasources/datasource.yml`
@@ -59,7 +82,7 @@
 - [ ] Run the focused test and Grafana/JSON validation; expect all checks to pass.
 - [ ] Commit `feat(observability): provision correlated grafana signals`.
 
-### Task 4: Live stack verification and documentation
+### Task 5: Live stack verification and documentation
 
 **Files:**
 - Modify: `README.md`

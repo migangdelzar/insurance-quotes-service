@@ -16,6 +16,14 @@ related signals without moving business metrics into Kafka.
 ## Decisions
 
 - Micrometer and Actuator remain the application metrics path.
+- Business meters cover quote creation, coverage updates, premium calculation,
+  submissions, insurer calls, cache failures, and rate-limit outcomes using
+  bounded labels only.
+- Redis provides atomic, shared fixed-window rate-limit counters at the HTTP
+  boundary. Authentication uses a stricter IP bucket; quote mutations use an
+  authenticated subject or trusted ingress address. Redis failure fails open
+  with a metric and warning so a cache outage does not become a total API
+  outage.
 - Spring Boot's OpenTelemetry starter exports sampled traces over OTLP to Tempo.
 - The API keeps structured JSON logs on stdout; Grafana Alloy tails Docker
   container logs and forwards them to Loki.
@@ -32,6 +40,7 @@ related signals without moving business metrics into Kafka.
 API --/actuator/prometheus--> Prometheus --query--> Grafana
 API --OTLP/gRPC traces-----> Tempo -------------> Grafana
 API --JSON stdout----------> Alloy --Loki push--> Loki ------------> Grafana
+Redis <--- atomic rate-limit counters --- API
 ```
 
 Tempo uses local filesystem storage for this development stack. Loki uses
@@ -39,6 +48,18 @@ single-binary TSDB/filesystem storage. Neither configuration is a production
 retention or high-availability design.
 
 ## Configuration boundaries
+
+### Metrics and rate limiting
+
+Actuator exposes Micrometer meters through `/actuator/prometheus`; Prometheus
+scrapes them directly. Kafka remains the durable transport for `QuoteSubmitted`
+and its producer metrics remain platform telemetry. The API does not publish
+every meter to Kafka.
+
+Redis rate limiting uses an atomic `INCR` plus `PEXPIRE` Lua script. Responses
+include `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `Retry-After` when a
+request is limited. The limiter never uses user IDs, quote IDs, or credentials
+as Prometheus labels.
 
 ### API
 
