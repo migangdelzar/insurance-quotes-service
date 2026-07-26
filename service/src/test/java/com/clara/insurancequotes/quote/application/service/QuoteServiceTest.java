@@ -43,7 +43,12 @@ class QuoteServiceTest {
 
     private static UpdateCoverageCommand seniorCoverage() {
         return new UpdateCoverageCommand(
-                CoverageType.STANDARD, true, Set.of(HealthCondition.DIABETES), false, true, true);
+                CoverageType.STANDARD,
+                true,
+                Set.of(HealthCondition.DIABETES, HealthCondition.HYPERTENSION),
+                false,
+                true,
+                true);
     }
 
     @Test
@@ -93,7 +98,7 @@ class QuoteServiceTest {
         var view = service.updateCoverage(id, seniorCoverage());
 
         assertThat(view.usesTobacco()).isTrue();
-        assertThat(view.conditions()).containsExactly(HealthCondition.DIABETES);
+        assertThat(view.conditions()).containsExactlyInAnyOrder(HealthCondition.DIABETES, HealthCondition.HYPERTENSION);
     }
 
     @Test

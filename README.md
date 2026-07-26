@@ -12,11 +12,11 @@ Install the pinned tools and hooks, then start the default JVM stack:
 mise run setup
 mise run up                         # PostgreSQL + Kafka + Redis + JVM API
 mise run up jvm observability       # add Prometheus :9090, Grafana :3001, Loki :3101, Tempo :3200
-mise run up jvm full                # add the frontend at http://localhost:3100
-mise run up jvm full e2e            # add WireMock at http://localhost:8089
+mise run up jvm full                # add the frontend at :3100 and local insurer stub
+mise run up jvm full e2e            # same stack; keeps the explicit E2E overlay alias
 ```
 
-The full-stack command expects the sibling frontend directory shown above. The API is available at `http://localhost:8080`; Swagger UI is at `/swagger-ui.html`. The local profile seeds three password users when they do not already exist:
+The full-stack command expects the sibling frontend directory shown above. The API is available at `http://localhost:8080`; Swagger UI is at `/swagger-ui.html`. Full local Compose runs use WireMock on `http://localhost:8089` as a deterministic insurer stand-in, so quote submission does not depend on external `httpstat.us` availability. Set `INSURER_BASE_URL` in a deployment-specific environment to use a real insurer endpoint. The local profile seeds three password users when they do not already exist:
 
 | Username | Password |
 | --- | --- |

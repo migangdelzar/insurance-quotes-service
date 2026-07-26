@@ -1,4 +1,11 @@
 services:
+  wiremock:
+    image: wiremock/wiremock:3.9.1
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./wiremock:/home/wiremock:ro
+
   web:
     build:
       context: ../../../insurance-quotes-web
@@ -9,3 +16,10 @@ services:
     depends_on:
       api:
         condition: service_healthy
+
+  api:
+    environment:
+      INSURER_BASE_URL: http://wiremock:8080/submit
+    depends_on:
+      wiremock:
+        condition: service_started
