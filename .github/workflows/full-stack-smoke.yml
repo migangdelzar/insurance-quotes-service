@@ -1,7 +1,7 @@
 ---
 name: Full-stack JVM Smoke
 
-on: # yamllint disable-line rule:truthy
+on:  # yamllint disable-line rule:truthy
   push:
   pull_request:
   workflow_dispatch:
@@ -42,6 +42,15 @@ jobs:
           -f deployment/compose/compose.fullstack.yml
           config
 
+      - name: Remove any stale Compose state
+        working-directory: insurance-quotes-service
+        run: >-
+          docker compose
+          -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.jvm.yml
+          -f deployment/compose/compose.fullstack.yml
+          down --volumes --remove-orphans
+
       - name: Start full JVM stack
         working-directory: insurance-quotes-service
         run: >-
@@ -76,6 +85,50 @@ jobs:
           curl --fail --silent http://localhost:3100/ > /dev/null
           curl --fail --silent http://localhost:3100/api/actuator/health |
             grep -q '"status":"UP"'
+
+      - name: Verify seeded password logins through the API
+        run: |
+          set -euo pipefail
+          login_url=http://localhost:3100/api/auth/login
+          login() {
+            local username="$1"
+            local password="$2"
+            curl --fail --silent --show-error "$login_url" \
+              -H 'Content-Type: application/json' \
+              -H 'API-Version: 1.0' \
+              --data "{\"username\":\"$username\",\"password\":\"$password\"}"
+          }
+          login demo demo-password | grep -q '"status":"TOKENS_ISSUED"'
+          login demo-two demo-password-two | grep -q '"status":"TOKENS_ISSUED"'
+          login demo-three demo-password-three |
+            grep -q '"status":"TOKENS_ISSUED"'
+
+      - name: Verify login survives API container recreation
+        working-directory: insurance-quotes-service
+        run: |
+          set -euo pipefail
+          docker compose \
+            -f deployment/compose/docker-compose.yml \
+            -f deployment/compose/docker-compose.jvm.yml \
+            -f deployment/compose/compose.fullstack.yml \
+            up -d --force-recreate api
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://localhost:8080/actuator/health |
+              grep -q '"status":"UP"'; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              exit 1
+            fi
+            sleep 2
+          done
+          login_url=http://localhost:3100/api/auth/login
+          credentials='{"username":"demo-three","password":"demo-password-three"}'
+          curl --fail --silent --show-error "$login_url" \
+            -H 'Content-Type: application/json' \
+            -H 'API-Version: 1.0' \
+            --data "$credentials" |
+            grep -q '"status":"TOKENS_ISSUED"'
 
       - name: Tear down full stack
         if: ${{ always() }}

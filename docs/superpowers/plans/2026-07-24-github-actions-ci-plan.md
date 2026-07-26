@@ -34,4 +34,4 @@
 - Responsive Playwright coverage passed at 320, 375, 768, and 1280 pixels.
 - The complete local Compose configuration was validated and the API, web, PostgreSQL, Kafka, Redis, and WireMock services reached healthy/running state.
 - Observability was verified with the observability overlay: `/actuator/prometheus` returned metrics, the Prometheus API target was `up`, Grafana's Prometheus proxy returned `up=1`, and the provisioned six-panel `Insurance Quotes` dashboard loaded successfully.
-- The full-stack workflow intentionally smoke-tests the backend branch with the frontend repository's `main`; feature-branch Playwright journeys were verified locally against both current worktrees.
+- The full-stack workflow intentionally smoke-tests the backend branch with the frontend repository's `main`; it starts from clean Compose volumes and verifies all three seeded password logins through the same-origin `/api` proxy. Feature-branch Playwright journeys were verified locally against both current worktrees.
