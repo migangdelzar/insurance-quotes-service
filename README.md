@@ -11,7 +11,7 @@ Install the pinned tools and hooks, then start the default JVM stack:
 ```bash
 mise run setup
 mise run up                         # PostgreSQL + Kafka + Redis + JVM API
-mise run up jvm observability       # add Prometheus :9090 and Grafana :3001
+mise run up jvm observability       # add Prometheus :9090, Grafana :3001, Loki :3101, Tempo :3200
 mise run up jvm full                # add the frontend at http://localhost:3100
 mise run up jvm full e2e            # add WireMock at http://localhost:8089
 ```
@@ -27,6 +27,12 @@ The full-stack command expects the sibling frontend directory shown above. The A
 Use `POST /auth/login` with any of these accounts. Passkey registration is optional on first login; an account that already has a passkey registered still requires it as MFA.
 
 Redis is shared ephemeral infrastructure for horizontally scaled or serverless instances. It stores the ten-minute quote cache and five-minute WebAuthn ceremonies so a request can be completed by a different instance. PostgreSQL remains the source of truth for users, passkeys, refresh-token rotation, quotes, and business events; Redis is not used for durable state or distributed locks. Quote-cache failures fall back to PostgreSQL, while WebAuthn failures require restarting the ceremony. Redis is available at `localhost:6379` in the local Compose stack.
+
+The observability overlay keeps ownership explicit: Actuator/Micrometer instruments the API, Prometheus scrapes `/actuator/prometheus`, and Grafana visualizes the resulting time series. Spring Boot exports request traces to Tempo through OTLP/HTTP, while Grafana Alloy reads Docker JSON logs and sends them to Loki. Grafana provisions all three sources with trace-to-log navigation. Kafka remains the durable transport for `QuoteSubmitted` domain events; it is not used as a metrics pipeline.
+
+The API also uses Redis as a distributed fixed-window rate limiter for authentication and quote mutations. The Lua script atomically increments a bucket and applies its expiry, so multiple API instances share one decision. Redis failures fail open for availability and emit `rate_limit_redis_failures_total`; rejected requests return `429` with `Retry-After` and `X-RateLimit-*` headers.
+
+Local telemetry ports are Prometheus `9090`, Grafana `3001` (`admin`/`admin`), Loki `3101`, and Tempo `3200` (query), `4317` (OTLP/gRPC), and `4318` (OTLP/HTTP). Loki and Tempo use short-lived filesystem storage through named Compose volumes. Alloy requires read-only access to the Docker socket for local collection; production deployments should replace that collector arrangement with a platform-native log pipeline.
 
 Without mise, use the compose files directly:
 

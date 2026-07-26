@@ -69,3 +69,21 @@ The backend now follows the responsibility-based package structure defined by th
 - [x] Preserve synchronous coverage pricing because the wizard needs the result immediately.
 - [x] Validate the same-origin Nginx `/api/actuator/health` proxy in the full-stack GitHub Actions smoke workflow.
 - [x] Keep push and pull-request workflows canceling superseded runs with `cancel-in-progress: true`.
+
+## Observability and mobile wizard polish checkpoint
+
+- [x] Add bounded business metrics for quote lifecycle, pricing, insurer calls, cache failures, domain events, and rate limits.
+- [x] Add Redis-backed distributed rate limiting with atomic fixed windows, 429 headers, and fail-open telemetry.
+- [x] Add Spring Boot OTLP tracing, trace/span log MDC fields, and the Okio runtime compatibility pin.
+- [x] Add Loki, Tempo, and Alloy to the observability Compose overlay with persistent local volumes.
+- [x] Provision Prometheus, Loki, and Tempo in Grafana with trace-to-log correlation and an operations dashboard.
+- [x] Add CI Compose validation for the complete observability overlay.
+- [x] Polish wizard progress and mobile action placement for small screens with safe-area padding.
+- [x] Verify web unit/build checks and Playwright mobile/desktop responsive flows.
+
+### Verification evidence
+
+- Backend: `mise exec -- mvn -B -pl service test` — 69 tests passed.
+- Frontend: `bun run --filter web test --run` — 58 tests passed; production build passed.
+- Browser: Playwright mobile premium journey passed with the action dock computed as `position: fixed`; 11 responsive desktop checks passed.
+- Live telemetry: Prometheus ready, Loki `/ready`, Tempo `/ready`, API health, rate-limit samples, Tempo trace search, and Loki range query all returned successfully.
