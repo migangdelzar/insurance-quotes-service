@@ -29,8 +29,9 @@ class QuoteServiceTest {
 
     private final InMemoryQuoteRepository repository = new InMemoryQuoteRepository();
     private final PremiumCalculator calculator = input -> new Premium(new BigDecimal("100.00"));
+    private final SimpleMeterRegistry metricsRegistry = new SimpleMeterRegistry();
     private final QuoteService service = new QuoteService(
-            repository, calculator, Clock.fixed(NOW, ZoneOffset.UTC), new BusinessMetrics(new SimpleMeterRegistry()));
+            repository, calculator, Clock.fixed(NOW, ZoneOffset.UTC), new BusinessMetrics(metricsRegistry));
 
     private static final CreateQuoteCommand ADULT = new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600");
     private static final CreateQuoteCommand SENIOR =
@@ -61,6 +62,13 @@ class QuoteServiceTest {
 
         assertThat(view.monthlyPremium()).isEqualByComparingTo("100.00");
         assertThat(view.coverageType()).isEqualTo(CoverageType.STANDARD);
+        assertThat(metricsRegistry
+                        .get("quotes.coverage.updates")
+                        .tag("outcome", "success")
+                        .tag("coverage_type", "standard")
+                        .counter()
+                        .count())
+                .isEqualTo(1);
     }
 
     @Test
@@ -69,6 +77,13 @@ class QuoteServiceTest {
 
         assertThatThrownBy(() -> service.updateCoverage(id, seniorCoverage()))
                 .isInstanceOf(HealthDataNotAllowedException.class);
+        assertThat(metricsRegistry
+                        .get("quotes.coverage.updates")
+                        .tag("outcome", "rejected")
+                        .tag("coverage_type", "standard")
+                        .counter()
+                        .count())
+                .isEqualTo(1);
     }
 
     @Test

@@ -51,11 +51,22 @@ public class QuoteService implements QuoteApi {
     @Transactional
     @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id", beforeInvocation = true)
     public QuoteView updateCoverage(UUID id, UpdateCoverageCommand command) {
-        var quote = load(id);
-        rejectHealthDataForNonSeniors(quote, command);
-        var premium = premiumCalculator.calculate(pricingInputOf(quote, command));
-        quote.updateCoverage(command.coverageType(), healthProfileOf(command), premium.monthly(), clock.instant());
-        return QuoteView.from(repository.save(quote));
+        try {
+            var quote = load(id);
+            rejectHealthDataForNonSeniors(quote, command);
+            var premium =
+                    metrics.timePremiumCalculation(() -> premiumCalculator.calculate(pricingInputOf(quote, command)));
+            quote.updateCoverage(command.coverageType(), healthProfileOf(command), premium.monthly(), clock.instant());
+            var view = QuoteView.from(repository.save(quote));
+            metrics.coverageUpdated("success", command.coverageType().name());
+            return view;
+        } catch (HealthDataNotAllowedException exception) {
+            metrics.coverageUpdated("rejected", command.coverageType().name());
+            throw exception;
+        } catch (RuntimeException exception) {
+            metrics.coverageUpdated("failed", command.coverageType().name());
+            throw exception;
+        }
     }
 
     @Override

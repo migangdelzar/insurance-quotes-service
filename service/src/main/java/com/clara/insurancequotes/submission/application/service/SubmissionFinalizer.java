@@ -1,5 +1,6 @@
 package com.clara.insurancequotes.submission.application.service;
 
+import com.clara.insurancequotes.config.BusinessMetrics;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.submission.api.event.QuoteSubmitted;
@@ -18,11 +19,13 @@ public class SubmissionFinalizer {
 
     private final QuoteApi quoteApi;
     private final ApplicationEventPublisher events;
+    private final BusinessMetrics metrics;
 
     @Transactional
     public QuoteView completeSubmission(UUID quoteId) {
         var view = quoteApi.markSubmitted(quoteId);
         events.publishEvent(new QuoteSubmitted(view.id(), view.monthlyPremium(), view.updatedAt()));
+        metrics.domainEventPublished("quote_submitted");
         log.debug("Finalized quote submission {}", quoteId);
         return view;
     }
