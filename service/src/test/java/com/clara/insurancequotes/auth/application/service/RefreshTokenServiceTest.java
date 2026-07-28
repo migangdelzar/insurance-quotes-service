@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.clara.insurancequotes.auth.api.exception.InvalidRefreshTokenException;
 import com.clara.insurancequotes.auth.domain.model.User;
+import com.clara.insurancequotes.auth.domain.model.UserRole;
 import com.clara.insurancequotes.testsupport.InMemoryRefreshTokenRepository;
 import java.time.Clock;
 import java.time.Duration;
@@ -19,7 +20,7 @@ class RefreshTokenServiceTest {
     private final InMemoryRefreshTokenRepository repository = new InMemoryRefreshTokenRepository();
     private final RefreshTokenService service =
             new RefreshTokenService(repository, Clock.fixed(NOW, ZoneOffset.UTC), Duration.ofDays(7));
-    private final User user = User.create("demo", "$2a$10$hash", NOW);
+    private final User user = User.create("demo", "$2a$10$hash", UserRole.USER, NOW);
 
     @Test
     void issueAndRotate_returnsNewTokenAndRevokesOld() {

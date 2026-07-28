@@ -47,7 +47,7 @@ public class AuthController {
     public TokenPairResponse refresh(@Valid @RequestBody RefreshRequest request) {
         var rotation = refreshTokenService.rotate(request.refreshToken());
         var user = users.findById(rotation.userId()).orElseThrow(InvalidRefreshTokenException::new);
-        var access = tokenService.issueApiToken(user.username());
+        var access = tokenService.issueApiToken(user);
         return new TokenPairResponse(access.accessToken(), rotation.rawToken(), access.expiresInSeconds());
     }
 

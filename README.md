@@ -131,6 +131,7 @@ The local profile seeds these accounts:
 | demo | demo-password | Standard, senior, retry, and history journeys |
 | demo-two | demo-password-two | Isolated passkey lifecycle journey |
 | demo-three | demo-password-three | Independent manual session |
+| demo-admin | demo-admin-password | Read-only oversight across every user's quotes |
 
 The first password login offers passkey enrollment. Passwordless login for an
 account without a credential returns an actionable passkey-not-registered

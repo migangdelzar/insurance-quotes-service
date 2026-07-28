@@ -1,5 +1,6 @@
 package com.clara.insurancequotes.auth.application.service;
 
+import com.clara.insurancequotes.auth.domain.model.User;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +30,12 @@ public class TokenService {
 
     public record IssuedAccess(String accessToken, long expiresInSeconds) {}
 
-    public IssuedAccess issueApiToken(String username) {
-        return issue(username, "api", ttl);
+    public IssuedAccess issueApiToken(User user) {
+        return issue(user.username(), "api", ttl, user);
     }
 
     public String issueMfaToken(String username) {
-        return issue(username, "mfa-pending", Duration.ofMinutes(5)).accessToken();
+        return issue(username, "mfa-pending", Duration.ofMinutes(5), null).accessToken();
     }
 
     public String scopeOf(String token) {
@@ -45,16 +46,18 @@ public class TokenService {
         }
     }
 
-    private IssuedAccess issue(String username, String scope, Duration tokenTtl) {
+    private IssuedAccess issue(String username, String scope, Duration tokenTtl, User user) {
         var now = Instant.now();
-        var claims = JwtClaimsSet.builder()
+        var claimsBuilder = JwtClaimsSet.builder()
                 .subject(username)
                 .issuedAt(now)
                 .expiresAt(now.plus(tokenTtl))
-                .claim("scope", scope)
-                .build();
+                .claim("scope", scope);
+        if (user != null) {
+            claimsBuilder.claim("uid", user.id().toString()).claim("role", user.role().name());
+        }
         var header = JwsHeader.with(MacAlgorithm.HS256).build();
-        var token = jwtEncoder.encode(JwtEncoderParameters.from(header, claims));
+        var token = jwtEncoder.encode(JwtEncoderParameters.from(header, claimsBuilder.build()));
         log.debug("Issued JWT for {}", username);
         return new IssuedAccess(token.getTokenValue(), tokenTtl.toSeconds());
     }

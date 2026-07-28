@@ -47,6 +47,9 @@ auth:
         password: ${AUTH_DEMO_PASSWORD_2:demo-password-two}
       - username: ${AUTH_DEMO_USERNAME_3:demo-three}
         password: ${AUTH_DEMO_PASSWORD_3:demo-password-three}
+      - username: ${AUTH_DEMO_USERNAME_ADMIN:demo-admin}
+        password: ${AUTH_DEMO_PASSWORD_ADMIN:demo-admin-password}
+        role: ADMIN
 
   webauthn:
     origins: ${AUTH_WEBAUTHN_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:3100}

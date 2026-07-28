@@ -46,7 +46,7 @@ public class LoginService {
 
     @Transactional
     public TokenPairResponse issuePair(User user) {
-        var access = tokenService.issueApiToken(user.username());
+        var access = tokenService.issueApiToken(user);
         var refresh = refreshTokens.issue(user);
         return new TokenPairResponse(access.accessToken(), refresh, access.expiresInSeconds());
     }

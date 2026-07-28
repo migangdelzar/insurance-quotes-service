@@ -12,6 +12,7 @@ import com.clara.insurancequotes.auth.application.port.out.CredentialRepository;
 import com.clara.insurancequotes.auth.application.port.out.PasskeyPort;
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.auth.domain.model.User;
+import com.clara.insurancequotes.auth.domain.model.UserRole;
 import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class WebAuthnServiceTest {
     private final WebAuthnService service =
             new WebAuthnService(passkeyPort, credentials, users, loginService, tokenService);
 
-    private final User demo = User.create("demo", "$2a$10$hash", Instant.now());
+    private final User demo = User.create("demo", "$2a$10$hash", UserRole.USER, Instant.now());
 
     @Test
     void assertionWithValidCeremonyIssuesTokenPair() {

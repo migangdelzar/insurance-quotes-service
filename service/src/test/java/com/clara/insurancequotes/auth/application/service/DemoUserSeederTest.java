@@ -53,7 +53,11 @@ class DemoUserSeederTest {
                 new DemoUserProperties.User("demo-two", "demo-password-two"),
                 new DemoUserProperties.User("demo-three", "demo-password-three")));
         when(users.findByUsername(anyString()))
-                .thenReturn(Optional.of(User.create("existing", "existing-hash", clock.instant())));
+                .thenReturn(Optional.of(User.create(
+                        "existing",
+                        "existing-hash",
+                        com.clara.insurancequotes.auth.domain.model.UserRole.USER,
+                        clock.instant())));
 
         new DemoUserSeeder()
                 .seedDemoUsers(users, passwordEncoder, clock, properties)
