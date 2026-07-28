@@ -32,4 +32,9 @@ class MessageResolverTest {
         assertThat(SupportedLocale.fromHeader("es-MX,es;q=0.9")).isEqualTo(Locale.forLanguageTag("es-MX"));
         assertThat(SupportedLocale.fromHeader("fr-FR")).isEqualTo(Locale.forLanguageTag("en-US"));
     }
+
+    @Test
+    void headerResolution_malformedLanguageRangeFallsBackToEnUs() {
+        assertThat(SupportedLocale.fromHeader("-")).isEqualTo(Locale.forLanguageTag("en-US"));
+    }
 }

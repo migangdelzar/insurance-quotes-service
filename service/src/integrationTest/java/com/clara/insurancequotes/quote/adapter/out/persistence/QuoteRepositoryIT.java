@@ -12,6 +12,7 @@ import com.clara.insurancequotes.quote.domain.model.QuoteMother;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.clara.insurancequotes.testsupport.TestUsers;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Set;
@@ -42,6 +43,9 @@ class QuoteRepositoryIT {
     @Autowired
     private UserRepository users;
 
+    @Autowired
+    private EntityManager entityManager;
+
     private UUID ownerId;
 
     @BeforeEach
@@ -69,9 +73,12 @@ class QuoteRepositoryIT {
                 new BigDecimal("327.60"),
                 QuoteMother.FIXED_NOW);
 
-        var updated = repository.save(saved);
+        repository.save(saved);
+        entityManager.flush();
+        entityManager.clear();
 
-        assertThat(updated.healthProfile().conditions()).containsExactly(HealthCondition.DIABETES);
+        var reloaded = repository.findById(saved.id(), ownerId).orElseThrow();
+        assertThat(reloaded.healthProfile().conditions()).containsExactly(HealthCondition.DIABETES);
     }
 
     @Test

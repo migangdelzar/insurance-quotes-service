@@ -24,7 +24,7 @@ public enum SupportedLocale {
         List<Locale.LanguageRange> ranges;
         try {
             ranges = Locale.LanguageRange.parse(acceptLanguage);
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException | IndexOutOfBoundsException exception) {
             return EN_US.locale();
         }
         var supported = List.of(EN_US.locale(), ES_MX.locale());

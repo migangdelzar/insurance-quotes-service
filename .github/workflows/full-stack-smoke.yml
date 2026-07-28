@@ -29,11 +29,13 @@ jobs:
       - name: Check out backend
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          persist-credentials: false
           path: insurance-quotes-service
 
       - name: Check out frontend baseline
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          persist-credentials: false
           repository: migangdelzar/insurance-quotes-web
           # Keep the cross-repository smoke test on a frontend ref that
           # contains the production Dockerfile. Once the frontend PR is
@@ -89,7 +91,7 @@ jobs:
               break
             fi
             if [ "$attempt" -eq 60 ]; then
-              "${compose[@]}" logs
+              "${compose[@]}" logs api
               exit 1
             fi
             sleep 2
@@ -131,6 +133,7 @@ jobs:
               break
             fi
             if [ "$attempt" -eq 60 ]; then
+              docker compose -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.jvm.yml -f deployment/compose/docker-compose.ci.yml -f deployment/compose/compose.fullstack.yml logs api
               exit 1
             fi
             sleep 2

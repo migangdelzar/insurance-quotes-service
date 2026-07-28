@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 class RateLimitInterceptorTest {
 
@@ -69,15 +70,30 @@ class RateLimitInterceptorTest {
     @Test
     void rejectsWhenRedisIsUnavailableInDefaultConfiguration() throws Exception {
         var request = request("POST", "/quotes", "10.0.0.8");
-        var response = Mockito.mock(HttpServletResponse.class);
-        when(response.getOutputStream()).thenReturn(Mockito.mock(ServletOutputStream.class));
+        var response = new MockHttpServletResponse();
         when(rateLimiter.tryAcquire(any(), any(), any(Long.class), any(Duration.class)))
                 .thenThrow(new IllegalStateException("redis unavailable"));
 
         assertThat(interceptor.preHandle(request, response, new Object())).isFalse();
-        verify(response).setStatus(503);
+        assertThat(response.getStatus()).isEqualTo(503);
+        assertThat(response.getContentAsString()).contains("RATE_LIMIT_UNAVAILABLE");
 
         assertThat(registry.get("rate_limit.redis.failures").counter().count()).isEqualTo(1);
+    }
+
+    @Test
+    void allowsRequestWhenRedisIsUnavailableAndFailOpenIsEnabled() throws Exception {
+        var failOpenProperties = new RateLimitProperties();
+        failOpenProperties.setFailOpen(true);
+        var failOpenInterceptor = new RateLimitInterceptor(rateLimiter, metrics, failOpenProperties, objectMapper);
+        var request = request("POST", "/quotes", "10.0.0.8");
+        var response = new MockHttpServletResponse();
+        when(rateLimiter.tryAcquire(any(), any(), any(Long.class), any(Duration.class)))
+                .thenThrow(new IllegalStateException("redis unavailable"));
+
+        assertThat(failOpenInterceptor.preHandle(request, response, new Object()))
+                .isTrue();
+        assertThat(response.getStatus()).isEqualTo(200);
     }
 
     private static HttpServletRequest request(String method, String uri, String remoteAddress) {
