@@ -27,12 +27,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out backend
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           path: insurance-quotes-service
 
       - name: Check out frontend baseline
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: migangdelzar/insurance-quotes-web
           # Keep the cross-repository smoke test on a frontend ref that
