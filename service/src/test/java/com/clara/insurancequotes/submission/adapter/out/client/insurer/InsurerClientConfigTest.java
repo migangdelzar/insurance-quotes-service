@@ -16,6 +16,11 @@ import org.springframework.web.client.RestClient;
 class InsurerClientConfigTest {
 
     @Test
+    void exposesRestClientBuilderForSpringBootFour() {
+        assertThat(new InsurerClientConfig().restClientBuilder()).isNotNull();
+    }
+
+    @Test
     void usesReusableJdkHttpClientFactoryForInsurerCalls() {
         var builder = mock(RestClient.Builder.class);
         var client = mock(RestClient.class);
