@@ -49,7 +49,7 @@ In the web application, detect and normalize the browser locale to `en-US` or `e
 
 | # | Task | Test file | Source/docs files | Status |
 |---|---|---|---|---|
-| 14 | Document Redis responsibilities, serverless/horizontal-scaling rationale, failure modes, local operations, dynamic locale behavior, and responsive verification commands. | Documentation validation via repository checks | `docs/decisions/ADR-011-redis-shared-ephemeral-state.md`, backend `README.md`, frontend `README.md`, Compose documentation | ✅ Done |
+| 14 | Document Redis responsibilities, serverless/horizontal-scaling rationale, failure modes, local operations, dynamic locale behavior, and responsive verification commands. | Documentation validation via repository checks | `docs/decisions/ADR-005-redis-shared-ephemeral-state.md`, backend `README.md`, frontend `README.md`, Compose documentation | ✅ Done |
 | 15 | Run all backend tests/builds, frontend unit/type/lint tests, Compose startup checks, and browser responsive audit; record limitations such as unavailable local Testcontainers/native resources. | Full suites and browser audit | Plan status and verification notes | ✅ Done |
 
 ## 3. TDD execution protocol
