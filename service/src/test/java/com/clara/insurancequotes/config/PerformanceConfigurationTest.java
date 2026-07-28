@@ -16,7 +16,7 @@ class PerformanceConfigurationTest {
         assertThat(properties)
                 .containsEntry("spring.datasource.hikari.maximum-pool-size", "${DB_POOL_MAX_SIZE:10}")
                 .containsEntry("spring.datasource.hikari.minimum-idle", "${DB_POOL_MIN_IDLE:2}")
-                .containsEntry("spring.datasource.hikari.connection-timeout", "${DB_POOL_CONNECTION_TIMEOUT:5s}")
+                .containsEntry("spring.datasource.hikari.connection-timeout", "${DB_POOL_CONNECTION_TIMEOUT:5000}")
                 .containsEntry("server.tomcat.threads.max", "${SERVER_TOMCAT_THREADS_MAX:200}")
                 .containsEntry("server.tomcat.threads.max-queue-capacity", "${SERVER_TOMCAT_THREADS_MAX_QUEUE:100}")
                 .containsEntry("server.tomcat.max-connections", "${SERVER_TOMCAT_MAX_CONNECTIONS:512}")
