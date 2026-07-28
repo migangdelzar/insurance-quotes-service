@@ -5,5 +5,5 @@ import java.util.UUID;
 
 public interface SubmissionApi {
 
-    QuoteView submit(UUID quoteId);
+    QuoteView submit(UUID quoteId, UUID ownerId);
 }

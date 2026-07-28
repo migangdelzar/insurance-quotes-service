@@ -5,19 +5,25 @@ import com.clara.insurancequotes.quote.api.type.HealthCondition;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Set;
+import java.util.UUID;
 
 public final class QuoteMother {
 
     public static final Instant FIXED_NOW = Instant.parse("2026-07-22T10:00:00Z");
+    public static final UUID OWNER_ID = UUID.fromString("a1111111-0000-0000-0000-000000000001");
 
     private QuoteMother() {}
 
     public static Quote draft() {
-        return Quote.createDraft("Jane Roe", "jane@example.com", 34, "06600", FIXED_NOW);
+        return draftForOwner(OWNER_ID);
+    }
+
+    public static Quote draftForOwner(UUID ownerId) {
+        return Quote.createDraft(ownerId, "Jane Roe", "jane@example.com", 34, "06600", FIXED_NOW);
     }
 
     public static Quote seniorDraft() {
-        return Quote.createDraft("John Elder", "john@example.com", 70, "06600", FIXED_NOW);
+        return Quote.createDraft(OWNER_ID, "John Elder", "john@example.com", 70, "06600", FIXED_NOW);
     }
 
     public static Quote submittableDraft() {

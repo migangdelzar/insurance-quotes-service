@@ -29,6 +29,7 @@ class SubmissionServiceTest {
             new SubmissionService(quoteApi, insurerGateway, finalizer, new BusinessMetrics(new SimpleMeterRegistry()));
 
     private static final UUID QUOTE_ID = UUID.randomUUID();
+    private static final UUID OWNER_ID = UUID.randomUUID();
 
     private static QuoteView viewWithStatus(QuoteStatus status) {
         return new QuoteView(
@@ -51,22 +52,22 @@ class SubmissionServiceTest {
 
     @Test
     void submit_alreadySubmitted_isIdempotentAndSkipsInsurer() {
-        when(quoteApi.getQuote(QUOTE_ID)).thenReturn(viewWithStatus(QuoteStatus.SUBMITTED));
+        when(quoteApi.getOwnedQuote(QUOTE_ID, OWNER_ID)).thenReturn(viewWithStatus(QuoteStatus.SUBMITTED));
 
-        var view = service.submit(QUOTE_ID);
+        var view = service.submit(QUOTE_ID, OWNER_ID);
 
         assertThat(view.status()).isEqualTo(QuoteStatus.SUBMITTED);
         verify(insurerGateway, never()).submit(QUOTE_ID);
-        verify(finalizer, never()).completeSubmission(QUOTE_ID);
+        verify(finalizer, never()).completeSubmission(QUOTE_ID, OWNER_ID);
     }
 
     @Test
     void submit_insurerAccepts_finalizes() {
-        when(quoteApi.getQuote(QUOTE_ID)).thenReturn(viewWithStatus(QuoteStatus.DRAFT));
-        when(quoteApi.ensureSubmittable(QUOTE_ID)).thenReturn(viewWithStatus(QuoteStatus.DRAFT));
-        when(finalizer.completeSubmission(QUOTE_ID)).thenReturn(viewWithStatus(QuoteStatus.SUBMITTED));
+        when(quoteApi.getOwnedQuote(QUOTE_ID, OWNER_ID)).thenReturn(viewWithStatus(QuoteStatus.DRAFT));
+        when(quoteApi.ensureSubmittable(QUOTE_ID, OWNER_ID)).thenReturn(viewWithStatus(QuoteStatus.DRAFT));
+        when(finalizer.completeSubmission(QUOTE_ID, OWNER_ID)).thenReturn(viewWithStatus(QuoteStatus.SUBMITTED));
 
-        var view = service.submit(QUOTE_ID);
+        var view = service.submit(QUOTE_ID, OWNER_ID);
 
         assertThat(view.status()).isEqualTo(QuoteStatus.SUBMITTED);
         verify(insurerGateway).submit(QUOTE_ID);
@@ -74,13 +75,13 @@ class SubmissionServiceTest {
 
     @Test
     void submit_insurerFails_marksFailedAndRethrows() {
-        when(quoteApi.getQuote(QUOTE_ID)).thenReturn(viewWithStatus(QuoteStatus.DRAFT));
-        when(quoteApi.ensureSubmittable(QUOTE_ID)).thenReturn(viewWithStatus(QuoteStatus.DRAFT));
+        when(quoteApi.getOwnedQuote(QUOTE_ID, OWNER_ID)).thenReturn(viewWithStatus(QuoteStatus.DRAFT));
+        when(quoteApi.ensureSubmittable(QUOTE_ID, OWNER_ID)).thenReturn(viewWithStatus(QuoteStatus.DRAFT));
         doThrow(new InsurerUnavailableException("boom")).when(insurerGateway).submit(QUOTE_ID);
 
-        assertThatThrownBy(() -> service.submit(QUOTE_ID)).isInstanceOf(InsurerUnavailableException.class);
+        assertThatThrownBy(() -> service.submit(QUOTE_ID, OWNER_ID)).isInstanceOf(InsurerUnavailableException.class);
 
-        verify(quoteApi).markSubmissionFailed(QUOTE_ID);
-        verify(finalizer, never()).completeSubmission(QUOTE_ID);
+        verify(quoteApi).markSubmissionFailed(QUOTE_ID, OWNER_ID);
+        verify(finalizer, never()).completeSubmission(QUOTE_ID, OWNER_ID);
     }
 }

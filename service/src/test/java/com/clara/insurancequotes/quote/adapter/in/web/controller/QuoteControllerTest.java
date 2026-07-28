@@ -19,6 +19,7 @@ import com.clara.insurancequotes.quote.api.result.QuotePageView;
 import com.clara.insurancequotes.quote.api.result.QuoteSummaryView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
+import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -54,6 +56,16 @@ class QuoteControllerTest {
     private QuoteApi quoteApi;
 
     private static final UUID QUOTE_ID = UUID.fromString("f7d9a1c2-0000-0000-0000-000000000001");
+    private static final UUID OWNER_ID = UUID.fromString("b2222222-0000-0000-0000-000000000002");
+
+    private static JwtRequestPostProcessor asOwner() {
+        return jwt().authorities(new SimpleGrantedAuthority("SCOPE_api"))
+                .jwt(builder -> builder.claim("uid", OWNER_ID.toString()).claim("role", "USER"));
+    }
+
+    private static RequestingUser requestingOwner() {
+        return new RequestingUser(OWNER_ID, false);
+    }
 
     private static QuoteView draftView() {
         return new QuoteView(
@@ -76,11 +88,11 @@ class QuoteControllerTest {
 
     @Test
     void createQuote_valid_returns201WithId() throws Exception {
-        when(quoteApi.create(any())).thenReturn(draftView());
+        when(quoteApi.create(any(), eq(OWNER_ID))).thenReturn(draftView());
 
         mockMvc.perform(
                         post("/quotes")
-                                .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                                .with(asOwner())
                                 .contentType("application/json")
                                 .content(
                                         "{\"name\":\"Jane Roe\",\"email\":\"jane@example.com\",\"age\":34,\"zipCode\":\"06600\"}"))
@@ -92,7 +104,7 @@ class QuoteControllerTest {
     @Test
     void createQuote_missingFields_returns400WithFieldErrors() throws Exception {
         mockMvc.perform(post("/quotes")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .with(asOwner())
                         .contentType("application/json")
                         .content("{\"name\":\"\",\"email\":\"not-an-email\",\"age\":0,\"zipCode\":\"\"}"))
                 .andExpect(status().isBadRequest())
@@ -102,10 +114,11 @@ class QuoteControllerTest {
 
     @Test
     void updateCoverage_healthDataRejected_returns422() throws Exception {
-        when(quoteApi.updateCoverage(eq(QUOTE_ID), any())).thenThrow(new HealthDataNotAllowedException(34));
+        when(quoteApi.updateCoverage(eq(QUOTE_ID), any(), eq(OWNER_ID)))
+                .thenThrow(new HealthDataNotAllowedException(34));
 
         mockMvc.perform(patch("/quotes/{id}/coverage", QUOTE_ID)
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .with(asOwner())
                         .contentType("application/json")
                         .content("{\"coverageType\":\"STANDARD\",\"usesTobacco\":true}"))
                 .andExpect(status().isUnprocessableEntity())
@@ -130,14 +143,24 @@ class QuoteControllerTest {
                 QuoteStatus.DRAFT,
                 Instant.now(),
                 Instant.now());
-        when(quoteApi.updateCoverage(eq(QUOTE_ID), any())).thenReturn(view);
+        when(quoteApi.updateCoverage(eq(QUOTE_ID), any(), eq(OWNER_ID))).thenReturn(view);
 
         mockMvc.perform(patch("/quotes/{id}/coverage", QUOTE_ID)
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .with(asOwner())
                         .contentType("application/json")
                         .content("{\"coverageType\":\"STANDARD\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.monthlyPremium").value(100.00));
+    }
+
+    @Test
+    void getQuote_ownedByOtherUser_returns404() throws Exception {
+        when(quoteApi.getQuote(eq(QUOTE_ID), eq(requestingOwner())))
+                .thenThrow(new com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException(QUOTE_ID));
+
+        mockMvc.perform(get("/quotes/{id}", QUOTE_ID).with(asOwner()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("QUOTE_NOT_FOUND"));
     }
 
     @Test
@@ -147,9 +170,7 @@ class QuoteControllerTest {
 
     @Test
     void unsupportedApiVersion_isRejected() throws Exception {
-        mockMvc.perform(get("/quotes")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
-                        .header("API-Version", "9.0"))
+        mockMvc.perform(get("/quotes").with(asOwner()).header("API-Version", "9.0"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -157,11 +178,9 @@ class QuoteControllerTest {
     void supportedApiVersion_routesToController() throws Exception {
         doReturn(new QuotePageView(List.of(), 0, 20, 0, 0, false, false))
                 .when(quoteApi)
-                .listQuotes(any());
+                .listQuotes(any(), eq(requestingOwner()));
 
-        mockMvc.perform(get("/quotes")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
-                        .header("API-Version", "1.0"))
+        mockMvc.perform(get("/quotes").with(asOwner()).header("API-Version", "1.0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content").isEmpty())
@@ -177,10 +196,10 @@ class QuoteControllerTest {
     void listQuotes_acceptsFilteringAndOrderingParameters() throws Exception {
         doReturn(new QuotePageView(List.of(), 1, 10, 1, 1, false, true))
                 .when(quoteApi)
-                .listQuotes(any());
+                .listQuotes(any(), eq(requestingOwner()));
 
         mockMvc.perform(get("/quotes")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .with(asOwner())
                         .header("API-Version", "1.0")
                         .queryParam("page", "1")
                         .queryParam("size", "10")
@@ -196,7 +215,7 @@ class QuoteControllerTest {
 
     @Test
     void getQuoteSummary_returnsAnalyticsEnvelope() throws Exception {
-        when(quoteApi.getSummary())
+        when(quoteApi.getSummary(requestingOwner()))
                 .thenReturn(new QuoteSummaryView(
                         3,
                         1,
@@ -211,9 +230,7 @@ class QuoteControllerTest {
                         List.of(),
                         List.of()));
 
-        mockMvc.perform(get("/quotes/summary")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
-                        .header("API-Version", "1.0"))
+        mockMvc.perform(get("/quotes/summary").with(asOwner()).header("API-Version", "1.0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalQuotes").value(3))
                 .andExpect(jsonPath("$.submissionRate").value(50.00))
@@ -222,9 +239,7 @@ class QuoteControllerTest {
 
     @Test
     void listQuotes_invalidQuery_returns400WithQuoteError() throws Exception {
-        mockMvc.perform(get("/quotes")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
-                        .queryParam("size", "101"))
+        mockMvc.perform(get("/quotes").with(asOwner()).queryParam("size", "101"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("QUOTE_INVALID_QUERY"));
     }

@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationEventPublisher;
 class SubmissionFinalizerTest {
 
     private static final UUID QUOTE_ID = UUID.randomUUID();
+    private static final UUID OWNER_ID = UUID.randomUUID();
 
     private final QuoteApi quoteApi = mock(QuoteApi.class);
     private final ApplicationEventPublisher events = mock(ApplicationEventPublisher.class);
@@ -30,9 +31,9 @@ class SubmissionFinalizerTest {
         when(view.id()).thenReturn(QUOTE_ID);
         when(view.monthlyPremium()).thenReturn(null);
         when(view.updatedAt()).thenReturn(Instant.parse("2026-07-26T08:00:00Z"));
-        when(quoteApi.markSubmitted(QUOTE_ID)).thenReturn(view);
+        when(quoteApi.markSubmitted(QUOTE_ID, OWNER_ID)).thenReturn(view);
 
-        finalizer.completeSubmission(QUOTE_ID);
+        finalizer.completeSubmission(QUOTE_ID, OWNER_ID);
 
         verify(events).publishEvent(org.mockito.ArgumentMatchers.<Object>any());
         assertThat(registry.get("domain.events")

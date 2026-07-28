@@ -65,10 +65,13 @@ class SubmissionFlowIT {
     @Autowired
     private SubmissionApi submissionApi;
 
+    private static final UUID OWNER = UUID.randomUUID();
+
     private UUID submittableQuote() {
-        var id = quoteApi.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"))
+        var id = quoteApi.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), OWNER)
                 .id();
-        quoteApi.updateCoverage(id, new UpdateCoverageCommand(CoverageType.STANDARD, null, null, null, null, null));
+        quoteApi.updateCoverage(
+                id, new UpdateCoverageCommand(CoverageType.STANDARD, null, null, null, null, null), OWNER);
         return id;
     }
 
@@ -77,7 +80,7 @@ class SubmissionFlowIT {
         INSURER.stubFor(post(urlEqualTo("/submit")).willReturn(aResponse().withStatus(200)));
         var id = submittableQuote();
 
-        var view = submissionApi.submit(id);
+        var view = submissionApi.submit(id, OWNER);
 
         assertThat(view.status()).isEqualTo(QuoteStatus.SUBMITTED);
         try (var consumer = newConsumer()) {
@@ -95,11 +98,11 @@ class SubmissionFlowIT {
         INSURER.stubFor(post(urlEqualTo("/submit")).willReturn(aResponse().withStatus(500)));
         var id = submittableQuote();
 
-        assertThatThrownBy(() -> submissionApi.submit(id)).isInstanceOf(InsurerUnavailableException.class);
-        assertThat(quoteApi.getQuote(id).status()).isEqualTo(QuoteStatus.SUBMISSION_FAILED);
+        assertThatThrownBy(() -> submissionApi.submit(id, OWNER)).isInstanceOf(InsurerUnavailableException.class);
+        assertThat(quoteApi.getOwnedQuote(id, OWNER).status()).isEqualTo(QuoteStatus.SUBMISSION_FAILED);
 
         INSURER.stubFor(post(urlEqualTo("/submit")).willReturn(aResponse().withStatus(200)));
-        assertThat(submissionApi.submit(id).status()).isEqualTo(QuoteStatus.SUBMITTED);
+        assertThat(submissionApi.submit(id, OWNER).status()).isEqualTo(QuoteStatus.SUBMITTED);
     }
 
     @Test
@@ -107,8 +110,8 @@ class SubmissionFlowIT {
         INSURER.stubFor(post(urlEqualTo("/submit")).willReturn(aResponse().withStatus(200)));
         var id = submittableQuote();
 
-        submissionApi.submit(id);
-        var second = submissionApi.submit(id);
+        submissionApi.submit(id, OWNER);
+        var second = submissionApi.submit(id, OWNER);
 
         assertThat(second.status()).isEqualTo(QuoteStatus.SUBMITTED);
         assertThat(INSURER.getAllServeEvents()).hasSize(1);

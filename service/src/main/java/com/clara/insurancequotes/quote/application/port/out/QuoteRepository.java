@@ -11,13 +11,14 @@ public interface QuoteRepository {
 
     Quote save(Quote quote);
 
-    Optional<Quote> findById(UUID id);
+    /** {@code ownerId == null} means unscoped (admin); non-null scopes to that owner. */
+    Optional<Quote> findById(UUID id, UUID ownerId);
 
-    QuoteSearchResult findPage(QuoteQuery query);
+    QuoteSearchResult findPage(QuoteQuery query, UUID ownerId);
 
-    QuoteSummaryData findSummary(Instant now);
+    QuoteSummaryData findSummary(Instant now, UUID ownerId);
 
-    List<UUID> findIdsToExpire(Instant cutoff);
+    List<StaleQuoteRef> findStaleDrafts(Instant cutoff);
 
     int markExpired(List<UUID> ids, Instant now);
 }

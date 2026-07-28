@@ -6,6 +6,7 @@ import com.clara.insurancequotes.quote.api.query.SortDirection;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.application.port.out.QuoteSearchResult;
 import com.clara.insurancequotes.quote.application.port.out.QuoteSummaryData;
+import com.clara.insurancequotes.quote.application.port.out.StaleQuoteRef;
 import com.clara.insurancequotes.quote.domain.model.Quote;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import java.time.Instant;
@@ -38,13 +39,17 @@ public class JpaQuoteRepository implements QuoteRepository {
     }
 
     @Override
-    public Optional<Quote> findById(UUID id) {
-        return delegate.findById(id);
+    public Optional<Quote> findById(UUID id, UUID ownerId) {
+        return ownerId == null ? delegate.findById(id) : delegate.findByIdAndUserId(id, ownerId);
     }
 
     @Override
-    public QuoteSearchResult findPage(QuoteQuery query) {
+    public QuoteSearchResult findPage(QuoteQuery query, UUID ownerId) {
         Specification<Quote> specification = (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.conjunction();
+        if (ownerId != null) {
+            specification = specification.and(
+                    (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get("userId"), ownerId));
+        }
         if (query.status() != null) {
             specification = specification.and((root, criteriaQuery, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("status"), query.status()));
@@ -66,23 +71,34 @@ public class JpaQuoteRepository implements QuoteRepository {
     }
 
     @Override
-    public QuoteSummaryData findSummary(Instant now) {
+    public QuoteSummaryData findSummary(Instant now, UUID ownerId) {
         var endDate = now.atZone(ZoneOffset.UTC).toLocalDate();
         var startDate = endDate.minusDays(6);
         var statusCounts = new EnumMap<QuoteStatus, Long>(QuoteStatus.class);
         for (var status : QuoteStatus.values()) {
-            statusCounts.put(status, delegate.countByStatus(status));
+            statusCounts.put(
+                    status,
+                    ownerId == null
+                            ? delegate.countByStatus(status)
+                            : delegate.countByStatusAndUserId(status, ownerId));
         }
         var coverageCounts = new EnumMap<CoverageType, Long>(CoverageType.class);
         for (var coverage : CoverageType.values()) {
-            coverageCounts.put(coverage, delegate.countByCoverageType(coverage));
+            coverageCounts.put(
+                    coverage,
+                    ownerId == null
+                            ? delegate.countByCoverageType(coverage)
+                            : delegate.countByCoverageTypeAndUserId(coverage, ownerId));
         }
         var trendBuckets = new LinkedHashMap<LocalDate, long[]>();
         for (var date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             trendBuckets.put(date, new long[3]);
         }
         var trendStart = startDate.atStartOfDay(ZoneOffset.UTC).toInstant();
-        for (var row : delegate.findTrendRows(trendStart, now)) {
+        var trendRows = ownerId == null
+                ? delegate.findTrendRows(trendStart, now)
+                : delegate.findTrendRowsForUser(trendStart, now, ownerId);
+        for (var row : trendRows) {
             var createdAt = (Instant) row[0];
             var updatedAt = (Instant) row[1];
             var status = (QuoteStatus) row[2];
@@ -103,18 +119,22 @@ public class JpaQuoteRepository implements QuoteRepository {
         trendBuckets.forEach(
                 (date, values) -> trend.add(new QuoteSummaryData.TrendPoint(date, values[0], values[1], values[2])));
         return new QuoteSummaryData(
-                delegate.count(),
+                ownerId == null ? delegate.count() : delegate.countByUserId(ownerId),
                 statusCounts,
                 coverageCounts,
-                delegate.countByMonthlyPremiumIsNotNull(),
-                delegate.sumMonthlyPremium(),
-                delegate.averageMonthlyPremium(),
+                ownerId == null
+                        ? delegate.countByMonthlyPremiumIsNotNull()
+                        : delegate.countByMonthlyPremiumIsNotNullAndUserId(ownerId),
+                ownerId == null ? delegate.sumMonthlyPremium() : delegate.sumMonthlyPremiumForUser(ownerId),
+                ownerId == null ? delegate.averageMonthlyPremium() : delegate.averageMonthlyPremiumForUser(ownerId),
                 trend);
     }
 
     @Override
-    public List<UUID> findIdsToExpire(Instant cutoff) {
-        return delegate.findIdsToExpire(cutoff);
+    public List<StaleQuoteRef> findStaleDrafts(Instant cutoff) {
+        return delegate.findStaleDraftRows(cutoff).stream()
+                .map(row -> new StaleQuoteRef((UUID) row[0], (UUID) row[1]))
+                .toList();
     }
 
     @Override

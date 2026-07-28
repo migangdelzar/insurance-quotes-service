@@ -6,6 +6,7 @@ import com.clara.insurancequotes.quote.api.query.SortDirection;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.application.port.out.QuoteSearchResult;
 import com.clara.insurancequotes.quote.application.port.out.QuoteSummaryData;
+import com.clara.insurancequotes.quote.application.port.out.StaleQuoteRef;
 import com.clara.insurancequotes.quote.domain.model.Quote;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import java.time.Instant;
@@ -33,13 +34,15 @@ public final class InMemoryQuoteRepository implements QuoteRepository {
     }
 
     @Override
-    public Optional<Quote> findById(UUID id) {
-        return Optional.ofNullable(store.get(id));
+    public Optional<Quote> findById(UUID id, UUID ownerId) {
+        return Optional.ofNullable(store.get(id))
+                .filter(quote -> ownerId == null || quote.userId().equals(ownerId));
     }
 
     @Override
-    public QuoteSearchResult findPage(QuoteQuery query) {
+    public QuoteSearchResult findPage(QuoteQuery query, UUID ownerId) {
         var filtered = store.values().stream()
+                .filter(quote -> ownerId == null || quote.userId().equals(ownerId))
                 .filter(quote -> query.status() == null || quote.status() == query.status())
                 .filter(quote -> query.coverage() == null || quote.coverageType() == query.coverage())
                 .filter(quote -> query.search() == null || containsSearch(quote, query.search()))
@@ -51,27 +54,27 @@ public final class InMemoryQuoteRepository implements QuoteRepository {
     }
 
     @Override
-    public QuoteSummaryData findSummary(Instant now) {
+    public QuoteSummaryData findSummary(Instant now, UUID ownerId) {
+        var scoped = store.values().stream()
+                .filter(quote -> ownerId == null || quote.userId().equals(ownerId))
+                .toList();
         var statusCounts = new EnumMap<QuoteStatus, Long>(QuoteStatus.class);
         for (var status : QuoteStatus.values()) {
             statusCounts.put(
                     status,
-                    store.values().stream()
-                            .filter(quote -> quote.status() == status)
-                            .count());
+                    scoped.stream().filter(quote -> quote.status() == status).count());
         }
         var coverageCounts = new EnumMap<CoverageType, Long>(CoverageType.class);
         for (var coverage : CoverageType.values()) {
             coverageCounts.put(
                     coverage,
-                    store.values().stream()
+                    scoped.stream()
                             .filter(quote -> quote.coverageType() == coverage)
                             .count());
         }
-        var pricedQuotes = store.values().stream()
-                .filter(quote -> quote.monthlyPremium() != null)
-                .count();
-        var totalPremium = store.values().stream()
+        var pricedQuotes =
+                scoped.stream().filter(quote -> quote.monthlyPremium() != null).count();
+        var totalPremium = scoped.stream()
                 .map(Quote::monthlyPremium)
                 .filter(value -> value != null)
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
@@ -85,7 +88,7 @@ public final class InMemoryQuoteRepository implements QuoteRepository {
         for (var date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             trendBuckets.put(date, new long[3]);
         }
-        store.values().forEach(quote -> {
+        scoped.forEach(quote -> {
             var createdBucket =
                     trendBuckets.get(quote.createdAt().atZone(ZoneOffset.UTC).toLocalDate());
             if (createdBucket != null) {
@@ -103,21 +106,21 @@ public final class InMemoryQuoteRepository implements QuoteRepository {
         trendBuckets.forEach(
                 (date, values) -> trend.add(new QuoteSummaryData.TrendPoint(date, values[0], values[1], values[2])));
         return new QuoteSummaryData(
-                store.size(), statusCounts, coverageCounts, pricedQuotes, totalPremium, averagePremium, trend);
+                scoped.size(), statusCounts, coverageCounts, pricedQuotes, totalPremium, averagePremium, trend);
     }
 
     @Override
-    public List<UUID> findIdsToExpire(Instant cutoff) {
+    public List<StaleQuoteRef> findStaleDrafts(Instant cutoff) {
         return store.values().stream()
                 .filter(quote -> quote.status().allowsExpiration())
                 .filter(quote -> quote.createdAt().isBefore(cutoff))
-                .map(Quote::id)
+                .map(quote -> new StaleQuoteRef(quote.id(), quote.userId()))
                 .toList();
     }
 
     @Override
     public int markExpired(List<UUID> ids, Instant now) {
-        ids.forEach(id -> findById(id).ifPresent(quote -> quote.expire(now)));
+        ids.forEach(id -> findById(id, null).ifPresent(quote -> quote.expire(now)));
         return ids.size();
     }
 

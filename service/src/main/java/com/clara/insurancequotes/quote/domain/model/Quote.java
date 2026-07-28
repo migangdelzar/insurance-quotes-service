@@ -22,6 +22,9 @@ public class Quote {
     @Id
     private UUID id;
 
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
+
     @Column(nullable = false)
     private String name;
 
@@ -59,8 +62,9 @@ public class Quote {
 
     protected Quote() {}
 
-    private Quote(UUID id, String name, String email, int age, String zipCode, Instant now) {
+    private Quote(UUID id, UUID userId, String name, String email, int age, String zipCode, Instant now) {
         this.id = id;
+        this.userId = userId;
         this.name = name;
         this.email = email;
         this.age = age;
@@ -71,8 +75,8 @@ public class Quote {
         this.updatedAt = now;
     }
 
-    public static Quote createDraft(String name, String email, int age, String zipCode, Instant now) {
-        return new Quote(UUID.randomUUID(), name, email, age, zipCode, now);
+    public static Quote createDraft(UUID userId, String name, String email, int age, String zipCode, Instant now) {
+        return new Quote(UUID.randomUUID(), userId, name, email, age, zipCode, now);
     }
 
     public void updateCoverage(
@@ -119,6 +123,10 @@ public class Quote {
 
     public UUID id() {
         return id;
+    }
+
+    public UUID userId() {
+        return userId;
     }
 
     public String name() {

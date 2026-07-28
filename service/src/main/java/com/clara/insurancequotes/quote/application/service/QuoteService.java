@@ -13,6 +13,7 @@ import com.clara.insurancequotes.quote.api.result.QuoteSummaryView;
 import com.clara.insurancequotes.quote.api.result.QuoteTrendPointView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
+import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
 import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.configuration.CacheConfig;
@@ -47,9 +48,9 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional
-    public QuoteView create(CreateQuoteCommand command) {
-        var quote =
-                Quote.createDraft(command.name(), command.email(), command.age(), command.zipCode(), clock.instant());
+    public QuoteView create(CreateQuoteCommand command, UUID ownerId) {
+        var quote = Quote.createDraft(
+                ownerId, command.name(), command.email(), command.age(), command.zipCode(), clock.instant());
         var saved = repository.save(quote);
         metrics.quoteCreated();
         log.debug("Created quote {}", saved.id());
@@ -58,10 +59,10 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id", beforeInvocation = true)
-    public QuoteView updateCoverage(UUID id, UpdateCoverageCommand command) {
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
+    public QuoteView updateCoverage(UUID id, UpdateCoverageCommand command, UUID ownerId) {
         try {
-            var quote = load(id);
+            var quote = load(id, ownerId);
             rejectHealthDataForNonSeniors(quote, command);
             var premium =
                     metrics.timePremiumCalculation(() -> premiumCalculator.calculate(pricingInputOf(quote, command)));
@@ -80,15 +81,15 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id")
-    public QuoteView getQuote(UUID id) {
-        return QuoteView.from(load(id));
+    @Cacheable(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #requester.id()")
+    public QuoteView getQuote(UUID id, RequestingUser requester) {
+        return QuoteView.from(load(id, requester.admin() ? null : requester.id()));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public QuotePageView listQuotes(QuoteQuery query) {
-        var result = repository.findPage(query);
+    public QuotePageView listQuotes(QuoteQuery query, RequestingUser requester) {
+        var result = repository.findPage(query, requester.admin() ? null : requester.id());
         return new QuotePageView(
                 result.content().stream().map(QuoteView::from).toList(),
                 result.page(),
@@ -101,8 +102,8 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional(readOnly = true)
-    public QuoteSummaryView getSummary() {
-        var data = repository.findSummary(clock.instant());
+    public QuoteSummaryView getSummary(RequestingUser requester) {
+        var data = repository.findSummary(clock.instant(), requester.admin() ? null : requester.id());
         var submitted = data.statusCounts().getOrDefault(QuoteStatus.SUBMITTED, 0L);
         var failed = data.statusCounts().getOrDefault(QuoteStatus.SUBMISSION_FAILED, 0L);
         var attempts = submitted + failed;
@@ -139,34 +140,40 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional(readOnly = true)
-    public QuoteView ensureSubmittable(UUID id) {
-        var quote = load(id);
+    public QuoteView getOwnedQuote(UUID id, UUID ownerId) {
+        return QuoteView.from(load(id, ownerId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public QuoteView ensureSubmittable(UUID id, UUID ownerId) {
+        var quote = load(id, ownerId);
         quote.ensureSubmittable();
         return QuoteView.from(quote);
     }
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id", beforeInvocation = true)
-    public QuoteView markSubmitted(UUID id) {
-        return transition(id, quote -> quote.markSubmitted(clock.instant()));
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
+    public QuoteView markSubmitted(UUID id, UUID ownerId) {
+        return transition(id, ownerId, quote -> quote.markSubmitted(clock.instant()));
     }
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id", beforeInvocation = true)
-    public QuoteView markSubmissionFailed(UUID id) {
-        return transition(id, quote -> quote.markSubmissionFailed(clock.instant()));
+    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
+    public QuoteView markSubmissionFailed(UUID id, UUID ownerId) {
+        return transition(id, ownerId, quote -> quote.markSubmissionFailed(clock.instant()));
     }
 
-    private QuoteView transition(UUID id, Consumer<Quote> change) {
-        var quote = load(id);
+    private QuoteView transition(UUID id, UUID ownerId, Consumer<Quote> change) {
+        var quote = load(id, ownerId);
         change.accept(quote);
         return QuoteView.from(repository.save(quote));
     }
 
-    private Quote load(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new QuoteNotFoundException(id));
+    private Quote load(UUID id, UUID ownerId) {
+        return repository.findById(id, ownerId).orElseThrow(() -> new QuoteNotFoundException(id));
     }
 
     private static void rejectHealthDataForNonSeniors(Quote quote, UpdateCoverageCommand command) {

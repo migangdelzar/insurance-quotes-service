@@ -22,8 +22,8 @@ public class SubmissionFinalizer {
     private final BusinessMetrics metrics;
 
     @Transactional
-    public QuoteView completeSubmission(UUID quoteId) {
-        var view = quoteApi.markSubmitted(quoteId);
+    public QuoteView completeSubmission(UUID quoteId, UUID ownerId) {
+        var view = quoteApi.markSubmitted(quoteId, ownerId);
         events.publishEvent(new QuoteSubmitted(view.id(), view.monthlyPremium(), view.updatedAt()));
         metrics.domainEventPublished("quote_submitted");
         log.debug("Finalized quote submission {}", quoteId);

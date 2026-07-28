@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class QuoteViewTest {
@@ -17,7 +18,7 @@ class QuoteViewTest {
     @Test
     void fromCopiesHealthConditionsIntoTransportSafeCollection() {
         var conditions = new HashSet<>(Set.of(HealthCondition.DIABETES));
-        var quote = Quote.createDraft("Jane Roe", "jane@example.com", 70, "06600", Instant.EPOCH);
+        var quote = Quote.createDraft(UUID.randomUUID(), "Jane Roe", "jane@example.com", 70, "06600", Instant.EPOCH);
         quote.updateCoverage(
                 CoverageType.BASIC,
                 new HealthProfile(true, conditions, false, false, false),

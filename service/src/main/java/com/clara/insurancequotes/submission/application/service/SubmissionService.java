@@ -23,20 +23,20 @@ public class SubmissionService implements SubmissionApi {
     private final BusinessMetrics metrics;
 
     @Override
-    public QuoteView submit(UUID quoteId) {
-        var current = quoteApi.getQuote(quoteId);
+    public QuoteView submit(UUID quoteId, UUID ownerId) {
+        var current = quoteApi.getOwnedQuote(quoteId, ownerId);
         if (current.status().alreadySubmitted()) {
             log.debug("Ignoring duplicate submission for quote {}", quoteId);
             return current;
         }
-        quoteApi.ensureSubmittable(quoteId);
-        callInsurerRecordingFailure(quoteId);
-        var completed = finalizer.completeSubmission(quoteId);
+        quoteApi.ensureSubmittable(quoteId, ownerId);
+        callInsurerRecordingFailure(quoteId, ownerId);
+        var completed = finalizer.completeSubmission(quoteId, ownerId);
         metrics.submissionSucceeded();
         return completed;
     }
 
-    private void callInsurerRecordingFailure(UUID quoteId) {
+    private void callInsurerRecordingFailure(UUID quoteId, UUID ownerId) {
         try {
             metrics.timeInsurerCall(() -> {
                 insurerGateway.submit(quoteId);
@@ -44,7 +44,7 @@ public class SubmissionService implements SubmissionApi {
             });
         } catch (InsurerUnavailableException exception) {
             metrics.submissionFailed();
-            quoteApi.markSubmissionFailed(quoteId);
+            quoteApi.markSubmissionFailed(quoteId, ownerId);
             throw exception;
         }
     }

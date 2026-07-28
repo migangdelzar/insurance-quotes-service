@@ -19,7 +19,7 @@ public class QuoteCacheEvictionListener {
     public void onQuoteExpired(QuoteExpired event) {
         var cache = cacheManager.getCache(CacheConfig.QUOTES_CACHE);
         if (cache != null) {
-            cache.evict(event.quoteId());
+            cache.evict(event.quoteId() + "|" + event.ownerId());
             log.debug("Evicted expired quote {} from cache", event.quoteId());
         }
     }

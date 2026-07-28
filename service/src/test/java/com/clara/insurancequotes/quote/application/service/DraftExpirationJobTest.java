@@ -39,9 +39,10 @@ class DraftExpirationJobTest {
         var expired = job.expireStaleDrafts();
 
         assertThat(expired).isEqualTo(1);
-        assertThat(repository.findById(stale.id()).orElseThrow().status()).isEqualTo(QuoteStatus.EXPIRED);
-        assertThat(repository.findById(submitted.id()).orElseThrow().status()).isEqualTo(QuoteStatus.SUBMITTED);
-        assertThat(publishedEvents).containsExactly(new QuoteExpired(stale.id()));
+        assertThat(repository.findById(stale.id(), null).orElseThrow().status()).isEqualTo(QuoteStatus.EXPIRED);
+        assertThat(repository.findById(submitted.id(), null).orElseThrow().status())
+                .isEqualTo(QuoteStatus.SUBMITTED);
+        assertThat(publishedEvents).containsExactly(new QuoteExpired(stale.id(), stale.userId()));
     }
 
     @Test

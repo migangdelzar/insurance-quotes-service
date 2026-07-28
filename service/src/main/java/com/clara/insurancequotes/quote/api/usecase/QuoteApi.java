@@ -10,19 +10,21 @@ import java.util.UUID;
 
 public interface QuoteApi {
 
-    QuoteView create(CreateQuoteCommand command);
+    QuoteView create(CreateQuoteCommand command, UUID ownerId);
 
-    QuoteView updateCoverage(UUID id, UpdateCoverageCommand command);
+    QuoteView updateCoverage(UUID id, UpdateCoverageCommand command, UUID ownerId);
 
-    QuoteView getQuote(UUID id);
+    QuoteView getQuote(UUID id, RequestingUser requester);
 
-    QuotePageView listQuotes(QuoteQuery query);
+    QuotePageView listQuotes(QuoteQuery query, RequestingUser requester);
 
-    QuoteSummaryView getSummary();
+    QuoteSummaryView getSummary(RequestingUser requester);
 
-    QuoteView ensureSubmittable(UUID id);
+    QuoteView getOwnedQuote(UUID id, UUID ownerId);
 
-    QuoteView markSubmitted(UUID id);
+    QuoteView ensureSubmittable(UUID id, UUID ownerId);
 
-    QuoteView markSubmissionFailed(UUID id);
+    QuoteView markSubmitted(UUID id, UUID ownerId);
+
+    QuoteView markSubmissionFailed(UUID id, UUID ownerId);
 }

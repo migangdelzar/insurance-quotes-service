@@ -2,6 +2,7 @@ package com.clara.insurancequotes.quote.application.service;
 
 import com.clara.insurancequotes.config.BusinessMetrics;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
+import com.clara.insurancequotes.quote.application.port.out.StaleQuoteRef;
 import com.clara.insurancequotes.quote.domain.event.QuoteExpired;
 import java.time.Clock;
 import java.time.Duration;
@@ -37,12 +38,13 @@ public class DraftExpirationJob {
     @Transactional
     public int expireStaleDrafts() {
         var now = clock.instant();
-        var staleIds = repository.findIdsToExpire(now.minus(draftTtl));
-        if (staleIds.isEmpty()) {
+        var staleDrafts = repository.findStaleDrafts(now.minus(draftTtl));
+        if (staleDrafts.isEmpty()) {
             return 0;
         }
+        var staleIds = staleDrafts.stream().map(StaleQuoteRef::id).toList();
         var expired = repository.markExpired(staleIds, now);
-        staleIds.forEach(id -> events.publishEvent(new QuoteExpired(id)));
+        staleDrafts.forEach(ref -> events.publishEvent(new QuoteExpired(ref.id(), ref.ownerId())));
         metrics.quotesExpired(expired);
         log.info("Expired {} stale draft quotes", expired);
         return expired;

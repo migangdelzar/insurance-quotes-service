@@ -11,6 +11,7 @@ import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
 import com.clara.insurancequotes.quote.api.type.HealthCondition;
+import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
 import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
@@ -27,6 +28,10 @@ import org.junit.jupiter.api.Test;
 class QuoteServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-07-22T10:00:00Z");
+    private static final UUID OWNER = UUID.randomUUID();
+    private static final UUID OTHER_OWNER = UUID.randomUUID();
+    private static final RequestingUser AS_OWNER = new RequestingUser(OWNER, false);
+    private static final RequestingUser AS_ADMIN = new RequestingUser(UUID.randomUUID(), true);
 
     private final InMemoryQuoteRepository repository = new InMemoryQuoteRepository();
     private final PremiumCalculator calculator = input -> new Premium(new BigDecimal("100.00"));
@@ -54,17 +59,17 @@ class QuoteServiceTest {
 
     @Test
     void create_persistsDraftAndReturnsView() {
-        var view = service.create(ADULT);
+        var view = service.create(ADULT, OWNER);
 
         assertThat(view.status()).isEqualTo(QuoteStatus.DRAFT);
-        assertThat(repository.findById(view.id())).isPresent();
+        assertThat(repository.findById(view.id(), OWNER)).isPresent();
     }
 
     @Test
     void updateCoverage_computesPremiumServerSide() {
-        var id = service.create(ADULT).id();
+        var id = service.create(ADULT, OWNER).id();
 
-        var view = service.updateCoverage(id, plainCoverage());
+        var view = service.updateCoverage(id, plainCoverage(), OWNER);
 
         assertThat(view.monthlyPremium()).isEqualByComparingTo("100.00");
         assertThat(view.coverageType()).isEqualTo(CoverageType.STANDARD);
@@ -79,9 +84,9 @@ class QuoteServiceTest {
 
     @Test
     void updateCoverage_healthDataAtAge65OrBelow_isRejected() {
-        var id = service.create(ADULT).id();
+        var id = service.create(ADULT, OWNER).id();
 
-        assertThatThrownBy(() -> service.updateCoverage(id, seniorCoverage()))
+        assertThatThrownBy(() -> service.updateCoverage(id, seniorCoverage(), OWNER))
                 .isInstanceOf(HealthDataNotAllowedException.class);
         assertThat(metricsRegistry
                         .get("quotes.coverage.updates")
@@ -94,9 +99,9 @@ class QuoteServiceTest {
 
     @Test
     void updateCoverage_healthDataOver65_isAccepted() {
-        var id = service.create(SENIOR).id();
+        var id = service.create(SENIOR, OWNER).id();
 
-        var view = service.updateCoverage(id, seniorCoverage());
+        var view = service.updateCoverage(id, seniorCoverage(), OWNER);
 
         assertThat(view.usesTobacco()).isTrue();
         assertThat(view.conditions()).containsExactlyInAnyOrder(HealthCondition.DIABETES, HealthCondition.HYPERTENSION);
@@ -104,28 +109,54 @@ class QuoteServiceTest {
 
     @Test
     void getQuote_unknownId_throwsNotFound() {
-        assertThatThrownBy(() -> service.getQuote(UUID.randomUUID())).isInstanceOf(QuoteNotFoundException.class);
+        assertThatThrownBy(() -> service.getQuote(UUID.randomUUID(), AS_OWNER))
+                .isInstanceOf(QuoteNotFoundException.class);
+    }
+
+    @Test
+    void getQuote_ownedByOtherUser_throwsNotFound() {
+        var id = service.create(ADULT, OTHER_OWNER).id();
+
+        assertThatThrownBy(() -> service.getQuote(id, AS_OWNER)).isInstanceOf(QuoteNotFoundException.class);
+    }
+
+    @Test
+    void getQuote_asAdmin_seesAnyUsersQuote() {
+        var id = service.create(ADULT, OTHER_OWNER).id();
+
+        var view = service.getQuote(id, AS_ADMIN);
+
+        assertThat(view.id()).isEqualTo(id);
+    }
+
+    @Test
+    void updateCoverage_ownedByOtherUser_throwsNotFoundEvenForAdmin() {
+        var id = service.create(ADULT, OTHER_OWNER).id();
+        var adminOwnId = AS_ADMIN.id();
+
+        assertThatThrownBy(() -> service.updateCoverage(id, plainCoverage(), adminOwnId))
+                .isInstanceOf(QuoteNotFoundException.class);
     }
 
     @Test
     void markSubmitted_transitionsAndPersists() {
-        var id = service.create(ADULT).id();
-        service.updateCoverage(id, plainCoverage());
+        var id = service.create(ADULT, OWNER).id();
+        service.updateCoverage(id, plainCoverage(), OWNER);
 
-        var view = service.markSubmitted(id);
+        var view = service.markSubmitted(id, OWNER);
 
         assertThat(view.status()).isEqualTo(QuoteStatus.SUBMITTED);
-        assertThat(repository.findById(id).orElseThrow().status()).isEqualTo(QuoteStatus.SUBMITTED);
+        assertThat(repository.findById(id, OWNER).orElseThrow().status()).isEqualTo(QuoteStatus.SUBMITTED);
     }
 
     @Test
     void listQuotes_returnsFilteredOrderedPageMetadata() {
-        var jane = service.create(ADULT);
-        service.updateCoverage(jane.id(), plainCoverage());
-        service.markSubmitted(jane.id());
-        service.create(SENIOR);
+        var jane = service.create(ADULT, OWNER);
+        service.updateCoverage(jane.id(), plainCoverage(), OWNER);
+        service.markSubmitted(jane.id(), OWNER);
+        service.create(SENIOR, OWNER);
 
-        var result = service.listQuotes(QuoteQuery.of(0, 1, "jane", "SUBMITTED", "STANDARD", "name", "asc"));
+        var result = service.listQuotes(QuoteQuery.of(0, 1, "jane", "SUBMITTED", "STANDARD", "name", "asc"), AS_OWNER);
 
         assertThat(result.content()).hasSize(1);
         assertThat(result.content().get(0).name()).isEqualTo("Jane Roe");
@@ -138,15 +169,36 @@ class QuoteServiceTest {
     }
 
     @Test
-    void getSummary_returnsAggregateMetricsAndSevenDayTrend() {
-        var draft = service.create(ADULT);
-        var submitted = service.create(SENIOR);
-        service.updateCoverage(submitted.id(), plainCoverage());
-        service.markSubmitted(submitted.id());
-        var failed = service.create(new CreateQuoteCommand("Failed Quote", "failed@example.com", 40, "06600"));
-        service.markSubmissionFailed(failed.id());
+    void listQuotes_excludesOtherUsersQuotesForNonAdmin() {
+        service.create(ADULT, OWNER);
+        service.create(SENIOR, OTHER_OWNER);
 
-        var result = service.getSummary();
+        var result = service.listQuotes(QuoteQuery.defaults(), AS_OWNER);
+
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.totalElements()).isEqualTo(1);
+    }
+
+    @Test
+    void listQuotes_includesEveryUsersQuotesForAdmin() {
+        service.create(ADULT, OWNER);
+        service.create(SENIOR, OTHER_OWNER);
+
+        var result = service.listQuotes(QuoteQuery.defaults(), AS_ADMIN);
+
+        assertThat(result.totalElements()).isEqualTo(2);
+    }
+
+    @Test
+    void getSummary_returnsAggregateMetricsAndSevenDayTrend() {
+        var draft = service.create(ADULT, OWNER);
+        var submitted = service.create(SENIOR, OWNER);
+        service.updateCoverage(submitted.id(), plainCoverage(), OWNER);
+        service.markSubmitted(submitted.id(), OWNER);
+        var failed = service.create(new CreateQuoteCommand("Failed Quote", "failed@example.com", 40, "06600"), OWNER);
+        service.markSubmissionFailed(failed.id(), OWNER);
+
+        var result = service.getSummary(AS_OWNER);
 
         assertThat(result.totalQuotes()).isEqualTo(3);
         assertThat(result.draftQuotes()).isEqualTo(1);
