@@ -10,7 +10,11 @@ services:
       retries: 12
 
   api:
+    # Keep the real-browser stack within GitHub's runner memory budget while
+    # leaving enough headroom for Spring startup and Flyway.
+    mem_limit: 768m
     environment:
+      JAVA_TOOL_OPTIONS: "${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=40 -XX:InitialRAMPercentage=10 -XX:MaxMetaspaceSize=256m -XX:+UseSerialGC}"
       INSURER_BASE_URL: http://wiremock:8080/submit
       CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3100,http://127.0.0.1:3000,http://127.0.0.1:3100
       WEB_RATE_LIMIT_ENABLED: ${WEB_RATE_LIMIT_ENABLED:-true}
