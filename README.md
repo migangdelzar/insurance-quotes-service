@@ -59,6 +59,10 @@ not used as a general-purpose distributed lock service.
 
 ## Quick start
 
+> **Full-stack runbook:** for the complete one-command setup, HMR workflow,
+> real Playwright verification, observability checks, and troubleshooting, see
+> the [Full-stack setup and verification guide](../insurance-quotes-web/docs/setup-and-verification.md).
+
 ### Prerequisites
 
 - Java 17
