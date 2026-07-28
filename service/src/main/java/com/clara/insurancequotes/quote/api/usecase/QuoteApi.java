@@ -2,8 +2,9 @@ package com.clara.insurancequotes.quote.api.usecase;
 
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
+import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.result.QuotePageView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
-import java.util.List;
 import java.util.UUID;
 
 public interface QuoteApi {
@@ -14,7 +15,7 @@ public interface QuoteApi {
 
     QuoteView getQuote(UUID id);
 
-    List<QuoteView> listQuotes();
+    QuotePageView listQuotes(QuoteQuery query);
 
     QuoteView ensureSubmittable(UUID id);
 

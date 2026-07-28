@@ -6,11 +6,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-interface SpringDataQuoteRepository extends JpaRepository<Quote, UUID> {
+interface SpringDataQuoteRepository extends JpaRepository<Quote, UUID>, JpaSpecificationExecutor<Quote> {
 
     @Query("select q.id from Quote q where q.status = :status and q.createdAt < :cutoff")
     List<UUID> findIdsToExpire(@Param("status") QuoteStatus status, @Param("cutoff") Instant cutoff);

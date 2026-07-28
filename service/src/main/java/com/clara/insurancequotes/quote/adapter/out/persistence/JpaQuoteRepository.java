@@ -1,13 +1,20 @@
 package com.clara.insurancequotes.quote.adapter.out.persistence;
 
+import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.query.SortDirection;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
+import com.clara.insurancequotes.quote.application.port.out.QuoteSearchResult;
 import com.clara.insurancequotes.quote.domain.model.Quote;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -28,8 +35,26 @@ public class JpaQuoteRepository implements QuoteRepository {
     }
 
     @Override
-    public List<Quote> findAll() {
-        return delegate.findAll();
+    public QuoteSearchResult findPage(QuoteQuery query) {
+        Specification<Quote> specification = (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.conjunction();
+        if (query.status() != null) {
+            specification = specification.and((root, criteriaQuery, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("status"), query.status()));
+        }
+        if (query.coverage() != null) {
+            specification = specification.and((root, criteriaQuery, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("coverageType"), query.coverage()));
+        }
+        if (query.search() != null) {
+            var pattern = "%" + query.search().toLowerCase(Locale.ROOT) + "%";
+            specification = specification.and((root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), pattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), pattern)));
+        }
+        var direction = query.direction() == SortDirection.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
+        var sort = Sort.by(direction, query.sortBy().property()).and(Sort.by(Sort.Direction.ASC, "id"));
+        var page = delegate.findAll(specification, PageRequest.of(query.page(), query.size(), sort));
+        return new QuoteSearchResult(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
     @Override

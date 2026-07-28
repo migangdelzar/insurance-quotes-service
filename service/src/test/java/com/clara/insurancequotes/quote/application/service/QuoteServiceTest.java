@@ -9,6 +9,7 @@ import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
+import com.clara.insurancequotes.quote.api.query.QuoteQuery;
 import com.clara.insurancequotes.quote.api.type.HealthCondition;
 import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
@@ -115,5 +116,24 @@ class QuoteServiceTest {
 
         assertThat(view.status()).isEqualTo(QuoteStatus.SUBMITTED);
         assertThat(repository.findById(id).orElseThrow().status()).isEqualTo(QuoteStatus.SUBMITTED);
+    }
+
+    @Test
+    void listQuotes_returnsFilteredOrderedPageMetadata() {
+        var jane = service.create(ADULT);
+        service.updateCoverage(jane.id(), plainCoverage());
+        service.markSubmitted(jane.id());
+        service.create(SENIOR);
+
+        var result = service.listQuotes(QuoteQuery.of(0, 1, "jane", "SUBMITTED", "STANDARD", "name", "asc"));
+
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().get(0).name()).isEqualTo("Jane Roe");
+        assertThat(result.page()).isZero();
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.totalElements()).isEqualTo(1);
+        assertThat(result.totalPages()).isEqualTo(1);
+        assertThat(result.hasNext()).isFalse();
+        assertThat(result.hasPrevious()).isFalse();
     }
 }

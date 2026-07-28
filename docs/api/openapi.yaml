@@ -22,15 +22,68 @@ paths:
           default: 1.0.0
           enum:
           - "1.0"
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+          minimum: 1
+          maximum: 100
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - SUBMISSION_FAILED
+          - EXPIRED
+      - name: coverage
+        in: query
+        schema:
+          type: string
+          enum:
+          - BASIC
+          - STANDARD
+          - PREMIUM
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+          default: createdAt
+          enum:
+          - createdAt
+          - updatedAt
+          - name
+          - monthlyPremium
+          - status
+      - name: direction
+        in: query
+        schema:
+          type: string
+          default: desc
+          enum:
+          - asc
+          - desc
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/QuoteView"
+                $ref: "#/components/schemas/QuotePageView"
     post:
       tags:
       - quote-controller
@@ -333,6 +386,37 @@ components:
       - email
       - name
       - zipCode
+    QuotePageView:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteView"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+      required:
+      - content
+      - page
+      - size
+      - totalElements
+      - totalPages
+      - hasNext
+      - hasPrevious
     QuoteView:
       type: object
       properties:

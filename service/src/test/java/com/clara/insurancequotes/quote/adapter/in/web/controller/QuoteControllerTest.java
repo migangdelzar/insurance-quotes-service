@@ -15,6 +15,7 @@ import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.adapter.in.web.advice.QuoteExceptionHandler;
+import com.clara.insurancequotes.quote.api.result.QuotePageView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
@@ -153,13 +154,51 @@ class QuoteControllerTest {
 
     @Test
     void supportedApiVersion_routesToController() throws Exception {
-        doReturn(List.of()).when(quoteApi).listQuotes();
+        doReturn(new QuotePageView(List.of(), 0, 20, 0, 0, false, false))
+                .when(quoteApi)
+                .listQuotes(any());
 
         mockMvc.perform(get("/quotes")
                         .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
                         .header("API-Version", "1.0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty());
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.totalPages").value(0))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpect(jsonPath("$.hasPrevious").value(false));
+    }
+
+    @Test
+    void listQuotes_acceptsFilteringAndOrderingParameters() throws Exception {
+        doReturn(new QuotePageView(List.of(), 1, 10, 1, 1, false, true))
+                .when(quoteApi)
+                .listQuotes(any());
+
+        mockMvc.perform(get("/quotes")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .header("API-Version", "1.0")
+                        .queryParam("page", "1")
+                        .queryParam("size", "10")
+                        .queryParam("search", "jane")
+                        .queryParam("status", "SUBMITTED")
+                        .queryParam("coverage", "STANDARD")
+                        .queryParam("sortBy", "name")
+                        .queryParam("direction", "desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.size").value(10));
+    }
+
+    @Test
+    void listQuotes_invalidQuery_returns400WithQuoteError() throws Exception {
+        mockMvc.perform(get("/quotes")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .queryParam("size", "101"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("QUOTE_INVALID_QUERY"));
     }
 }

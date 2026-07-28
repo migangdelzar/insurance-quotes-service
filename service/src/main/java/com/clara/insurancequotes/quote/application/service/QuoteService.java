@@ -5,6 +5,8 @@ import com.clara.insurancequotes.pricing.api.command.PricingInput;
 import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
+import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.result.QuotePageView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
@@ -14,7 +16,6 @@ import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedExce
 import com.clara.insurancequotes.quote.domain.model.HealthProfile;
 import com.clara.insurancequotes.quote.domain.model.Quote;
 import java.time.Clock;
-import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
@@ -78,8 +79,16 @@ public class QuoteService implements QuoteApi {
 
     @Override
     @Transactional(readOnly = true)
-    public List<QuoteView> listQuotes() {
-        return repository.findAll().stream().map(QuoteView::from).toList();
+    public QuotePageView listQuotes(QuoteQuery query) {
+        var result = repository.findPage(query);
+        return new QuotePageView(
+                result.content().stream().map(QuoteView::from).toList(),
+                result.page(),
+                result.size(),
+                result.totalElements(),
+                result.totalPages(),
+                result.hasNext(),
+                result.hasPrevious());
     }
 
     @Override

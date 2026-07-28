@@ -1,5 +1,6 @@
 package com.clara.insurancequotes.quote.application.port.out;
 
+import com.clara.insurancequotes.quote.api.query.QuoteQuery;
 import com.clara.insurancequotes.quote.domain.model.Quote;
 import java.time.Instant;
 import java.util.List;
@@ -12,7 +13,7 @@ public interface QuoteRepository {
 
     Optional<Quote> findById(UUID id);
 
-    List<Quote> findAll();
+    QuoteSearchResult findPage(QuoteQuery query);
 
     List<UUID> findIdsToExpire(Instant cutoff);
 
