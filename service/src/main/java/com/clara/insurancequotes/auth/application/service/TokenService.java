@@ -54,7 +54,9 @@ public class TokenService {
                 .expiresAt(now.plus(tokenTtl))
                 .claim("scope", scope);
         if (user != null) {
-            claimsBuilder.claim("uid", user.id().toString()).claim("role", user.role().name());
+            claimsBuilder
+                    .claim("uid", user.id().toString())
+                    .claim("role", user.role().name());
         }
         var header = JwsHeader.with(MacAlgorithm.HS256).build();
         var token = jwtEncoder.encode(JwtEncoderParameters.from(header, claimsBuilder.build()));
