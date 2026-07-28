@@ -1,0 +1,57 @@
+language: en-US
+
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
+  review_status: true
+  poem: false
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+    ignore_title_keywords:
+      - "WIP"
+      - "[skip review]"
+  path_filters:
+    - "!**/target/**"
+    - "!**/.idea/**"
+    - "!**/*.generated.*"
+    - "!**/generated/**"
+    - "!**/*.puml"
+    - "!**/*.pdf"
+  path_instructions:
+    - path: "service/src/main/java/**"
+      instructions: |
+        Review this Java 17 Spring Boot code as a DDD, hexagonal, Spring Modulith application.
+        Check module boundaries, transport-neutral domain behavior, dependency direction,
+        constructor injection, validation, authorization, error mapping, transaction scope,
+        idempotency, and observability. Flag HTTP or infrastructure concerns leaking into the domain.
+    - path: "service/src/test/**"
+      instructions: |
+        Check that meaningful business behavior has focused tests, including happy paths,
+        edge cases, failure paths, state preservation, authorization, and persistence boundaries.
+        Prefer deterministic fakes and real integration tests only at infrastructure boundaries.
+    - path: "service/src/integrationTest/**"
+      instructions: |
+        Review Testcontainers and database/Redis/Kafka integration tests for isolation,
+        cleanup, deterministic fixtures, meaningful assertions, and reliable CI execution.
+    - path: "service/src/main/resources/**"
+      instructions: |
+        Check configuration for Java 17 runtime compatibility, secure defaults, environment
+        variable handling, profile separation, migration safety, and accidental secrets.
+    - path: "docs/decisions/**"
+      instructions: |
+        Check ADRs for one decision per record, accurate status, alternatives, consequences,
+        implementation evidence, links, and consistency with the current code and deployment topology.
+    - path: ".github/workflows/**"
+      instructions: |
+        Check least-privilege permissions, pinned or maintained actions, concurrency cancellation,
+        secret handling, Java 17 compatibility, reproducibility, diagnostics, and failure cleanup.
+
+knowledge_base:
+  code_guidelines:
+    filePatterns:
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "README.md"

@@ -29,7 +29,6 @@ The challenge needs a deployable service without losing the seams required for i
 - \`service/src/main/java/com/clara/insurancequotes/{quote,auth,pricing,submission}\`
 - \`service/src/test/java/com/clara/insurancequotes/ModularityTest.java\`
 - \`docs/architecture/modules/\`
-- \`docs/superpowers/specs/2026-07-22-package-structure-design.md\`
 
 ## Consequences
 

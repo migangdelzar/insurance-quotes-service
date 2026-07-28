@@ -28,7 +28,6 @@ The organization’s modulith template expects reusable error-handling functions
 - \`libraries/service-i18n/\`
 - root \`pom.xml\` reactor modules
 - \`service/pom.xml\` dependencies
-- \`docs/superpowers/specs/2026-07-22-package-structure-design.md\`
 
 ## Consequences
 
