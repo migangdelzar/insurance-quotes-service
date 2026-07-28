@@ -23,17 +23,29 @@ public final class QuoteMother {
     }
 
     public static Quote seniorDraft() {
-        return Quote.createDraft(OWNER_ID, "John Elder", "john@example.com", 70, "06600", FIXED_NOW);
+        return seniorDraftForOwner(OWNER_ID);
+    }
+
+    public static Quote seniorDraftForOwner(UUID ownerId) {
+        return Quote.createDraft(ownerId, "John Elder", "john@example.com", 70, "06600", FIXED_NOW);
     }
 
     public static Quote submittableDraft() {
-        var quote = draft();
+        return submittableDraft(OWNER_ID);
+    }
+
+    public static Quote submittableDraft(UUID ownerId) {
+        var quote = draftForOwner(ownerId);
         quote.updateCoverage(CoverageType.STANDARD, HealthProfile.none(), new BigDecimal("100.00"), FIXED_NOW);
         return quote;
     }
 
     public static Quote submittableSeniorDraft() {
-        var quote = seniorDraft();
+        return submittableSeniorDraft(OWNER_ID);
+    }
+
+    public static Quote submittableSeniorDraft(UUID ownerId) {
+        var quote = seniorDraftForOwner(ownerId);
         var health = new HealthProfile(true, Set.of(HealthCondition.DIABETES), false, true, true);
         quote.updateCoverage(CoverageType.STANDARD, health, new BigDecimal("327.60"), FIXED_NOW);
         return quote;

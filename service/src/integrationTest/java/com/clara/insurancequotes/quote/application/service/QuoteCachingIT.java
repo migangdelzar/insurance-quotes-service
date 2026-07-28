@@ -3,14 +3,14 @@ package com.clara.insurancequotes.quote.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
 import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.testsupport.Containers;
-import java.sql.Timestamp;
-import java.time.Instant;
+import com.clara.insurancequotes.testsupport.TestUsers;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -41,40 +40,34 @@ class QuoteCachingIT {
     private StringRedisTemplate redis;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private UserRepository users;
 
-    private static final UUID OWNER = UUID.randomUUID();
+    private UUID ownerId;
 
     @BeforeEach
     void seedOwner() {
-        jdbcTemplate.update(
-                "insert into users (id, username, password_hash, role, created_at) values (?, ?, ?, ?, ?) "
-                        + "on conflict (id) do nothing",
-                OWNER,
-                "user-" + OWNER,
-                "hash",
-                "USER",
-                Timestamp.from(Instant.now()));
+        ownerId = TestUsers.create(users);
     }
 
     @Test
     void getQuote_populatesCache_updateCoverageEvicts() {
-        var id = service.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), OWNER)
+        var id = service.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         var cache = cacheManager.getCache("quotes");
-        var owner = new RequestingUser(OWNER, false);
+        var owner = new RequestingUser(ownerId, false);
 
         service.getQuote(id, owner);
         assertThat(redis.keys("*")).isNotEmpty();
-        assertThat(cache.get(id + "|" + OWNER)).isNotNull();
+        assertThat(cache.get(id + "|" + ownerId)).isNotNull();
 
-        service.updateCoverage(id, new UpdateCoverageCommand(CoverageType.BASIC, null, null, null, null, null), OWNER);
-        assertThat(cache.get(id + "|" + OWNER)).isNull();
+        service.updateCoverage(
+                id, new UpdateCoverageCommand(CoverageType.BASIC, null, null, null, null, null), ownerId);
+        assertThat(cache.get(id + "|" + ownerId)).isNull();
     }
 
     @Test
     void getQuote_cacheEntryIsIsolatedPerRequester() {
-        var id = service.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), OWNER)
+        var id = service.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         var admin = new RequestingUser(UUID.randomUUID(), true);
         var otherUser = new RequestingUser(UUID.randomUUID(), false);

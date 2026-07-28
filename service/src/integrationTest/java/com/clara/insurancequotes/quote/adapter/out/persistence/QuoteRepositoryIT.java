@@ -2,14 +2,14 @@ package com.clara.insurancequotes.quote.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
 import com.clara.insurancequotes.quote.application.port.out.StaleQuoteRef;
 import com.clara.insurancequotes.quote.domain.model.QuoteMother;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.testsupport.Containers;
-import java.sql.Timestamp;
+import com.clara.insurancequotes.testsupport.TestUsers;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -36,38 +35,30 @@ class QuoteRepositoryIT {
     private JpaQuoteRepository repository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private UserRepository users;
+
+    private UUID ownerId;
 
     @BeforeEach
     void seedOwner() {
-        insertUser(QuoteMother.OWNER_ID);
-    }
-
-    private void insertUser(UUID id) {
-        jdbcTemplate.update(
-                "insert into users (id, username, password_hash, role, created_at) values (?, ?, ?, ?, ?)",
-                id,
-                "user-" + id,
-                "hash",
-                "USER",
-                Timestamp.from(Instant.now()));
+        ownerId = TestUsers.create(users);
     }
 
     @Test
     void savesAndReloadsAggregateWithHealthProfile() {
-        var saved = repository.save(QuoteMother.submittableSeniorDraft());
+        var saved = repository.save(QuoteMother.submittableSeniorDraft(ownerId));
 
         var reloaded = repository.findById(saved.id(), null).orElseThrow();
 
         assertThat(reloaded.healthProfile().conditions()).isNotEmpty();
         assertThat(reloaded.monthlyPremium()).isEqualByComparingTo("327.60");
-        assertThat(reloaded.userId()).isEqualTo(QuoteMother.OWNER_ID);
+        assertThat(reloaded.userId()).isEqualTo(ownerId);
     }
 
     @Test
     void markExpired_batchUpdatesOnlyGivenIds() {
-        var stale = repository.save(QuoteMother.draft());
-        var fresh = repository.save(QuoteMother.submittableDraft());
+        var stale = repository.save(QuoteMother.draftForOwner(ownerId));
+        var fresh = repository.save(QuoteMother.submittableDraft(ownerId));
 
         var cutoff = QuoteMother.FIXED_NOW.plus(Duration.ofMinutes(31));
         var ids = repository.findStaleDrafts(cutoff).stream()
@@ -82,9 +73,9 @@ class QuoteRepositoryIT {
 
     @Test
     void findById_scopedToOtherOwner_returnsEmpty() {
-        var saved = repository.save(QuoteMother.draft());
+        var saved = repository.save(QuoteMother.draftForOwner(ownerId));
 
-        var asOwner = repository.findById(saved.id(), QuoteMother.OWNER_ID);
+        var asOwner = repository.findById(saved.id(), ownerId);
         var asOtherUser = repository.findById(saved.id(), UUID.randomUUID());
 
         assertThat(asOwner).isPresent();
@@ -93,10 +84,8 @@ class QuoteRepositoryIT {
 
     @Test
     void findPage_scopedToOwner_excludesOtherUsersQuotes() {
-        var ownerA = UUID.randomUUID();
-        var ownerB = UUID.randomUUID();
-        insertUser(ownerA);
-        insertUser(ownerB);
+        var ownerA = TestUsers.create(users);
+        var ownerB = TestUsers.create(users);
         repository.save(QuoteMother.draftForOwner(ownerA));
         repository.save(QuoteMother.draftForOwner(ownerB));
 
