@@ -1,146 +1,256 @@
-# insurance-quotes-service
+# Clara Insurance Quotes · API
 
-Spring Boot 4.0.6 / Java 17 backend for the insurance quote flow. It is a DDD and hexagonal Spring Modulith: business capabilities are package modules, domain code is transport-neutral, and inbound/outbound adapters are explicit.
+![Java 17](https://img.shields.io/badge/runtime-Java%2017-007396?style=flat-square)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-6DB33F?style=flat-square)
+![Architecture](https://img.shields.io/badge/architecture-DDD%20%2B%20hexagonal%20%2B%20Modulith-111827?style=flat-square)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?style=flat-square)
 
-Sibling frontend: [insurance-quotes-web](../insurance-quotes-web)
+The Clara backend is a Java 17 Spring Boot service for the insurance quote
+challenge. It is a DDD and hexagonal Spring Modulith: quote, authentication,
+pricing, and submission capabilities share one deployable runtime while
+keeping domain rules independent from HTTP, PostgreSQL, Redis, Kafka, and
+observability adapters.
 
-## Run
+> **Start here:** the sibling frontend is
+> [insurance-quotes-web](../insurance-quotes-web). The integrated application
+> uses same-origin browser traffic through the frontend proxy.
 
-Install the pinned tools and hooks, then start the default JVM stack:
+## Architecture at a glance
 
-```bash
-mise run setup
-mise run up                         # PostgreSQL + Kafka + Redis + JVM API
-mise run up jvm observability       # add Prometheus :9090, Grafana :3001, Loki :3101, Tempo :3200
-mise run up jvm full                # add the frontend at :3100 and local insurer stub
-mise run up jvm full e2e            # same stack; keeps the explicit E2E overlay alias
-```
+~~~mermaid
+flowchart LR
+  browser[React/Vite browser] --> web[Nginx or Vite /api proxy]
+  web --> api[Spring Boot API]
+  api --> quote[Quote domain]
+  api --> auth[Auth and WebAuthn]
+  api --> pricing[Pricing]
+  api --> submission[Submission]
+  quote --> postgres[(PostgreSQL)]
+  auth --> postgres
+  api --> redis[(Redis)]
+  submission --> insurer[InsurerGateway / WireMock]
+  submission --> outbox[Spring Modulith outbox]
+  outbox --> kafka[(Kafka)]
+  api --> metrics[Actuator + Micrometer]
+  metrics --> prometheus[(Prometheus)]
+  prometheus --> grafana[Grafana]
+  api --> traces[OpenTelemetry]
+  traces --> tempo[(Tempo)]
+  api --> logs[JSON stdout]
+  logs --> alloy[Alloy]
+  alloy --> loki[(Loki)]
+~~~
 
-For the fastest source-change loop, run infrastructure in Docker and the API/frontend on the host:
+## Responsibilities and boundaries
 
-```bash
-mise run dev-infra                  # PostgreSQL, Kafka, Redis, and WireMock
-mise run dev                        # Spring profile `dev`, DevTools restart + LiveReload :35729
-cd ../insurance-quotes-web
-bun run dev:hmr                     # Vite HMR on :5173, same-origin `/api` proxy to :8080
-```
+| Concern | Runtime owner | Boundary |
+|---|---|---|
+| Durable users, passkeys, refresh state, quotes, and migrations | PostgreSQL + Flyway | Source of truth |
+| Quote cache and WebAuthn ceremonies | Redis | Bounded ephemeral state |
+| Quote business events | Spring Modulith outbox → Kafka | Durable event delivery |
+| Operational metrics | Actuator/Micrometer → Prometheus | Scrape/query path |
+| Logs | JSON stdout → Alloy → Loki | Correlated log search |
+| Traces | OpenTelemetry → Tempo | Distributed request diagnosis |
+| HTTP protection | Redis fixed-window Lua buckets | Shared rate-limit decisions |
+| Application runtime | Java 17 JVM | Default reviewer/deployment path |
 
-The `dev` profile is development-only: it enables Spring DevTools restart/LiveReload, disables Redis rate limiting by default to keep repeated local journeys fast, disables static-resource caching, and allows the HMR origin. Production and Docker profiles keep their existing rate-limit, cache, and packaging behavior. Spring DevTools is optional and remains excluded from the repackaged production image.
+Kafka is not the metrics pipeline. Redis is not durable business state and is
+not used as a general-purpose distributed lock service.
 
-The full-stack command expects the sibling frontend directory shown above. The API is available at `http://localhost:8080`; Swagger UI is at `/swagger-ui.html`. Full local Compose runs use WireMock on `http://localhost:8089` as a deterministic insurer stand-in, so quote submission does not depend on external `httpstat.us` availability. Set `INSURER_BASE_URL` in a deployment-specific environment to use a real insurer endpoint. The local profile seeds three password users when they do not already exist:
+## Quick start
 
-| Username | Password |
-| --- | --- |
-| `demo` | `demo-password` |
-| `demo-two` | `demo-password-two` |
-| `demo-three` | `demo-password-three` |
+### Prerequisites
 
-Use `POST /auth/login` with any of these accounts. On the first password login, the web app offers an explicit passkey setup step. If passwordless sign-in is requested with a username that has no registered credential, `/auth/webauthn/assertion-options` returns `409 AUTH_PASSKEY_NOT_REGISTERED` before starting a browser ceremony. An account that already has a passkey registered still requires it as MFA.
+- Java 17
+- Maven 3.9+
+- Docker and Compose
+- mise (recommended)
+- sibling checkout of the frontend for full-stack flows
 
-The demo users are persisted in the local PostgreSQL volume. If a previous passkey journey registered a passkey for an account and that passkey is unavailable in the browser, password login will intentionally show the MFA prompt. Start a clean reviewer stack with `docker compose -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.jvm.yml -f deployment/compose/compose.fullstack.yml down --volumes` before bringing it up again, or use a seeded account without a registered passkey.
+Expected layout:
 
-Redis is shared ephemeral infrastructure for horizontally scaled or serverless instances. It stores the ten-minute quote cache and five-minute WebAuthn ceremonies so a request can be completed by a different instance. PostgreSQL remains the source of truth for users, passkeys, refresh-token rotation, quotes, and business events; Redis is not used for durable state or distributed locks. Quote-cache failures fall back to PostgreSQL, while WebAuthn failures require restarting the ceremony. Redis is available at `localhost:6379` in the local Compose stack.
-
-The observability overlay keeps ownership explicit: Actuator/Micrometer instruments the API, Prometheus scrapes `/actuator/prometheus`, and Grafana visualizes the resulting time series. Spring Boot exports request traces to Tempo through OTLP/HTTP, while Grafana Alloy reads Docker JSON logs and sends them to Loki. Grafana provisions all three sources with trace-to-log navigation. Kafka remains the durable transport for `QuoteSubmitted` domain events; it is not used as a metrics pipeline.
-
-The API also uses Redis as a distributed fixed-window rate limiter for authentication and quote mutations. The Lua script atomically increments a bucket and applies its expiry, so multiple API instances share one decision. Redis failures fail open for availability and emit `rate_limit_redis_failures_total`; rejected requests return `429` with `Retry-After` and `X-RateLimit-*` headers.
-
-Local telemetry ports are Prometheus `9090`, Grafana `3001` (`admin`/`admin`), Loki `3101`, and Tempo `3200` (query), `4317` (OTLP/gRPC), and `4318` (OTLP/HTTP). Loki and Tempo use short-lived filesystem storage through named Compose volumes. Alloy requires read-only access to the Docker socket for local collection; production deployments should replace that collector arrangement with a platform-native log pipeline.
-
-Without mise, use the compose files directly:
-
-```bash
-docker-compose \
-  -f deployment/compose/docker-compose.yml \
-  -f deployment/compose/docker-compose.jvm.yml \
-  -f deployment/compose/compose.fullstack.yml up -d --build
-```
-
-The repository’s `mise run up` task uses `docker compose` when available and falls back to the legacy `docker-compose` binary.
-
-## GitHub Actions
-
-Backend CI and the full-stack JVM smoke workflow run on every push and pull request. Runs are grouped by source branch and cancel older in-progress runs when a newer commit arrives. The backend workflow verifies Java 17, Testcontainers, the JVM API image, Compose configuration, and the sibling frontend baseline. Native-image compilation remains an explicit/manual path because of its documented memory requirements.
-
-## Tests
-
-```bash
-mvn test                  # unit tests and docker-free slices
-mvn verify                # integration tests, formatting, and JaCoCo gate
-mvn verify -Pe2e          # backend black-box tests against a running stack
-open service/target/site/jacoco/index.html
-```
-
-The domain/application coverage gate is 80%. The frontend repository owns the Playwright journeys; run them from the sibling repository after `mise run up jvm full e2e`:
-
-```bash
-cd ../insurance-quotes-web
-E2E_BASE_URL=http://localhost:3100 bun run e2e
-```
-
-## How I approached it
-
-1. I read the fixed contract and business rules first, then froze the API, pricing formula, quote states, and error semantics as non-decisions.
-2. I designed the package boundaries and communication styles before implementation. The risky paths were the aggregate state machine, remote insurer call, expiration, money, authentication, and event publication.
-3. I implemented the core with red-green-refactor tests, then added persistence, authentication, observability, API versioning, native packaging, and full-stack integration in separate increments.
-
-## Design decisions
-
-The ten accepted decisions are recorded in [`docs/decisions`](docs/decisions). The generated Modulith diagrams and module descriptions are in [`docs/architecture/modules`](docs/architecture/modules).
-
-| Pattern | Example |
-| --- | --- |
-| DDD aggregate/state machine | `quote.domain.model.Quote` and `QuoteStatus` |
-| Ports and adapters | `InsurerGateway`, repositories, and inbound web controllers |
-| Strategy | Premium factors under `pricing.domain` |
-| Outbox/event publication | Spring Modulith event registry to Kafka |
-| Facade/use-case orchestration | Quote and submission application services |
-
-The domain and application layers do not depend on HTTP status abstractions. Transport mapping stays in inbound adapters, and controllers use Spring’s native version-aware mappings.
-
-## AI usage
-
-This repository was built with AI pair-programming: design brainstorming, written specifications, phased plans, TDD implementation, and review checkpoints. Every generated change was inspected, tested, and committed by the developer. The package boundaries, domain/transport separation, eventing choice, and authentication scope were human-reviewed decisions; the trade-offs are recorded in the ADRs.
-
-## Challenges / unfinished
-
-- WebAuthn and stateless JWT required a Yubico integration because the ceremony state and refresh-token lifecycle need explicit application control.
-- Native compilation is an optional profile and is intentionally slower than the JVM path. Spring Boot 4’s Paketo native builder requires Java 25 as build tooling, while the application and default runtime remain Java 17.
-- The local environment used the legacy `docker-compose` executable because the Docker Compose plugin was unavailable; the mise task supports both forms.
-
-## JVM vs native
-
-The JVM image is the default reviewer path. The native image build reached GraalVM executable generation with optimization level 2, but the local Colima builder terminated it with exit status 137 after exhausting its memory. No native runtime number is fabricated; run the native build with a larger Docker/Colima memory allocation before comparing runtime behavior.
-
-Once the native image is available, the repeatable comparison flow is:
-
-```bash
-mise run native
-RUNTIME_REPORT_PATH=/tmp/clara-runtime-comparison.md ./scripts/compare-runtimes.sh
-cat /tmp/clara-runtime-comparison.md
-```
-
-The report measures Spring startup, compose elapsed time, health-request latency, container RSS, and image size for both the Java 17 JVM image and the optional native image. The same comparison is available through the manually dispatched `Native versus JVM runtime comparison` GitHub Actions workflow; it uploads the Markdown report and does not change the Java 17 runtime default.
-
-| Runtime | Startup | Memory | Result |
-| --- | ---: | ---: | --- |
-| JVM | 9.823 s | 438.3 MiB | Verified with the Java 17 Compose API container; image size 207,720,155 bytes |
-| Native | Not measured | Not measured | Build stopped by local builder OOM (exit 137); Java 25 Paketo builder is build-only, application baseline remains Java 17 |
-
-## Running both repositories
-
-Expected sibling layout:
-
-```text
+~~~text
 workspace/
 ├── insurance-quotes-service/
 └── insurance-quotes-web/
-```
+~~~
 
-From this repository, one command starts the API and frontend:
+### JVM stack
 
-```bash
-mise run up jvm full
-```
+~~~bash
+mise run setup
+mise run up                         # PostgreSQL + Kafka + Redis + API
+mise run up jvm full e2e            # add Nginx :3100 and WireMock :8089
+~~~
 
-Then use `cd ../insurance-quotes-web && E2E_BASE_URL=http://localhost:3100 bun run e2e` for the browser journeys. The web app detects `navigator.languages`/`navigator.language`, normalizes to `en-US` or `es-MX`, and sends that locale as `Accept-Language` on API requests; unsupported browser locales fall back to `en-US`.
+The API is available at http://localhost:8080. Swagger UI is at
+http://localhost:8080/swagger-ui.html.
+
+### Fast hot-reload loop
+
+~~~bash
+mise run dev-infra                  # PostgreSQL, Kafka, Redis, WireMock
+mise run dev                        # Spring DevTools + LiveReload :35729
+cd ../insurance-quotes-web
+bun run dev:hmr                     # Vite HMR :5173
+~~~
+
+The dev profile disables rate limiting for fast local iteration and is not the
+production security posture. Docker and production profiles retain Redis
+rate limiting, caching, and packaging defaults.
+
+## Development users and passkeys
+
+The local profile seeds these accounts:
+
+| Username | Password | Purpose |
+|---|---|---|
+| demo | demo-password | Standard journey and passkey lifecycle |
+| demo-two | demo-password-two | Independent manual session |
+| demo-three | demo-password-three | Independent manual session |
+
+The first password login offers passkey enrollment. Passwordless login for an
+account without a credential returns an actionable passkey-not-registered
+error. If a previous browser journey registered a passkey, reset the local
+database before using password-only recovery:
+
+~~~bash
+docker compose \
+  -f deployment/compose/docker-compose.yml \
+  -f deployment/compose/docker-compose.jvm.yml \
+  -f deployment/compose/compose.fullstack.yml \
+  down --volumes
+~~~
+
+## API and business flow
+
+The controller layer exposes versioned HTTP contracts. The domain remains
+transport-neutral and owns quote transitions, completeness, senior health
+rules, diabetes/hypertension pricing factors, and retryable submission state.
+
+~~~text
+login → create draft → personal details → coverage and health
+     → premium calculation → submit to insurer → submitted or retryable failure
+     → paginated history and analytics
+~~~
+
+The browser calls the frontend origin at /api. Nginx/Vite proxies that path to
+the API, so the deployed browser flow does not call the backend or insurer
+directly and does not require browser CORS.
+
+## Observability
+
+Start the local observability overlay:
+
+~~~bash
+mise run up jvm observability
+~~~
+
+| Tool | URL | Role |
+|---|---|---|
+| Actuator | http://localhost:8080/actuator | Health, metrics, Prometheus, Modulith |
+| Prometheus | http://localhost:9090 | Scraped time series |
+| Grafana | http://localhost:3001 | Dashboards; admin/admin locally |
+| Loki | http://localhost:3101 | Structured logs |
+| Tempo | http://localhost:3200 | Trace query |
+| Tempo OTLP | localhost:4317 / 4318 | gRPC / HTTP trace ingestion |
+
+Business meters cover quote lifecycle, submission latency and outcomes, cache
+failures, and rate-limit behavior. The dashboard is provisioned from
+deployment/compose/observability/grafana/dashboards/quotes.json.
+
+## Verification
+
+~~~bash
+mvn -B test
+mvn -B verify
+mvn -B verify -Pe2e
+~~~
+
+The service JaCoCo gate is 80%. For the real browser journeys:
+
+~~~bash
+cd ../insurance-quotes-web
+E2E_BASE_URL=http://localhost:3100 bun run e2e -- --retries=0
+~~~
+
+The browser recording gallery is
+[docs/demo/flow-hyperframes.md](../insurance-quotes-web/docs/demo/flow-hyperframes.md).
+
+## JVM versus native
+
+Java 17 is the application runtime. Native compilation is an explicit
+comparison path; Java 25 is build-only tooling for the Spring Boot 4/Paketo
+native builder.
+
+~~~bash
+mise run native
+RUNTIME_REPORT_PATH=/tmp/clara-runtime-comparison.md ./scripts/compare-runtimes.sh
+cat /tmp/clara-runtime-comparison.md
+~~~
+
+The comparison measures startup, health latency, elapsed time, RSS, and image
+size for the same API. The manual
+[native comparison workflow](.github/workflows/native-comparison.yml) uploads
+the report without changing the JVM default.
+
+## CI/CD
+
+- [Backend CI](.github/workflows/ci.yml) runs Java 17 verification, reactor
+  dependency resolution, image build, and Compose configuration checks.
+- [Full-stack JVM smoke](.github/workflows/full-stack-smoke.yml) verifies the
+  API, Nginx frontend, seeded login, and analytics against compatible refs.
+- [Native comparison](.github/workflows/native-comparison.yml) is manual
+  because native compilation requires more memory.
+- Push and pull-request runs use concurrency cancellation so a newer commit
+  stops an older in-progress run for the same branch.
+
+The workflows validate deployable images and full-stack behavior. Cloud
+deployment is intentionally target-neutral until a registry, hosting target,
+and credentials are selected.
+
+## Architecture decisions
+
+The maintained catalogue is in [docs/decisions](docs/decisions/README.md).
+The [decision flow](docs/decisions/decision-flow.md) explains the separation
+between durable state, Redis state, Kafka business events, metrics, logs, and
+traces.
+
+The most important decisions are:
+
+1. DDD, hexagonal, responsibility-based Spring Modulith boundaries.
+2. JWT refresh rotation and WebAuthn for session/passkey flows.
+3. PostgreSQL/Flyway for durable state.
+4. Redis for bounded shared state and rate limiting.
+5. Actuator/Micrometer/OpenTelemetry for operational visibility.
+
+## Challenge map
+
+| Requirement | Implementation |
+|---|---|
+| Quote lifecycle | Quote aggregate, state machine, application services |
+| Senior health pricing | Health profile and pricing strategy |
+| Authentication | Password, JWT refresh rotation, WebAuthn enrollment/MFA/passwordless |
+| Reliable submission | Insurer port, retryable failure state, outbox publication |
+| Scalable transient state | Redis cache, ceremonies, and rate limits |
+| Localized API errors | service-i18n library and locale-aware error mapping |
+| Operability | Actuator, Prometheus, Grafana, Loki, Tempo, Alloy |
+| Packaging | Java 17 JVM default and optional native image |
+
+## Troubleshooting
+
+- **Port 3000 is occupied:** use the application’s Nginx port 3100.
+- **Passkey asks for an unavailable credential:** reset the local volumes or
+  use another seeded user.
+- **Quote submission is slow:** local full-stack uses WireMock; verify the
+  WireMock service is healthy on port 8089.
+- **Redis is unavailable:** quote reads fail open to PostgreSQL; WebAuthn
+  ceremonies must be restarted; rate limiting emits a warning and fails open.
+- **Native build exits 137:** increase the Docker/Colima memory allocation and
+  rerun the manual comparison path.
+
+## Contributing
+
+Keep commits focused and use conventional commit messages. New architecture
+decisions belong in docs/decisions with an index update. New browser behavior
+should have a real Playwright journey or a focused component contract.
