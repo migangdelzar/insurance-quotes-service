@@ -28,8 +28,7 @@ Native compilation may reduce startup time and memory, but it is slower, resourc
 
 - \`service/pom.xml\` native profile
 - \`deployment/compose/docker-compose.native.yml\`
-- \`scripts/compare-runtimes.sh\`
-- \`.github/workflows/native-comparison.yml\`
+- \`mise run native\` and \`scripts/compare-runtimes.sh\`
 - \`README.md\` JVM/native comparison section
 
 ## Consequences

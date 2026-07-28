@@ -277,9 +277,8 @@ cat /tmp/clara-runtime-comparison.md
 ~~~
 
 The comparison measures startup, health latency, elapsed time, RSS, and image
-size for the same API. The manual
-[native comparison workflow](.github/workflows/native-comparison.yml) uploads
-the report without changing the JVM default.
+size for the same API. The local comparison command produces a report without
+adding a required CI check.
 
 ## CI/CD
 
@@ -287,8 +286,8 @@ the report without changing the JVM default.
   dependency resolution, image build, and Compose configuration checks.
 - [Full-stack JVM smoke](.github/workflows/full-stack-smoke.yml) verifies the
   API, Nginx frontend, seeded login, and analytics against compatible refs.
-- [Native comparison](.github/workflows/native-comparison.yml) is manual
-  because native compilation requires more memory.
+- Native comparison is local/manual
+  because native compilation requires more memory and is not required in CI.
 - Push and pull-request runs use concurrency cancellation so a newer commit
   stops an older in-progress run for the same branch.
 
