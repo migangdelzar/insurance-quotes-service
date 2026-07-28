@@ -2779,6 +2779,8 @@ git commit -m "feat(quote): scope quotes to their owner with read-only admin ove
 
 ### Task 3: Cross-user isolation and admin-oversight regression tests
 
+**Status:** Implementation completed in commit `c61eaa6`. The controller regression test exists; full-suite verification remains intentionally deferred until the user-isolation migration work is ready for validation.
+
 Most of the ownership-specific tests were already added inline in Task 2 (Steps 1, 19, 22, 23) because TDD on a signature cascade means the new assertions have to compile against the new signatures from the start. This task closes the remaining gap: a controller-level proof that the submit endpoint itself is owner-scoped (Task 2 only added this at the service level via `SubmissionServiceTest`).
 
 **Files:**
@@ -2787,7 +2789,7 @@ Most of the ownership-specific tests were already added inline in Task 2 (Steps 
 **Interfaces:**
 - Consumes: `SubmissionApi.submit(UUID quoteId, UUID ownerId)` (Task 2).
 
-- [ ] **Step 1: Write the failing controller test**
+- [x] **Step 1: Write the failing controller test**
 
 Create `service/src/test/java/com/clara/insurancequotes/submission/adapter/in/web/controller/SubmissionControllerTest.java`:
 
@@ -2861,7 +2863,7 @@ Expected: This should actually PASS immediately if Task 2 was completed correctl
 Run: `cd insurance-quotes-service && mvn -pl service test`
 Expected: PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd insurance-quotes-service
@@ -2873,6 +2875,8 @@ git commit -m "test(submission): prove submit is owner-scoped at the controller 
 
 ### Task 4: Update the AIUP documentation to reflect ownership and the admin role
 
+**Status:** Documentation changes completed; validation of the integrated application remains deferred.
+
 The reverse-engineered `docs/use_cases/UC-003..005-*.md` and `docs/entity_model.md` currently describe the pre-ownership shared-pool model. This task brings them in line with what Tasks 1–3 built, closing the follow-up flagged in the design doc's §9.
 
 **Files:**
@@ -2882,15 +2886,15 @@ The reverse-engineered `docs/use_cases/UC-003..005-*.md` and `docs/entity_model.
 - Modify: `docs/use_cases/UC-004-submit-quote-to-insurer.md`
 - Modify: `docs/use_cases/UC-005-review-quote-history-and-analytics.md`
 
-- [ ] **Step 1: Add `QUOTE.user_id` and `USER.role` to the entity model**
+- [x] **Step 1: Add `QUOTE.user_id` and `USER.role` to the entity model**
 
 Modify `docs/entity_model.md`: add a `user_id` row to the `QUOTE` attribute table (`Foreign Key (USER.id)`, `Not Null`) directly after `id`; add a `role` row to the `USER` attribute table (`String`, length 20, `Not Null, Values: USER, ADMIN`) directly after `username`; add `USER ||--o{ QUOTE : "creates"` to the Mermaid diagram; remove the "Notes" paragraph stating quotes and users are unrelated subgraphs (no longer true).
 
-- [ ] **Step 2: Add the Administrator actor to the use case diagram**
+- [x] **Step 2: Add the Administrator actor to the use case diagram**
 
 Modify `docs/use_cases.puml`: add `actor "Administrator" as admin` and connect it to `UC005` (`admin --> UC005`), since admin oversight only applies to the read/history use case.
 
-- [ ] **Step 3: Update UC-003, UC-004, UC-005 with ownership and admin business rules**
+- [x] **Step 3: Update UC-003, UC-004, UC-005 with ownership and admin business rules**
 
 Modify `docs/use_cases/UC-003-request-an-insurance-quote.md`: add to the Success Postconditions that the draft quote is owned by the requesting user; add `BR-023: Quotes Are Owned by Their Creator` under Business Rules.
 
@@ -2898,7 +2902,7 @@ Modify `docs/use_cases/UC-004-submit-quote-to-insurer.md`: add `BR-024: Submissi
 
 Modify `docs/use_cases/UC-005-review-quote-history-and-analytics.md`: change the Primary Actor line to `Registered User / Administrator (read-only)`; rewrite the note that previously said quotes are a shared pool visible to any signed-in user, replacing it with: a regular user's list/detail/analytics are scoped to quotes they created; an Administrator sees every user's quotes and global analytics, but cannot create, edit, or submit on another user's behalf. Add `BR-025: Administrator Read-Only Oversight`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd insurance-quotes-service

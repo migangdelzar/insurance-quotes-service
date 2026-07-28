@@ -1,0 +1,29 @@
+@startuml Use Cases Overview
+left to right direction
+
+actor "Visitor" as visitor
+actor "Registered User" as user
+actor "Administrator" as admin
+actor "Scheduler" as scheduler
+actor "Insurer" as insurer
+
+rectangle "Insurance Quotes" {
+    usecase "UC-001\nAuthenticate" as UC001
+    usecase "UC-002\nEnroll a Passkey" as UC002
+    usecase "UC-003\nRequest an Insurance Quote" as UC003
+    usecase "UC-004\nSubmit Quote to Insurer" as UC004
+    usecase "UC-005\nReview Quote History and Analytics" as UC005
+    usecase "UC-006\nExpire Stale Draft Quotes" as UC006
+}
+
+visitor --> UC001
+user --> UC001
+user --> UC002
+user --> UC003
+user --> UC004
+user --> UC005
+admin --> UC005
+scheduler --> UC006
+insurer --> UC004
+
+@enduml
