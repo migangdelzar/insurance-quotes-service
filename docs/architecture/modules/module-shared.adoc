@@ -4,4 +4,6 @@
 |`com.clara.insurancequotes.shared`
 |Spring components
 |* `c.c.i.s.error.GlobalExceptionHandler`
+|Bean references
+|* `c.c.i.c.BusinessMetrics` (in Config)
 |===

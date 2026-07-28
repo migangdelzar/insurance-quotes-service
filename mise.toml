@@ -2,21 +2,14 @@
 java = "temurin-17"
 maven = "3.9"
 
-[env]
-SPRING_PROFILES_ACTIVE = "local"
-INSURER_BASE_URL = "https://httpstat.us/200?sleep=500"
-JWT_SECRET = "local-dev-secret-change-me-32-bytes!!"
-AUTH_DEMO_USERNAME = "demo"
-AUTH_DEMO_PASSWORD = "demo-password"
-
 [tasks.build]
-run = "mvn -q clean verify"
+run = "SPRING_PROFILES_ACTIVE=local mvn -q clean verify"
 [tasks.test]
-run = "mvn -q test"
+run = "SPRING_PROFILES_ACTIVE=local mvn -q test"
 [tasks.itest]
-run = "mvn -q verify"
+run = "SPRING_PROFILES_ACTIVE=local mvn -q verify"
 [tasks.run]
-run = "mvn -q -pl service spring-boot:run"
+run = "SPRING_PROFILES_ACTIVE=local mvn -q -pl service spring-boot:run"
 [tasks.dev]
 description = "Run the API with Spring DevTools and the dev profile"
 run = "SPRING_PROFILES_ACTIVE=dev KAFKA_BOOTSTRAP=localhost:9094 INSURER_BASE_URL=http://localhost:8089/submit mvn -q -pl service spring-boot:run"
@@ -114,3 +107,7 @@ docker compose \
   -f compose.e2e.yml \
   down --volumes --remove-orphans
 '''
+
+[tasks.reset-demo]
+description = "Reset local PostgreSQL, Redis, and Kafka demo state, then restart the stack"
+run = "./scripts/reset-demo.sh"

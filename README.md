@@ -65,11 +65,37 @@ not used as a general-purpose distributed lock service.
 
 ### Prerequisites
 
+The supported demo baseline is intentionally small and local:
+
+| Requirement | Minimum / recommended value |
+|---|---|
+| Java | 17 (runtime and build) |
+| Maven | 3.9+ (or the pinned `mise` tool) |
+| Docker | Docker Engine with Compose v2, or legacy `docker-compose` |
+| Container runtime | Colima with 2 CPUs and 4 GiB RAM, or an equivalent Docker VM |
+| Disk | At least 8 GiB free for images and the demo volumes |
+| Frontend runtime | Bun, for the sibling web workspace |
+| Ports | `3100` web, `8080` API, `5432` PostgreSQL, `6379` Redis, `8089` WireMock, `9094` Kafka |
+
+The JVM demo API is capped at 512 MiB and the supporting services are kept
+small enough for the 4 GiB Colima profile. Native images use a lower memory
+cap, but are optional and are not required to run the demo.
+
 - Java 17
 - Maven 3.9+
 - Docker and Compose
 - mise (recommended)
 - sibling checkout of the frontend for full-stack flows
+
+For Colima, the recommended low-memory setup is:
+
+~~~bash
+colima stop --force
+colima start --cpu 2 --memory 4
+~~~
+
+Use `colima status` and `docker info` to confirm the active runtime before
+starting the stack.
 
 Expected layout:
 
@@ -113,6 +139,41 @@ The command is idempotent: if a healthy Clara stack is already serving
 If the frontend checkout is elsewhere, set `CLARA_WEB_DIR` before running the
 demo.
 
+To return the demo to a clean state after passkey or quote journeys, run the
+explicit reset command:
+
+~~~bash
+mise run reset-demo
+~~~
+
+It removes the local PostgreSQL volume and recreates the Redis and Kafka demo
+containers before restarting the JVM full-stack stack. The command asks you to
+type `reset`; for a non-interactive local script, use:
+
+~~~bash
+DEMO_RESET_CONFIRM=reset mise run reset-demo
+~~~
+
+The command rejects the `prod` mise environment or Spring profile and never
+runs automatically at application startup. It is intended only for local demo
+data.
+
+### Demo verification checklist
+
+After setup, these checks exercise the real browser proxy and API:
+
+~~~bash
+curl -fsS http://localhost:3100/api/actuator/health
+curl -fsS -X POST http://localhost:3100/api/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"username":"demo","password":"demo-password"}'
+~~~
+
+The login response contains short-lived tokens; do not paste them into issue
+reports or documentation. The Playwright suite in the sibling web workspace
+should be run against `http://localhost:3100` so it verifies same-origin BFF
+routing rather than calling the API directly.
+
 ### Fast hot-reload loop
 
 ~~~bash
@@ -139,15 +200,11 @@ The local profile seeds these accounts:
 
 The first password login offers passkey enrollment. Passwordless login for an
 account without a credential returns an actionable passkey-not-registered
-error. If a previous browser journey registered a passkey, reset the local
-database before using password-only recovery:
+error. If a previous browser journey registered a passkey, reset the local demo
+before using password-only recovery:
 
 ~~~bash
-docker compose \
-  -f deployment/compose/docker-compose.yml \
-  -f deployment/compose/docker-compose.jvm.yml \
-  -f deployment/compose/compose.fullstack.yml \
-  down --volumes
+mise run reset-demo
 ~~~
 
 ## API and business flow

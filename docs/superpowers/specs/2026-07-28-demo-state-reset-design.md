@@ -1,7 +1,7 @@
 # Demo State Reset Design
 
 **Date:** 2026-07-28  
-**Status:** Approved for implementation  
+**Status:** Implemented and verified
 **Scope:** Local JVM full-stack demo only
 
 ## Goal
@@ -71,12 +71,14 @@ volume/container recreation gives the demo a deterministic clean boundary.
 
 ## Verification plan
 
-Validation is intentionally deferred while the per-user quote ownership
-migration is being completed. Once that work is ready, verify:
+Verification completed after the per-user quote ownership migration:
 
-- the command refuses without confirmation;
-- the command refuses a production profile;
-- a confirmed reset removes the local state and restarts the stack;
-- the API health endpoint becomes `UP`;
-- a fresh demo login and passkey enrollment work;
-- no unrelated Compose project is removed.
+- `bash -n scripts/reset-demo.sh` passes;
+- the command refuses without `DEMO_RESET_CONFIRM=reset`;
+- the command refuses `MISE_ENV=prod` before Compose teardown;
+- a confirmed reset removes the local PostgreSQL volume and recreates the
+  JVM/full-stack/e2e Compose stack;
+- the API and same-origin web proxy health endpoints are `UP`;
+- a fresh real API login succeeds with the seeded demo account;
+- the service unit suite passes, including indexed demo-user property binding;
+- no unrelated Compose project is targeted by the reset file list.

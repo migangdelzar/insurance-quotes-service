@@ -6,7 +6,7 @@ services:
     mem_limit: 512m
     environment:
       SPRING_PROFILES_ACTIVE: docker,demo
-      JAVA_TOOL_OPTIONS: "${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=65 -XX:InitialRAMPercentage=20 -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC}"
+      JAVA_TOOL_OPTIONS: "${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=50 -XX:InitialRAMPercentage=15 -XX:MaxMetaspaceSize=192m -XX:+UseSerialGC}"
       DB_USER: quotes_app
       DB_PASSWORD: quotes_app
       JWT_SECRET: docker-dev-secret-change-me-32-byte!
