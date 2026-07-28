@@ -2,6 +2,7 @@ package com.clara.insurancequotes.auth.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.clara.insurancequotes.auth.domain.model.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -27,8 +28,20 @@ class DemoUserPropertiesBindingTest {
             assertThat(properties.users())
                     .extracting(DemoUserProperties.User::username)
                     .containsExactly("demo", "demo-admin");
-            assertThat(properties.users().get(1).role()).isEqualTo("ADMIN");
+            assertThat(properties.users().get(0).role()).isEqualTo(UserRole.USER);
+            assertThat(properties.users().get(1).role()).isEqualTo(UserRole.ADMIN);
         });
+    }
+
+    @Test
+    void rejectsUnknownRoleDuringBinding() {
+        new ApplicationContextRunner()
+                .withUserConfiguration(TestConfiguration.class)
+                .withPropertyValues(
+                        "auth.demo.users[0].username=demo",
+                        "auth.demo.users[0].password=demo-password",
+                        "auth.demo.users[0].role=ADMNI")
+                .run(context -> assertThat(context).hasFailed());
     }
 
     @Configuration(proxyBeanMethods = false)
