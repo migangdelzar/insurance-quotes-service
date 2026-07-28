@@ -3,13 +3,18 @@ package com.clara.insurancequotes.quote.adapter.out.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
+import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.type.HealthCondition;
 import com.clara.insurancequotes.quote.application.port.out.StaleQuoteRef;
+import com.clara.insurancequotes.quote.domain.model.HealthProfile;
 import com.clara.insurancequotes.quote.domain.model.QuoteMother;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.clara.insurancequotes.testsupport.TestUsers;
+import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +58,20 @@ class QuoteRepositoryIT {
         assertThat(reloaded.healthProfile().conditions()).isNotEmpty();
         assertThat(reloaded.monthlyPremium()).isEqualByComparingTo("327.60");
         assertThat(reloaded.userId()).isEqualTo(ownerId);
+    }
+
+    @Test
+    void savesExistingAggregateAfterUpdatingHealthProfile() {
+        var saved = repository.save(QuoteMother.draftForOwner(ownerId));
+        saved.updateCoverage(
+                CoverageType.PREMIUM,
+                new HealthProfile(true, Set.of(HealthCondition.DIABETES), true, false, false),
+                new BigDecimal("327.60"),
+                QuoteMother.FIXED_NOW);
+
+        var updated = repository.save(saved);
+
+        assertThat(updated.healthProfile().conditions()).containsExactly(HealthCondition.DIABETES);
     }
 
     @Test

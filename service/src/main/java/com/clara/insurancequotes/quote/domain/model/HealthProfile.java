@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import java.util.HashSet;
 import java.util.Set;
 
 @Embeddable
@@ -41,7 +42,7 @@ public class HealthProfile {
             Boolean usesTobacco,
             Boolean needsSpouseCoverage) {
         this.hasPreexistingConditions = hasPreexistingConditions;
-        this.conditions = conditions == null ? null : Set.copyOf(conditions);
+        this.conditions = conditions == null ? null : new HashSet<>(conditions);
         this.takesPrescriptionMedication = takesPrescriptionMedication;
         this.usesTobacco = usesTobacco;
         this.needsSpouseCoverage = needsSpouseCoverage;
