@@ -50,8 +50,9 @@ public class RefreshTokenService {
         if (token.isExpired(clock.instant())) {
             throw new InvalidRefreshTokenException();
         }
-        token.revoke(clock.instant());
-        repository.save(token);
+        if (repository.revokeIfActive(token.id(), clock.instant()) != 1) {
+            throw new InvalidRefreshTokenException();
+        }
         return new Rotation(token.userId(), issueInFamily(token.userId(), token.familyId()));
     }
 

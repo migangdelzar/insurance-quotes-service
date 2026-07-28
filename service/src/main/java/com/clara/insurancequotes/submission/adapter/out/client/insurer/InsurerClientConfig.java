@@ -12,11 +12,6 @@ import org.springframework.web.client.RestClient;
 public class InsurerClientConfig {
 
     @Bean
-    public RestClient.Builder restClientBuilder() {
-        return RestClient.builder();
-    }
-
-    @Bean
     public RestClient insurerRestClient(
             RestClient.Builder builder,
             @Value("${insurer.base-url}") String baseUrl,

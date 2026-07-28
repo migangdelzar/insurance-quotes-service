@@ -32,6 +32,9 @@ public class YubicoCredentialRepository implements com.yubico.webauthn.Credentia
     }
 
     public static UUID userIdOf(ByteArray userHandle) {
+        if (userHandle == null || userHandle.size() != 16) {
+            throw new InvalidPasskeyException("invalid user handle");
+        }
         var buffer = ByteBuffer.wrap(userHandle.getBytes());
         return new UUID(buffer.getLong(), buffer.getLong());
     }
@@ -61,6 +64,7 @@ public class YubicoCredentialRepository implements com.yubico.webauthn.Credentia
     public Optional<RegisteredCredential> lookup(ByteArray credentialId, ByteArray userHandle) {
         return credentials
                 .findByCredentialId(credentialId.getBase64Url())
+                .filter(credential -> userHandleOf(credential.userId()).equals(userHandle))
                 .map(credential -> RegisteredCredential.builder()
                         .credentialId(credentialId)
                         .userHandle(userHandleOf(credential.userId()))

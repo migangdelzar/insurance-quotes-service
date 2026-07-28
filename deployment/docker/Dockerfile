@@ -14,6 +14,6 @@ FROM eclipse-temurin:17-jre
 RUN groupadd --system app && useradd --system --gid app app
 USER app
 WORKDIR /app
-COPY --from=build /workspace/service/target/service-1.0.0.jar app.jar
+COPY --from=build /workspace/service/target/service.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

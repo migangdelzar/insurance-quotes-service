@@ -21,7 +21,12 @@ public enum SupportedLocale {
         if (acceptLanguage == null || acceptLanguage.isBlank()) {
             return EN_US.locale();
         }
-        var ranges = Locale.LanguageRange.parse(acceptLanguage);
+        List<Locale.LanguageRange> ranges;
+        try {
+            ranges = Locale.LanguageRange.parse(acceptLanguage);
+        } catch (IllegalArgumentException exception) {
+            return EN_US.locale();
+        }
         var supported = List.of(EN_US.locale(), ES_MX.locale());
         var match = Locale.lookup(ranges, supported);
         return match != null ? match : EN_US.locale();

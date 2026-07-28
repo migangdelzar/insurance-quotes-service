@@ -63,6 +63,10 @@ public class RefreshToken {
         return userId;
     }
 
+    public UUID id() {
+        return id;
+    }
+
     public UUID familyId() {
         return familyId;
     }

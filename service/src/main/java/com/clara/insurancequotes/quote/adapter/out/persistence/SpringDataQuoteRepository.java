@@ -63,10 +63,15 @@ interface SpringDataQuoteRepository extends JpaRepository<Quote, UUID>, JpaSpeci
     }
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update Quote q set q.status = :status, q.updatedAt = :now where q.id in :ids")
-    int markExpired(@Param("status") QuoteStatus status, @Param("ids") List<UUID> ids, @Param("now") Instant now);
+    @Query("update Quote q set q.status = :status, q.updatedAt = :now "
+            + "where q.id in :ids and q.status = :currentStatus")
+    int markExpired(
+            @Param("currentStatus") QuoteStatus currentStatus,
+            @Param("status") QuoteStatus status,
+            @Param("ids") List<UUID> ids,
+            @Param("now") Instant now);
 
     default int markExpired(List<UUID> ids, Instant now) {
-        return markExpired(QuoteStatus.EXPIRED, ids, now);
+        return markExpired(QuoteStatus.DRAFT, QuoteStatus.EXPIRED, ids, now);
     }
 }

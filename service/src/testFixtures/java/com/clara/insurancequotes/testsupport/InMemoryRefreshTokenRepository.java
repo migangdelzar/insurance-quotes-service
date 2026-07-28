@@ -24,6 +24,18 @@ public final class InMemoryRefreshTokenRepository implements RefreshTokenReposit
     }
 
     @Override
+    public synchronized int revokeIfActive(UUID tokenId, Instant now) {
+        return byHash.values().stream()
+                .filter(token -> token.id().equals(tokenId) && !token.isRevoked())
+                .findFirst()
+                .map(token -> {
+                    token.revoke(now);
+                    return 1;
+                })
+                .orElse(0);
+    }
+
+    @Override
     public int revokeFamily(UUID familyId, Instant now) {
         var count = 0;
         for (var token : byHash.values()) {

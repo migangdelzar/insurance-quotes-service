@@ -15,4 +15,10 @@ public record QuoteSummaryView(
         BigDecimal submissionRate,
         List<QuoteDistributionView> statusDistribution,
         List<QuoteDistributionView> coverageDistribution,
-        List<QuoteTrendPointView> trend) {}
+        List<QuoteTrendPointView> trend) {
+    public QuoteSummaryView {
+        statusDistribution = statusDistribution == null ? null : List.copyOf(statusDistribution);
+        coverageDistribution = coverageDistribution == null ? null : List.copyOf(coverageDistribution);
+        trend = trend == null ? null : List.copyOf(trend);
+    }
+}

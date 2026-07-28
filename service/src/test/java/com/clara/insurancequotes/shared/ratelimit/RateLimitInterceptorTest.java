@@ -67,13 +67,15 @@ class RateLimitInterceptorTest {
     }
 
     @Test
-    void failsOpenWhenRedisIsUnavailable() throws Exception {
+    void rejectsWhenRedisIsUnavailableInDefaultConfiguration() throws Exception {
         var request = request("POST", "/quotes", "10.0.0.8");
         var response = Mockito.mock(HttpServletResponse.class);
+        when(response.getOutputStream()).thenReturn(Mockito.mock(ServletOutputStream.class));
         when(rateLimiter.tryAcquire(any(), any(), any(Long.class), any(Duration.class)))
                 .thenThrow(new IllegalStateException("redis unavailable"));
 
-        assertThat(interceptor.preHandle(request, response, new Object())).isTrue();
+        assertThat(interceptor.preHandle(request, response, new Object())).isFalse();
+        verify(response).setStatus(503);
 
         assertThat(registry.get("rate_limit.redis.failures").counter().count()).isEqualTo(1);
     }

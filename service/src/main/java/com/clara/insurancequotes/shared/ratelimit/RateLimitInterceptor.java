@@ -52,8 +52,17 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                     bucket.config().window());
         } catch (RuntimeException exception) {
             metrics.rateLimiterRedisFailure();
-            log.warn("Redis rate limiter unavailable; allowing request for bucket {}", bucket.name(), exception);
-            return true;
+            if (properties.failOpen()) {
+                log.warn("Redis rate limiter unavailable; allowing request for bucket {}", bucket.name(), exception);
+                return true;
+            }
+            log.error("Redis rate limiter unavailable; rejecting request for bucket {}", bucket.name(), exception);
+            response.setStatus(503);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            objectMapper.writeValue(
+                    response.getOutputStream(),
+                    ApiError.of(503, "RATE_LIMIT_UNAVAILABLE", "Request protection is temporarily unavailable."));
+            return false;
         }
 
         response.setHeader("X-RateLimit-Limit", String.valueOf(decision.limit()));

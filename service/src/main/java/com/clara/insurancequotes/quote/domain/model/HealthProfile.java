@@ -17,7 +17,7 @@ public class HealthProfile {
     @Column(name = "has_preexisting_conditions")
     private Boolean hasPreexistingConditions;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "quote_health_conditions", joinColumns = @JoinColumn(name = "quote_id"))
     @Column(name = "condition")
     @Enumerated(EnumType.STRING)
@@ -41,7 +41,7 @@ public class HealthProfile {
             Boolean usesTobacco,
             Boolean needsSpouseCoverage) {
         this.hasPreexistingConditions = hasPreexistingConditions;
-        this.conditions = conditions;
+        this.conditions = conditions == null ? null : Set.copyOf(conditions);
         this.takesPrescriptionMedication = takesPrescriptionMedication;
         this.usesTobacco = usesTobacco;
         this.needsSpouseCoverage = needsSpouseCoverage;
@@ -75,7 +75,7 @@ public class HealthProfile {
     }
 
     public Set<HealthCondition> conditions() {
-        return conditions;
+        return conditions == null ? null : Set.copyOf(conditions);
     }
 
     public Boolean takesPrescriptionMedication() {

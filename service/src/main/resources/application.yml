@@ -88,6 +88,7 @@ web:
   rate-limit:
     enabled: ${WEB_RATE_LIMIT_ENABLED:true}
     trust-forwarded-headers: ${WEB_RATE_LIMIT_TRUST_FORWARDED_HEADERS:false}
+    fail-open: ${WEB_RATE_LIMIT_FAIL_OPEN:false}
     auth:
       limit: ${WEB_RATE_LIMIT_AUTH_LIMIT:10}
       window: ${WEB_RATE_LIMIT_AUTH_WINDOW:1m}

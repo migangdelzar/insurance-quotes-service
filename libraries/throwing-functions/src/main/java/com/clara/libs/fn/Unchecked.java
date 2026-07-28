@@ -14,6 +14,8 @@ public final class Unchecked {
         return input -> {
             try {
                 return fn.apply(input);
+            } catch (RuntimeException exception) {
+                throw exception;
             } catch (Exception exception) {
                 throw new UncheckedException(exception);
             }
@@ -24,6 +26,8 @@ public final class Unchecked {
         return () -> {
             try {
                 return fn.get();
+            } catch (RuntimeException exception) {
+                throw exception;
             } catch (Exception exception) {
                 throw new UncheckedException(exception);
             }
@@ -34,6 +38,8 @@ public final class Unchecked {
         return input -> {
             try {
                 fn.accept(input);
+            } catch (RuntimeException exception) {
+                throw exception;
             } catch (Exception exception) {
                 throw new UncheckedException(exception);
             }
@@ -44,6 +50,8 @@ public final class Unchecked {
         return () -> {
             try {
                 fn.run();
+            } catch (RuntimeException exception) {
+                throw exception;
             } catch (Exception exception) {
                 throw new UncheckedException(exception);
             }
@@ -54,6 +62,8 @@ public final class Unchecked {
         return (first, second) -> {
             try {
                 return fn.apply(first, second);
+            } catch (RuntimeException exception) {
+                throw exception;
             } catch (Exception exception) {
                 throw new UncheckedException(exception);
             }

@@ -5,11 +5,13 @@ import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
 import com.clara.insurancequotes.auth.api.exception.InvalidPasskeyException;
 import com.clara.insurancequotes.auth.api.exception.PasskeyNotRegisteredException;
 import com.clara.insurancequotes.shared.error.ApiError;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Slf4j
 public class AuthExceptionHandler {
 
     @ExceptionHandler(AuthException.class)
@@ -19,6 +21,7 @@ public class AuthExceptionHandler {
                     .body(ApiError.of(401, "AUTH_INVALID_CREDENTIALS", exception.getMessage()));
         }
         if (exception instanceof InvalidPasskeyException) {
+            log.warn("Passkey authentication failed", exception);
             return ResponseEntity.status(401).body(ApiError.of(401, "AUTH_INVALID_PASSKEY", exception.getMessage()));
         }
         if (exception instanceof PasskeyNotRegisteredException) {

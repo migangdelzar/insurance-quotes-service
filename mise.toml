@@ -103,6 +103,8 @@ cd deployment/compose
 docker compose \
   -f docker-compose.yml \
   -f docker-compose.jvm.yml \
+  -f docker-compose.native.yml \
+  -f compose.observability.yml \
   -f compose.fullstack.yml \
   -f compose.e2e.yml \
   down --volumes --remove-orphans
