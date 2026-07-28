@@ -17,6 +17,12 @@ run = "mvn -q test"
 run = "mvn -q verify"
 [tasks.run]
 run = "mvn -q -pl service spring-boot:run"
+[tasks.dev]
+description = "Run the API with Spring DevTools and the dev profile"
+run = "SPRING_PROFILES_ACTIVE=dev KAFKA_BOOTSTRAP=localhost:9094 INSURER_BASE_URL=http://localhost:8089/submit mvn -q -pl service spring-boot:run"
+[tasks.dev-infra]
+description = "Start local dependencies for the host-run dev profile"
+run = "docker compose -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.dev.yml up -d"
 [tasks.format]
 run = "mvn -q -pl service -am spotless:apply"
 [tasks.setup]

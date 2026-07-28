@@ -1,8 +1,10 @@
 package com.clara.insurancequotes.auth.application.service;
 
 import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
+import com.clara.insurancequotes.auth.api.exception.PasskeyNotRegisteredException;
 import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
 import com.clara.insurancequotes.auth.api.result.WebAuthnChallengeResponse;
+import com.clara.insurancequotes.auth.application.port.out.CredentialRepository;
 import com.clara.insurancequotes.auth.application.port.out.PasskeyPort;
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import java.util.Optional;
@@ -15,19 +17,31 @@ public class WebAuthnService {
     private static final String MFA_SCOPE = "mfa-pending";
 
     private final PasskeyPort passkeyPort;
+    private final CredentialRepository credentials;
     private final UserRepository users;
     private final LoginService loginService;
     private final TokenService tokenService;
 
     public WebAuthnService(
-            PasskeyPort passkeyPort, UserRepository users, LoginService loginService, TokenService tokenService) {
+            PasskeyPort passkeyPort,
+            CredentialRepository credentials,
+            UserRepository users,
+            LoginService loginService,
+            TokenService tokenService) {
         this.passkeyPort = passkeyPort;
+        this.credentials = credentials;
         this.users = users;
         this.loginService = loginService;
         this.tokenService = tokenService;
     }
 
     public WebAuthnChallengeResponse startAssertion(Optional<String> username) {
+        if (username.isPresent()) {
+            var user = users.findByUsername(username.get()).orElseThrow(InvalidCredentialsException::new);
+            if (!credentials.existsForUser(user.id())) {
+                throw new PasskeyNotRegisteredException();
+            }
+        }
         var ceremony = passkeyPort.startAssertion(username);
         return new WebAuthnChallengeResponse(ceremony.challengeId(), ceremony.publicKeyOptionsJson());
     }

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.clara.insurancequotes.auth.adapter.in.web.advice.AuthExceptionHandler;
 import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
+import com.clara.insurancequotes.auth.api.exception.PasskeyNotRegisteredException;
 import com.clara.insurancequotes.auth.api.result.LoginResponse;
 import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
@@ -22,6 +23,7 @@ import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -88,6 +90,17 @@ class AuthControllerTest {
                         .content("{\"username\":\"demo\",\"password\":\"nope\"}"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTH_INVALID_CREDENTIALS"));
+    }
+
+    @Test
+    void passkeyAssertionForUnregisteredUser_returnsSetupError() throws Exception {
+        when(webAuthnService.startAssertion(Optional.of("demo"))).thenThrow(new PasskeyNotRegisteredException());
+
+        mockMvc.perform(post("/auth/webauthn/assertion-options")
+                        .contentType("application/json")
+                        .content("{\"username\":\"demo\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("AUTH_PASSKEY_NOT_REGISTERED"));
     }
 
     @Test

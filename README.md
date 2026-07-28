@@ -16,6 +16,17 @@ mise run up jvm full                # add the frontend at :3100 and local insure
 mise run up jvm full e2e            # same stack; keeps the explicit E2E overlay alias
 ```
 
+For the fastest source-change loop, run infrastructure in Docker and the API/frontend on the host:
+
+```bash
+mise run dev-infra                  # PostgreSQL, Kafka, Redis, and WireMock
+mise run dev                        # Spring profile `dev`, DevTools restart + LiveReload :35729
+cd ../insurance-quotes-web
+bun run dev:hmr                     # Vite HMR on :5173, same-origin `/api` proxy to :8080
+```
+
+The `dev` profile is development-only: it enables Spring DevTools restart/LiveReload, disables Redis rate limiting by default to keep repeated local journeys fast, disables static-resource caching, and allows the HMR origin. Production and Docker profiles keep their existing rate-limit, cache, and packaging behavior. Spring DevTools is optional and remains excluded from the repackaged production image.
+
 The full-stack command expects the sibling frontend directory shown above. The API is available at `http://localhost:8080`; Swagger UI is at `/swagger-ui.html`. Full local Compose runs use WireMock on `http://localhost:8089` as a deterministic insurer stand-in, so quote submission does not depend on external `httpstat.us` availability. Set `INSURER_BASE_URL` in a deployment-specific environment to use a real insurer endpoint. The local profile seeds three password users when they do not already exist:
 
 | Username | Password |
@@ -24,7 +35,7 @@ The full-stack command expects the sibling frontend directory shown above. The A
 | `demo-two` | `demo-password-two` |
 | `demo-three` | `demo-password-three` |
 
-Use `POST /auth/login` with any of these accounts. Passkey registration is optional on first login; an account that already has a passkey registered still requires it as MFA.
+Use `POST /auth/login` with any of these accounts. On the first password login, the web app offers an explicit passkey setup step. If passwordless sign-in is requested with a username that has no registered credential, `/auth/webauthn/assertion-options` returns `409 AUTH_PASSKEY_NOT_REGISTERED` before starting a browser ceremony. An account that already has a passkey registered still requires it as MFA.
 
 The demo users are persisted in the local PostgreSQL volume. If a previous passkey journey registered a passkey for an account and that passkey is unavailable in the browser, password login will intentionally show the MFA prompt. Start a clean reviewer stack with `docker compose -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.jvm.yml -f deployment/compose/compose.fullstack.yml down --volumes` before bringing it up again, or use a seeded account without a registered passkey.
 

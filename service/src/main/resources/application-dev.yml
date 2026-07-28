@@ -1,0 +1,23 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: service/src/main/java,service/src/main/resources
+    livereload:
+      enabled: true
+      port: 35729
+  web:
+    resources:
+      cache:
+        period: 0
+
+web:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:3100,http://127.0.0.1:5173,http://127.0.0.1:3000,http://127.0.0.1:3100}
+  rate-limit:
+    enabled: ${WEB_RATE_LIMIT_ENABLED:false}
+
+logging:
+  level:
+    com.clara.insurancequotes: DEBUG
+    org.springframework.boot.devtools: INFO
