@@ -86,6 +86,29 @@ mise run up jvm full e2e            # add Nginx :3100 and WireMock :8089
 The API is available at http://localhost:8080. Swagger UI is at
 http://localhost:8080/swagger-ui.html.
 
+### One-command reviewer demo
+
+For the easiest full-stack setup, keep the sibling repositories in the layout
+shown above and run this from `insurance-quotes-service`:
+
+~~~bash
+mise run demo
+~~~
+
+This installs both workspaces, builds and starts the JVM Compose stack, and
+prints the browser URL and seeded credentials. Open http://localhost:3100 and
+sign in with `demo` / `demo-password`. Stop it with:
+
+~~~bash
+mise run stop
+~~~
+
+The command is idempotent: if a healthy Clara stack is already serving
+`localhost:3100`, it reuses that stack instead of rebuilding or replacing it.
+
+If the frontend checkout is elsewhere, set `CLARA_WEB_DIR` before running the
+demo.
+
 ### Fast hot-reload loop
 
 ~~~bash
