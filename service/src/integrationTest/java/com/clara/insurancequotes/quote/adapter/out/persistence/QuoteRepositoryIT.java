@@ -7,6 +7,7 @@ import com.clara.insurancequotes.quote.application.port.out.StaleQuoteRef;
 import com.clara.insurancequotes.quote.domain.model.QuoteMother;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.testsupport.Containers;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
@@ -49,7 +50,7 @@ class QuoteRepositoryIT {
                 "user-" + id,
                 "hash",
                 "USER",
-                Instant.now());
+                Timestamp.from(Instant.now()));
     }
 
     @Test

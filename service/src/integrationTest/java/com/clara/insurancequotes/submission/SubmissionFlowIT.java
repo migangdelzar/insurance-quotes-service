@@ -15,7 +15,9 @@ import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableExce
 import com.clara.insurancequotes.submission.api.usecase.SubmissionApi;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -65,7 +68,22 @@ class SubmissionFlowIT {
     @Autowired
     private SubmissionApi submissionApi;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private static final UUID OWNER = UUID.randomUUID();
+
+    @BeforeEach
+    void seedOwner() {
+        jdbcTemplate.update(
+                "insert into users (id, username, password_hash, role, created_at) values (?, ?, ?, ?, ?) "
+                        + "on conflict (id) do nothing",
+                OWNER,
+                "user-" + OWNER,
+                "hash",
+                "USER",
+                Timestamp.from(Instant.now()));
+    }
 
     private UUID submittableQuote() {
         var id = quoteApi.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), OWNER)

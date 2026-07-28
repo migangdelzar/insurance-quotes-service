@@ -7,8 +7,11 @@ import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.testsupport.Containers;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +42,18 @@ class DraftExpirationJobIT {
     private CacheManager cacheManager;
 
     private static final UUID OWNER = UUID.randomUUID();
+
+    @BeforeEach
+    void seedOwner() {
+        jdbcTemplate.update(
+                "insert into users (id, username, password_hash, role, created_at) values (?, ?, ?, ?, ?) "
+                        + "on conflict (id) do nothing",
+                OWNER,
+                "user-" + OWNER,
+                "hash",
+                "USER",
+                Timestamp.from(Instant.now()));
+    }
 
     @Test
     void staleDraft_getsExpired_andItsCacheEntryEvicted() {

@@ -9,12 +9,16 @@ import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
 import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.testsupport.Containers;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -36,7 +40,22 @@ class QuoteCachingIT {
     @Autowired
     private StringRedisTemplate redis;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private static final UUID OWNER = UUID.randomUUID();
+
+    @BeforeEach
+    void seedOwner() {
+        jdbcTemplate.update(
+                "insert into users (id, username, password_hash, role, created_at) values (?, ?, ?, ?, ?) "
+                        + "on conflict (id) do nothing",
+                OWNER,
+                "user-" + OWNER,
+                "hash",
+                "USER",
+                Timestamp.from(Instant.now()));
+    }
 
     @Test
     void getQuote_populatesCache_updateCoverageEvicts() {
