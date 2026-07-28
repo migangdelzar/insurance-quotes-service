@@ -1,11 +1,19 @@
 package com.clara.insurancequotes.quote.adapter.out.persistence;
 
+import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
 import com.clara.insurancequotes.quote.api.query.SortDirection;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.application.port.out.QuoteSearchResult;
+import com.clara.insurancequotes.quote.application.port.out.QuoteSummaryData;
 import com.clara.insurancequotes.quote.domain.model.Quote;
+import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -55,6 +63,53 @@ public class JpaQuoteRepository implements QuoteRepository {
         var sort = Sort.by(direction, query.sortBy().property()).and(Sort.by(Sort.Direction.ASC, "id"));
         var page = delegate.findAll(specification, PageRequest.of(query.page(), query.size(), sort));
         return new QuoteSearchResult(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
+    }
+
+    @Override
+    public QuoteSummaryData findSummary(Instant now) {
+        var endDate = now.atZone(ZoneOffset.UTC).toLocalDate();
+        var startDate = endDate.minusDays(6);
+        var statusCounts = new EnumMap<QuoteStatus, Long>(QuoteStatus.class);
+        for (var status : QuoteStatus.values()) {
+            statusCounts.put(status, delegate.countByStatus(status));
+        }
+        var coverageCounts = new EnumMap<CoverageType, Long>(CoverageType.class);
+        for (var coverage : CoverageType.values()) {
+            coverageCounts.put(coverage, delegate.countByCoverageType(coverage));
+        }
+        var trendBuckets = new LinkedHashMap<LocalDate, long[]>();
+        for (var date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            trendBuckets.put(date, new long[3]);
+        }
+        var trendStart = startDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        for (var row : delegate.findTrendRows(trendStart, now)) {
+            var createdAt = (Instant) row[0];
+            var updatedAt = (Instant) row[1];
+            var status = (QuoteStatus) row[2];
+            var createdDate = createdAt.atZone(ZoneOffset.UTC).toLocalDate();
+            var createdBucket = trendBuckets.get(createdDate);
+            if (createdBucket != null) {
+                createdBucket[0]++;
+            }
+            var updatedDate = updatedAt.atZone(ZoneOffset.UTC).toLocalDate();
+            var updatedBucket = trendBuckets.get(updatedDate);
+            if (updatedBucket != null && status == QuoteStatus.SUBMITTED) {
+                updatedBucket[1]++;
+            } else if (updatedBucket != null && status == QuoteStatus.SUBMISSION_FAILED) {
+                updatedBucket[2]++;
+            }
+        }
+        var trend = new ArrayList<QuoteSummaryData.TrendPoint>();
+        trendBuckets.forEach(
+                (date, values) -> trend.add(new QuoteSummaryData.TrendPoint(date, values[0], values[1], values[2])));
+        return new QuoteSummaryData(
+                delegate.count(),
+                statusCounts,
+                coverageCounts,
+                delegate.countByMonthlyPremiumIsNotNull(),
+                delegate.sumMonthlyPremium(),
+                delegate.averageMonthlyPremium(),
+                trend);
     }
 
     @Override

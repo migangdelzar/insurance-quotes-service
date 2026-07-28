@@ -2,11 +2,15 @@ package com.clara.insurancequotes.quote.application.service;
 
 import com.clara.insurancequotes.config.BusinessMetrics;
 import com.clara.insurancequotes.pricing.api.command.PricingInput;
+import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.result.QuoteDistributionView;
 import com.clara.insurancequotes.quote.api.result.QuotePageView;
+import com.clara.insurancequotes.quote.api.result.QuoteSummaryView;
+import com.clara.insurancequotes.quote.api.result.QuoteTrendPointView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
@@ -15,7 +19,11 @@ import com.clara.insurancequotes.quote.configuration.CacheConfig;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.model.HealthProfile;
 import com.clara.insurancequotes.quote.domain.model.Quote;
+import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
@@ -89,6 +97,44 @@ public class QuoteService implements QuoteApi {
                 result.totalPages(),
                 result.hasNext(),
                 result.hasPrevious());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public QuoteSummaryView getSummary() {
+        var data = repository.findSummary(clock.instant());
+        var submitted = data.statusCounts().getOrDefault(QuoteStatus.SUBMITTED, 0L);
+        var failed = data.statusCounts().getOrDefault(QuoteStatus.SUBMISSION_FAILED, 0L);
+        var attempts = submitted + failed;
+        var submissionRate = attempts == 0
+                ? BigDecimal.ZERO.setScale(2)
+                : BigDecimal.valueOf(submitted)
+                        .multiply(BigDecimal.valueOf(100))
+                        .divide(BigDecimal.valueOf(attempts), 2, RoundingMode.HALF_UP);
+        var statusDistribution = Arrays.stream(QuoteStatus.values())
+                .map(status -> new QuoteDistributionView(
+                        status.name(), data.statusCounts().getOrDefault(status, 0L)))
+                .toList();
+        var coverageDistribution = Arrays.stream(CoverageType.values())
+                .map(coverage -> new QuoteDistributionView(
+                        coverage.name(), data.coverageCounts().getOrDefault(coverage, 0L)))
+                .toList();
+        var trend = data.trend().stream()
+                .map(point -> new QuoteTrendPointView(point.date(), point.created(), point.submitted(), point.failed()))
+                .toList();
+        return new QuoteSummaryView(
+                data.totalQuotes(),
+                data.statusCounts().getOrDefault(QuoteStatus.DRAFT, 0L),
+                submitted,
+                failed,
+                data.statusCounts().getOrDefault(QuoteStatus.EXPIRED, 0L),
+                data.pricedQuotes(),
+                data.totalMonthlyPremium(),
+                data.averageMonthlyPremium(),
+                submissionRate,
+                statusDistribution,
+                coverageDistribution,
+                trend);
     }
 
     @Override

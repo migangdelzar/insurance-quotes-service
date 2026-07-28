@@ -112,6 +112,16 @@ This repository was built with AI pair-programming: design brainstorming, writte
 
 The JVM image is the default reviewer path. The native image build reached GraalVM executable generation with optimization level 2, but the local Colima builder terminated it with exit status 137 after exhausting its memory. No native runtime number is fabricated; run the native build with a larger Docker/Colima memory allocation before comparing runtime behavior.
 
+Once the native image is available, the repeatable comparison flow is:
+
+```bash
+mise run native
+RUNTIME_REPORT_PATH=/tmp/clara-runtime-comparison.md ./scripts/compare-runtimes.sh
+cat /tmp/clara-runtime-comparison.md
+```
+
+The report measures Spring startup, compose elapsed time, health-request latency, container RSS, and image size for both the Java 17 JVM image and the optional native image. The same comparison is available through the manually dispatched `Native versus JVM runtime comparison` GitHub Actions workflow; it uploads the Markdown report and does not change the Java 17 runtime default.
+
 | Runtime | Startup | Memory | Result |
 | --- | ---: | ---: | --- |
 | JVM | 9.823 s | 438.3 MiB | Verified with the Java 17 Compose API container; image size 207,720,155 bytes |

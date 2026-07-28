@@ -4,6 +4,7 @@ import com.clara.insurancequotes.quote.adapter.in.web.request.CreateQuoteRequest
 import com.clara.insurancequotes.quote.adapter.in.web.request.UpdateCoverageRequest;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
 import com.clara.insurancequotes.quote.api.result.QuotePageView;
+import com.clara.insurancequotes.quote.api.result.QuoteSummaryView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.application.exception.InvalidQuoteQueryException;
@@ -61,5 +62,10 @@ public class QuoteController {
         } catch (IllegalArgumentException exception) {
             throw new InvalidQuoteQueryException(exception.getMessage());
         }
+    }
+
+    @GetMapping("/summary")
+    public QuoteSummaryView getSummary() {
+        return quoteApi.getSummary();
     }
 }

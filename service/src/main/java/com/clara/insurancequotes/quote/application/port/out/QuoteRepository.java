@@ -15,6 +15,8 @@ public interface QuoteRepository {
 
     QuoteSearchResult findPage(QuoteQuery query);
 
+    QuoteSummaryData findSummary(Instant now);
+
     List<UUID> findIdsToExpire(Instant cutoff);
 
     int markExpired(List<UUID> ids, Instant now);

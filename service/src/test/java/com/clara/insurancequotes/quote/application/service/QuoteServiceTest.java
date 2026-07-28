@@ -136,4 +136,35 @@ class QuoteServiceTest {
         assertThat(result.hasNext()).isFalse();
         assertThat(result.hasPrevious()).isFalse();
     }
+
+    @Test
+    void getSummary_returnsAggregateMetricsAndSevenDayTrend() {
+        var draft = service.create(ADULT);
+        var submitted = service.create(SENIOR);
+        service.updateCoverage(submitted.id(), plainCoverage());
+        service.markSubmitted(submitted.id());
+        var failed = service.create(new CreateQuoteCommand("Failed Quote", "failed@example.com", 40, "06600"));
+        service.markSubmissionFailed(failed.id());
+
+        var result = service.getSummary();
+
+        assertThat(result.totalQuotes()).isEqualTo(3);
+        assertThat(result.draftQuotes()).isEqualTo(1);
+        assertThat(result.submittedQuotes()).isEqualTo(1);
+        assertThat(result.submissionFailedQuotes()).isEqualTo(1);
+        assertThat(result.expiredQuotes()).isZero();
+        assertThat(result.pricedQuotes()).isEqualTo(1);
+        assertThat(result.totalMonthlyPremium()).isEqualByComparingTo("100.00");
+        assertThat(result.averageMonthlyPremium()).isEqualByComparingTo("100.00");
+        assertThat(result.submissionRate()).isEqualByComparingTo("50.00");
+        assertThat(result.statusDistribution())
+                .extracting("key")
+                .containsExactly("DRAFT", "SUBMITTED", "SUBMISSION_FAILED", "EXPIRED");
+        assertThat(result.coverageDistribution()).extracting("key").containsExactly("BASIC", "STANDARD", "PREMIUM");
+        assertThat(result.trend()).hasSize(7);
+        assertThat(result.trend().get(6).created()).isEqualTo(3);
+        assertThat(result.trend().get(6).submitted()).isEqualTo(1);
+        assertThat(result.trend().get(6).failed()).isEqualTo(1);
+        assertThat(draft.status()).isEqualTo(QuoteStatus.DRAFT);
+    }
 }

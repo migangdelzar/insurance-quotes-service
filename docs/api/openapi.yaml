@@ -135,6 +135,26 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/QuoteView"
+  /quotes/summary:
+    get:
+      tags:
+      - quote-controller
+      operationId: getSummary
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuoteSummaryView"
   /auth/webauthn/register:
     post:
       tags:
@@ -417,6 +437,89 @@ components:
       - totalPages
       - hasNext
       - hasPrevious
+    QuoteDistributionView:
+      type: object
+      properties:
+        key:
+          type: string
+        count:
+          type: integer
+          format: int64
+      required:
+      - key
+      - count
+    QuoteTrendPointView:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        created:
+          type: integer
+          format: int64
+        submitted:
+          type: integer
+          format: int64
+        failed:
+          type: integer
+          format: int64
+      required:
+      - date
+      - created
+      - submitted
+      - failed
+    QuoteSummaryView:
+      type: object
+      properties:
+        totalQuotes:
+          type: integer
+          format: int64
+        draftQuotes:
+          type: integer
+          format: int64
+        submittedQuotes:
+          type: integer
+          format: int64
+        submissionFailedQuotes:
+          type: integer
+          format: int64
+        expiredQuotes:
+          type: integer
+          format: int64
+        pricedQuotes:
+          type: integer
+          format: int64
+        totalMonthlyPremium:
+          type: number
+        averageMonthlyPremium:
+          type: number
+        submissionRate:
+          type: number
+        statusDistribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteDistributionView"
+        coverageDistribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteDistributionView"
+        trend:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteTrendPointView"
+      required:
+      - totalQuotes
+      - draftQuotes
+      - submittedQuotes
+      - submissionFailedQuotes
+      - expiredQuotes
+      - pricedQuotes
+      - totalMonthlyPremium
+      - averageMonthlyPremium
+      - submissionRate
+      - statusDistribution
+      - coverageDistribution
+      - trend
     QuoteView:
       type: object
       properties:

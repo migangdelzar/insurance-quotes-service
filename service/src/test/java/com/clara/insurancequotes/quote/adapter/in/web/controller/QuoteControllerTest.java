@@ -16,6 +16,7 @@ import com.clara.insurancequotes.auth.configuration.SecurityConfig;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.adapter.in.web.advice.QuoteExceptionHandler;
 import com.clara.insurancequotes.quote.api.result.QuotePageView;
+import com.clara.insurancequotes.quote.api.result.QuoteSummaryView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
@@ -191,6 +192,32 @@ class QuoteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page").value(1))
                 .andExpect(jsonPath("$.size").value(10));
+    }
+
+    @Test
+    void getQuoteSummary_returnsAnalyticsEnvelope() throws Exception {
+        when(quoteApi.getSummary())
+                .thenReturn(new QuoteSummaryView(
+                        3,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        new BigDecimal("100.00"),
+                        new BigDecimal("100.00"),
+                        new BigDecimal("50.00"),
+                        List.of(),
+                        List.of(),
+                        List.of()));
+
+        mockMvc.perform(get("/quotes/summary")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api")))
+                        .header("API-Version", "1.0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalQuotes").value(3))
+                .andExpect(jsonPath("$.submissionRate").value(50.00))
+                .andExpect(jsonPath("$.trend").isArray());
     }
 
     @Test

@@ -1,0 +1,44 @@
+name: Native versus JVM runtime comparison
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    name: Build and measure native and JVM images
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out backend
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Install Mise tools
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+
+      - name: Build native image
+        run: mise run native
+
+      - name: Compare JVM and native runtime statistics
+        env:
+          RUNTIME_REPORT_PATH: runtime-comparison.md
+        run: ./scripts/compare-runtimes.sh
+
+      - name: Upload comparison report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: jvm-native-runtime-comparison
+          if-no-files-found: warn
+          path: runtime-comparison.md

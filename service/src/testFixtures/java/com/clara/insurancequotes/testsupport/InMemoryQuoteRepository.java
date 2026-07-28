@@ -1,12 +1,20 @@
 package com.clara.insurancequotes.testsupport;
 
+import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
 import com.clara.insurancequotes.quote.api.query.SortDirection;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.application.port.out.QuoteSearchResult;
+import com.clara.insurancequotes.quote.application.port.out.QuoteSummaryData;
 import com.clara.insurancequotes.quote.domain.model.Quote;
+import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,6 +48,62 @@ public final class InMemoryQuoteRepository implements QuoteRepository {
         var from = Math.min(query.page() * query.size(), filtered.size());
         var to = Math.min(from + query.size(), filtered.size());
         return new QuoteSearchResult(filtered.subList(from, to), query.page(), query.size(), filtered.size());
+    }
+
+    @Override
+    public QuoteSummaryData findSummary(Instant now) {
+        var statusCounts = new EnumMap<QuoteStatus, Long>(QuoteStatus.class);
+        for (var status : QuoteStatus.values()) {
+            statusCounts.put(
+                    status,
+                    store.values().stream()
+                            .filter(quote -> quote.status() == status)
+                            .count());
+        }
+        var coverageCounts = new EnumMap<CoverageType, Long>(CoverageType.class);
+        for (var coverage : CoverageType.values()) {
+            coverageCounts.put(
+                    coverage,
+                    store.values().stream()
+                            .filter(quote -> quote.coverageType() == coverage)
+                            .count());
+        }
+        var pricedQuotes = store.values().stream()
+                .filter(quote -> quote.monthlyPremium() != null)
+                .count();
+        var totalPremium = store.values().stream()
+                .map(Quote::monthlyPremium)
+                .filter(value -> value != null)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        var averagePremium = pricedQuotes == 0
+                ? java.math.BigDecimal.ZERO
+                : totalPremium.divide(java.math.BigDecimal.valueOf(pricedQuotes), 2, java.math.RoundingMode.HALF_UP);
+
+        var endDate = now.atZone(ZoneOffset.UTC).toLocalDate();
+        var startDate = endDate.minusDays(6);
+        var trendBuckets = new LinkedHashMap<LocalDate, long[]>();
+        for (var date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            trendBuckets.put(date, new long[3]);
+        }
+        store.values().forEach(quote -> {
+            var createdBucket =
+                    trendBuckets.get(quote.createdAt().atZone(ZoneOffset.UTC).toLocalDate());
+            if (createdBucket != null) {
+                createdBucket[0]++;
+            }
+            var updatedBucket =
+                    trendBuckets.get(quote.updatedAt().atZone(ZoneOffset.UTC).toLocalDate());
+            if (updatedBucket != null && quote.status() == QuoteStatus.SUBMITTED) {
+                updatedBucket[1]++;
+            } else if (updatedBucket != null && quote.status() == QuoteStatus.SUBMISSION_FAILED) {
+                updatedBucket[2]++;
+            }
+        });
+        var trend = new ArrayList<QuoteSummaryData.TrendPoint>();
+        trendBuckets.forEach(
+                (date, values) -> trend.add(new QuoteSummaryData.TrendPoint(date, values[0], values[1], values[2])));
+        return new QuoteSummaryData(
+                store.size(), statusCounts, coverageCounts, pricedQuotes, totalPremium, averagePremium, trend);
     }
 
     @Override

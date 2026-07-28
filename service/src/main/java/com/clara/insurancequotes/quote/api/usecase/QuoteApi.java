@@ -4,6 +4,7 @@ import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
 import com.clara.insurancequotes.quote.api.result.QuotePageView;
+import com.clara.insurancequotes.quote.api.result.QuoteSummaryView;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import java.util.UUID;
 
@@ -16,6 +17,8 @@ public interface QuoteApi {
     QuoteView getQuote(UUID id);
 
     QuotePageView listQuotes(QuoteQuery query);
+
+    QuoteSummaryView getSummary();
 
     QuoteView ensureSubmittable(UUID id);
 
