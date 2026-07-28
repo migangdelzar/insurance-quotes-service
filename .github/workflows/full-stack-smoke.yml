@@ -5,6 +5,11 @@ on:  # yamllint disable-line rule:truthy
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      frontend_ref:
+        description: Frontend branch, tag, or SHA to verify with this backend
+        required: false
+        default: feat-frontend
 
 concurrency:
   group: >-
@@ -30,7 +35,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: migangdelzar/insurance-quotes-web
-          ref: main
+          # Keep the cross-repository smoke test on a frontend ref that
+          # contains the production Dockerfile. Once the frontend PR is
+          # merged, this can be switched to main or supplied manually.
+          ref: ${{ inputs.frontend_ref || 'feat-frontend' }}
           path: insurance-quotes-web
 
       - name: Validate full-stack Compose configuration

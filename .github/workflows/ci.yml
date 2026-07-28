@@ -35,7 +35,7 @@ jobs:
           cache: maven
 
       - name: Verify service
-        run: mvn -B -pl service verify
+        run: mvn -B -pl service -am verify
 
   docker:
     name: Build JVM API image
