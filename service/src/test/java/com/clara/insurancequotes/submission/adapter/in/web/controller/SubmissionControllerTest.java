@@ -49,8 +49,9 @@ class SubmissionControllerTest {
         when(submissionApi.submit(eq(QUOTE_ID), eq(OWNER_ID))).thenThrow(new QuoteNotFoundException(QUOTE_ID));
 
         mockMvc.perform(post("/quotes/{id}/submit", QUOTE_ID)
-                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api"))
-                                .jwt(builder -> builder.claim("uid", OWNER_ID.toString()).claim("role", "USER"))))
+                .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api"))
+                                .jwt(builder -> builder.claim("uid", OWNER_ID.toString())
+                                        .claim("role", "USER"))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("QUOTE_NOT_FOUND"));
     }

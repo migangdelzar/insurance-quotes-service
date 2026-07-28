@@ -80,6 +80,8 @@ The supported demo baseline is intentionally small and local:
 The JVM demo API is capped at 512 MiB and the supporting services are kept
 small enough for the 4 GiB Colima profile. Native images use a lower memory
 cap, but are optional and are not required to run the demo.
+GitHub smoke tests use a CI-only 768 MiB API cap to absorb cold-start class
+loading without changing the local demo budget.
 
 - Java 17
 - Maven 3.9+

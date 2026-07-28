@@ -47,6 +47,7 @@ jobs:
           docker compose
           -f deployment/compose/docker-compose.yml
           -f deployment/compose/docker-compose.jvm.yml
+          -f deployment/compose/docker-compose.ci.yml
           -f deployment/compose/compose.fullstack.yml
           config
 
@@ -56,6 +57,7 @@ jobs:
           docker compose
           -f deployment/compose/docker-compose.yml
           -f deployment/compose/docker-compose.jvm.yml
+          -f deployment/compose/docker-compose.ci.yml
           -f deployment/compose/compose.fullstack.yml
           down --volumes --remove-orphans
 
@@ -65,6 +67,7 @@ jobs:
           docker compose
           -f deployment/compose/docker-compose.yml
           -f deployment/compose/docker-compose.jvm.yml
+          -f deployment/compose/docker-compose.ci.yml
           -f deployment/compose/compose.fullstack.yml
           up -d --build
 
@@ -77,6 +80,7 @@ jobs:
             docker compose
             -f deployment/compose/docker-compose.yml
             -f deployment/compose/docker-compose.jvm.yml
+            -f deployment/compose/docker-compose.ci.yml
             -f deployment/compose/compose.fullstack.yml
           )
           for attempt in $(seq 1 60); do
@@ -118,6 +122,7 @@ jobs:
           docker compose \
             -f deployment/compose/docker-compose.yml \
             -f deployment/compose/docker-compose.jvm.yml \
+            -f deployment/compose/docker-compose.ci.yml \
             -f deployment/compose/compose.fullstack.yml \
             up -d --force-recreate api
           for attempt in $(seq 1 60); do
@@ -145,5 +150,6 @@ jobs:
           docker compose
           -f deployment/compose/docker-compose.yml
           -f deployment/compose/docker-compose.jvm.yml
+          -f deployment/compose/docker-compose.ci.yml
           -f deployment/compose/compose.fullstack.yml
           down --volumes --remove-orphans
