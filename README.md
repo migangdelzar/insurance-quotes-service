@@ -105,8 +105,8 @@ The local profile seeds these accounts:
 
 | Username | Password | Purpose |
 |---|---|---|
-| demo | demo-password | Standard journey and passkey lifecycle |
-| demo-two | demo-password-two | Independent manual session |
+| demo | demo-password | Standard, senior, retry, and history journeys |
+| demo-two | demo-password-two | Isolated passkey lifecycle journey |
 | demo-three | demo-password-three | Independent manual session |
 
 The first password login offers passkey enrollment. Passwordless login for an
