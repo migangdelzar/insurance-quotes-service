@@ -75,6 +75,8 @@ jobs:
   observability-compose:
     name: Validate observability Compose configuration
     runs-on: ubuntu-latest
+    env:
+      GF_SECURITY_ADMIN_PASSWORD: ci-only-grafana-password
     steps:
       - name: Check out source
         uses: actions/checkout@v4
