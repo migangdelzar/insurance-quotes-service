@@ -54,4 +54,3 @@ credentials, tokens, quote IDs, or email addresses.
 ## Related decisions
 
 - [ADR-011: Redis for shared ephemeral state](ADR-011-redis-shared-ephemeral-state.md)
-- [ADR-012: Operational metrics and Kafka boundary](ADR-012-operational-metrics-and-kafka-boundary.md)
