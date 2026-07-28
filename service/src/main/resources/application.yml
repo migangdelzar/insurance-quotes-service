@@ -1,6 +1,8 @@
 spring:
   application:
     name: insurance-quotes-service
+  lifecycle:
+    timeout-per-shutdown-phase: ${SERVER_SHUTDOWN_TIMEOUT:20s}
   http:
     converters:
       preferred-json-mapper: jackson2
@@ -8,6 +10,15 @@ spring:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:quotes}
     username: ${DB_USER:quotes_app}
     password: ${DB_PASSWORD:quotes_app}
+    hikari:
+      pool-name: ${DB_POOL_NAME:quotes-hikari}
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      connection-timeout: ${DB_POOL_CONNECTION_TIMEOUT:5s}
+      validation-timeout: ${DB_POOL_VALIDATION_TIMEOUT:1s}
+      idle-timeout: ${DB_POOL_IDLE_TIMEOUT:10m}
+      max-lifetime: ${DB_POOL_MAX_LIFETIME:30m}
+      keepalive-time: ${DB_POOL_KEEPALIVE:2m}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -27,6 +38,23 @@ spring:
       enable-statistics: true
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+
+server:
+  shutdown: graceful
+  compression:
+    enabled: true
+    min-response-size: 2KB
+    mime-types: text/html,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml
+  tomcat:
+    threads:
+      max: ${SERVER_TOMCAT_THREADS_MAX:200}
+      min-spare: ${SERVER_TOMCAT_THREADS_MIN_SPARE:10}
+      max-queue-capacity: ${SERVER_TOMCAT_THREADS_MAX_QUEUE:100}
+    max-connections: ${SERVER_TOMCAT_MAX_CONNECTIONS:512}
+    accept-count: ${SERVER_TOMCAT_ACCEPT_COUNT:100}
+    connection-timeout: ${SERVER_TOMCAT_CONNECTION_TIMEOUT:5s}
+    keep-alive-timeout: ${SERVER_TOMCAT_KEEP_ALIVE_TIMEOUT:20s}
+    max-keep-alive-requests: ${SERVER_TOMCAT_MAX_KEEP_ALIVE_REQUESTS:1000}
 
 insurer:
   base-url: ${INSURER_BASE_URL:https://httpstat.us/200?sleep=500}
