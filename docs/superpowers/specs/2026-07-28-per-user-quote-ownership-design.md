@@ -69,55 +69,73 @@ CREATE INDEX idx_quotes_user_id ON quotes (user_id);
   a string) and `role` (`USER`/`ADMIN`). Both existing call sites
   (`LoginService.issuePair`, `AuthController.refresh`) already have the
   `User` in scope, so this isn't a new lookup.
-- `SecurityConfig`'s JWT authority mapping is extended with a converter that
-  also turns the `role` claim into `ROLE_ADMIN`/`ROLE_USER`, alongside the
-  existing `scope` → `SCOPE_api` mapping. The existing
-  `.anyRequest().hasAuthority("SCOPE_api")` gate is unchanged; the role
-  authority is purely additive and checked inside the application layer, not
-  at the filter-chain level (mutation vs. read-only admin behavior needs
-  method-level nuance the filter chain can't express).
-- `QuoteController` and `SubmissionController` read
-  `@AuthenticationPrincipal Jwt jwt` (the same pattern already used in
-  `AuthController`) and build a `RequestingUser(UUID id, boolean admin)`
-  record from the `uid`/`role` claims, passed into every `QuoteApi` /
-  `SubmissionApi` call.
+- `SecurityConfig`'s filter chain is unchanged — `.anyRequest().hasAuthority("SCOPE_api")`
+  keeps gating access exactly as today. Admin-awareness is purely an
+  application-layer concern, not a Spring Security authority: `QuoteController`
+  reads the `role` claim directly off the already-validated `Jwt` principal
+  (`@AuthenticationPrincipal Jwt jwt`, the same pattern `AuthController`
+  already uses) rather than mapping it to a `ROLE_ADMIN` `GrantedAuthority`.
+  There is no `@PreAuthorize`/method-security use of this claim anywhere, so
+  adding an authority mapping would be unused machinery.
+- `QuoteController` builds a `RequestingUser(UUID id, boolean admin)` record
+  (`quote.api.usecase.RequestingUser`) from the `uid`/`role` claims, but only
+  passes it into the three read methods that are admin-aware
+  (`getQuote`, `listQuotes`, `getSummary`). `create` and `updateCoverage`
+  take a plain `UUID ownerId` (`requester.id()`), and `SubmissionController`
+  extracts just the `uid` claim as a plain `UUID ownerId` — neither ever sees
+  the `admin` flag, so it's structurally impossible for an admin-only bypass
+  to leak into a mutation path by accident.
 
 ## 5. Application/domain layer changes
 
-`QuoteApi` and `SubmissionApi` method signatures gain a `RequestingUser`
-parameter:
+`QuoteApi` methods split by whether admin bypass can ever apply — encoded in
+the parameter type itself, not just a runtime check, so a mutation path can't
+accidentally be wired to the admin-aware overload:
 
 ```
-create(command, requester)
-updateCoverage(id, command, requester)          // always owner-scoped
-getQuote(id, requester)                          // admin sees any quote
-listQuotes(query, requester)                     // admin sees all
-getSummary(requester)                            // admin sees global stats
-ensureSubmittable(id, requester)                 // always owner-scoped
-markSubmitted(id, requester)                     // always owner-scoped
-markSubmissionFailed(id, requester)               // always owner-scoped
-submit(quoteId, requester)                        // SubmissionApi, owner-scoped
+create(command, ownerId)                    // UUID ownerId — always self
+updateCoverage(id, command, ownerId)         // UUID ownerId — always owner-scoped
+getQuote(id, requester)                      // RequestingUser — admin sees any quote
+listQuotes(query, requester)                 // RequestingUser — admin sees all
+getSummary(requester)                        // RequestingUser — admin sees global stats
+getOwnedQuote(id, ownerId)                   // UUID ownerId — always owner-scoped
+ensureSubmittable(id, ownerId)               // UUID ownerId — always owner-scoped
+markSubmitted(id, ownerId)                   // UUID ownerId — always owner-scoped
+markSubmissionFailed(id, ownerId)            // UUID ownerId — always owner-scoped
 ```
 
-`QuoteService` picks the scoped or unscoped repository call based on
-`requester.admin()` only for the three read methods; every write path always
-calls the owner-scoped repository method regardless of role.
+`SubmissionApi.submit(quoteId, ownerId)` takes a plain `UUID ownerId` too —
+the submission flow never sees the `admin` flag at all, so there's no path
+by which submitting a quote can be admin-bypassed. This replaces
+`SubmissionService`'s current use of `quoteApi.getQuote(quoteId)` for its
+idempotency check with the new owner-scoped `getOwnedQuote`.
+
+`QuoteRepository` (the port) gains a nullable `UUID ownerId` parameter on its
+read methods (`findById`, `findPage`, `findSummary`): `null` means unscoped
+(admin), non-null means scoped to that owner. `QuoteService` passes
+`requester.admin() ? null : requester.id()` for the three admin-aware
+methods, and always the caller-supplied `ownerId` (never null) for every
+owner-scoped method.
 
 ## 6. Repository layer changes
 
-`JpaQuoteRepository.findPage` already builds a `Specification<Quote>`
-conjunctively (status/coverage/search predicates added only when present) —
-an owner predicate is added the same way, only when the requester isn't an
-admin. This fits the existing pattern with no new abstraction.
+`JpaQuoteRepository.findPage(query, ownerId)` already builds a
+`Specification<Quote>` conjunctively (status/coverage/search predicates
+added only when present) — an owner predicate is added the same way, only
+when `ownerId != null`. This fits the existing pattern with no new
+abstraction.
 
-`findById` gets a sibling `findByIdAndUserId(id, ownerId)`; `QuoteService`
-calls the owner-scoped one unless the requester is an admin doing a read.
+`JpaQuoteRepository.findById(id, ownerId)` delegates to a new
+`SpringDataQuoteRepository.findByIdAndUserId(id, ownerId)` derived query
+when `ownerId != null`, otherwise the existing unscoped `delegate.findById(id)`.
 
-`findSummary`'s per-status/per-coverage counters
-(`countByStatus`, `countByCoverageType`, `sumMonthlyPremium`,
-`averageMonthlyPremium`, `findTrendRows`) get owner-scoped sibling derived
-queries (`countByStatusAndUserId`, etc.), selected the same way the existing
-unscoped ones are called today — no dynamic query builder needed here since
+`findSummary(now, ownerId)`'s per-status/per-coverage counters get owner-scoped
+sibling derived queries on `SpringDataQuoteRepository`
+(`countByStatusAndUserId`, `countByCoverageTypeAndUserId`,
+`countByMonthlyPremiumIsNotNullAndUserId`, `sumMonthlyPremiumForUser`,
+`averageMonthlyPremiumForUser`, `findTrendRowsForUser`), and
+`JpaQuoteRepository` picks the scoped or unscoped method per counter based on
+whether `ownerId` is null — no dynamic query builder needed here since
 Spring Data derived queries already cover it.
 
 ## 7. Cache correctness (bug this design closes)
@@ -131,7 +149,36 @@ cache hit short-circuits the method body. The key changes to
 `"#id + '|' + #requester.id()"` so cache entries are isolated per requester,
 not just per quote. This is being fixed as part of this change, not filed
 separately, since shipping ownership without it would silently reopen the
-leak it's meant to close.
+leak it's meant to close. Since `RequestingUser.id()` is always the real
+authenticated caller's own UUID (admin or not — the `admin` boolean is a
+separate flag, `id()` never changes meaning), `key = "#id + '|' + #requester.id()"`
+is sufficient on its own: it isolates every requester's cache entries from
+every other requester's, admin included, with no special-casing needed in
+the key expression itself.
+
+The three `@CacheEvict(key = "#id")` annotations on mutation paths
+(`updateCoverage`, `markSubmitted`, `markSubmissionFailed`) become
+`key = "#id + '|' + #ownerId"`, matching the owner's own cache entry exactly
+(these methods are always owner-scoped, so `#ownerId` is the parameter name
+directly, not `#requester.id()`). An admin who separately viewed that same
+quote keeps a stale cached copy for up to the existing 10-minute TTL — a
+staleness window, not a leak, since the admin was already authorized to see
+that data; solving it would need cache tagging this codebase doesn't have
+today, so it's left as-is.
+
+**A second eviction path exists and must change too.** `QuoteCacheEvictionListener`
+(`quote/adapter/in/messaging/consumer`) listens for the in-memory `QuoteExpired`
+event fired by `DraftExpirationJob` and evicts the cache by `event.quoteId()`
+alone. Once the cache key includes the owner, that plain-ID eviction stops
+matching any real entry — draft expiration would silently stop invalidating
+the cache for every requester, not just admins. Fix: `QuoteExpired` gains an
+`ownerId` field (`record QuoteExpired(UUID quoteId, UUID ownerId)`);
+`QuoteRepository.findIdsToExpire` is replaced by a
+`findStaleDrafts(Instant cutoff)` returning `List<StaleQuoteRef>` (a new
+`record StaleQuoteRef(UUID id, UUID ownerId)` in the port package) so
+`DraftExpirationJob` has the owner available when it publishes each event;
+`markExpired` keeps taking a plain `List<UUID>` extracted from those refs.
+`QuoteCacheEvictionListener` evicts `event.quoteId() + "|" + event.ownerId()`.
 
 ## 8. Testing
 
