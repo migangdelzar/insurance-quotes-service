@@ -261,8 +261,8 @@ cd ../insurance-quotes-web
 E2E_BASE_URL=http://localhost:3100 bun run e2e -- --retries=0
 ~~~
 
-The browser recording gallery is
-[docs/demo/flow-hyperframes.md](../insurance-quotes-web/docs/demo/flow-hyperframes.md).
+The browser recording workflow is documented in
+[docs/demo-recordings.md](../insurance-quotes-web/docs/demo-recordings.md).
 
 ## JVM versus native
 
