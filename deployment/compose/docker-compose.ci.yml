@@ -1,0 +1,8 @@
+services:
+  api:
+    # GitHub-hosted runners have a higher memory budget than the local demo
+    # runtime. Keep the local cap at 512 MiB while allowing startup class
+    # loading and Flyway to complete reliably in CI.
+    mem_limit: 768m
+    environment:
+      JAVA_TOOL_OPTIONS: "${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=40 -XX:InitialRAMPercentage=10 -XX:MaxMetaspaceSize=256m -XX:+UseSerialGC}"

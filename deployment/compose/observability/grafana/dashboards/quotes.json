@@ -1,0 +1,24 @@
+{
+  "title": "Insurance Quotes · Operations",
+  "uid": "insurance-quotes",
+  "schemaVersion": 39,
+  "refresh": "10s",
+  "tags": ["insurance-quotes", "business", "operations"],
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {"id": 1, "type": "timeseries", "title": "HTTP request rate /s", "gridPos": {"x": 0, "y": 0, "w": 8, "h": 8}, "targets": [{"expr": "sum(rate(http_server_requests_seconds_count{uri!~\"/actuator.*\"}[5m]))", "legendFormat": "requests"}]},
+    {"id": 2, "type": "timeseries", "title": "HTTP errors /s", "gridPos": {"x": 8, "y": 0, "w": 8, "h": 8}, "targets": [{"expr": "sum(rate(http_server_requests_seconds_count{status=~\"4..|5..\"}[5m]))", "legendFormat": "errors"}]},
+    {"id": 3, "type": "timeseries", "title": "HTTP p95 latency (s)", "gridPos": {"x": 16, "y": 0, "w": 8, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{uri!~\"/actuator.*\"}[5m])))", "legendFormat": "p95"}]},
+    {"id": 4, "type": "timeseries", "title": "Quotes created /min", "gridPos": {"x": 0, "y": 8, "w": 8, "h": 8}, "targets": [{"expr": "rate(quotes_created_total[5m]) * 60", "legendFormat": "created"}]},
+    {"id": 5, "type": "timeseries", "title": "Coverage updates by outcome /min", "gridPos": {"x": 8, "y": 8, "w": 8, "h": 8}, "targets": [{"expr": "rate(quotes_coverage_updates_total[5m]) * 60", "legendFormat": "{{outcome}} · {{coverage_type}}"}]},
+    {"id": 6, "type": "timeseries", "title": "Submissions by outcome /min", "gridPos": {"x": 16, "y": 8, "w": 8, "h": 8}, "targets": [{"expr": "rate(quotes_submissions_total[5m]) * 60", "legendFormat": "{{outcome}}"}]},
+    {"id": 7, "type": "timeseries", "title": "Premium calculation p95 (s)", "gridPos": {"x": 0, "y": 16, "w": 8, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, sum by (le, outcome) (rate(quotes_premium_calculation_seconds_bucket[5m])))", "legendFormat": "{{outcome}}"}]},
+    {"id": 8, "type": "timeseries", "title": "Insurer call p95 (s)", "gridPos": {"x": 8, "y": 16, "w": 8, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, sum by (le) (rate(insurer_calls_seconds_bucket[5m])))", "legendFormat": "p95"}]},
+    {"id": 9, "type": "timeseries", "title": "Rate-limit decisions /min", "gridPos": {"x": 16, "y": 16, "w": 8, "h": 8}, "targets": [{"expr": "rate(rate_limit_requests_total[5m]) * 60", "legendFormat": "{{bucket}} · {{outcome}}"}]},
+    {"id": 10, "type": "stat", "title": "Quotes expired", "gridPos": {"x": 0, "y": 24, "w": 6, "h": 6}, "targets": [{"expr": "quotes_expired_total"}]},
+    {"id": 11, "type": "stat", "title": "Cache errors", "gridPos": {"x": 6, "y": 24, "w": 6, "h": 6}, "targets": [{"expr": "sum(cache_errors_total)"}]},
+    {"id": 12, "type": "stat", "title": "Redis rate limiter failures", "gridPos": {"x": 12, "y": 24, "w": 6, "h": 6}, "targets": [{"expr": "rate_limit_redis_failures_total"}]},
+    {"id": 13, "type": "timeseries", "title": "JVM heap used", "gridPos": {"x": 18, "y": 24, "w": 6, "h": 6}, "targets": [{"expr": "jvm_memory_used_bytes{area=\"heap\"}", "legendFormat": "{{id}}"}]},
+    {"id": 14, "type": "logs", "title": "API logs", "gridPos": {"x": 0, "y": 30, "w": 24, "h": 8}, "targets": [{"refId": "A", "expr": "{job=\"docker\"} |= \"insurance-quotes-service\""}], "datasource": {"type": "loki", "uid": "loki"}, "options": {"showTime": true, "wrapLines": true, "enableLogDetails": true}}
+  ]
+}

@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.7</version>
+    <version>4.0.6</version>
     <relativePath/>
   </parent>
   <groupId>com.clara</groupId>
@@ -16,10 +16,11 @@
 
   <properties>
     <java.version>17</java.version>
-    <spring-modulith.version>1.3.5</spring-modulith.version>
+    <spring-modulith.version>2.0.7</spring-modulith.version>
     <wiremock.version>3.9.1</wiremock.version>
     <spotless.version>2.44.5</spotless.version>
     <build-helper.version>3.6.0</build-helper.version>
+    <testcontainers.version>2.0.5</testcontainers.version>
   </properties>
 
   <dependencyManagement>
@@ -35,6 +36,13 @@
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock-standalone</artifactId>
         <version>${wiremock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

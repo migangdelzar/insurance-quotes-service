@@ -1,0 +1,5 @@
+[env]
+MISE_ENV = "test"
+SPRING_PROFILES_ACTIVE = "local"
+INSURER_BASE_URL = "http://localhost:8089/submit"
+JWT_SECRET = "local-test-secret-change-me-32-bytes!!"

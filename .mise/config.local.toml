@@ -1,0 +1,8 @@
+[env]
+MISE_ENV = "local"
+SPRING_PROFILES_ACTIVE = "local"
+INSURER_BASE_URL = "https://httpstat.us/200?sleep=500"
+JWT_SECRET = "local-dev-secret-change-me-32-bytes!!"
+AUTH_DEMO_USERNAME = "demo"
+AUTH_DEMO_PASSWORD = "demo-password"
+GF_SECURITY_ADMIN_PASSWORD = "demo-grafana-password"

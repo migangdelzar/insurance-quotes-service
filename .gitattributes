@@ -1,0 +1,7 @@
+* text=auto
+*.toml text eol=lf
+*.sh text eol=lf
+*.java text eol=lf
+*.sql text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

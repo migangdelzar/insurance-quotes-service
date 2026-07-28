@@ -1,23 +1,60 @@
 spring:
   application:
     name: insurance-quotes-service
+  lifecycle:
+    timeout-per-shutdown-phase: ${SERVER_SHUTDOWN_TIMEOUT:20s}
+  http:
+    converters:
+      preferred-json-mapper: jackson2
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:quotes}
     username: ${DB_USER:quotes_app}
     password: ${DB_PASSWORD:quotes_app}
+    hikari:
+      pool-name: ${DB_POOL_NAME:quotes-hikari}
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      connection-timeout: ${DB_POOL_CONNECTION_TIMEOUT:5000}
+      validation-timeout: ${DB_POOL_VALIDATION_TIMEOUT:1000}
+      idle-timeout: ${DB_POOL_IDLE_TIMEOUT:600000}
+      max-lifetime: ${DB_POOL_MAX_LIFETIME:1800000}
+      keepalive-time: ${DB_POOL_KEEPALIVE:120000}
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
   flyway:
     enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   cache:
-    type: caffeine
+    type: redis
     cache-names: quotes
-    caffeine:
-      spec: maximumSize=500,expireAfterWrite=10m
+    redis:
+      time-to-live: 10m
+      cache-null-values: false
+      enable-statistics: true
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+
+server:
+  shutdown: graceful
+  compression:
+    enabled: true
+    min-response-size: 2KB
+    mime-types: text/html,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml
+  tomcat:
+    threads:
+      max: ${SERVER_TOMCAT_THREADS_MAX:200}
+      min-spare: ${SERVER_TOMCAT_THREADS_MIN_SPARE:10}
+      max-queue-capacity: ${SERVER_TOMCAT_THREADS_MAX_QUEUE:100}
+    max-connections: ${SERVER_TOMCAT_MAX_CONNECTIONS:512}
+    accept-count: ${SERVER_TOMCAT_ACCEPT_COUNT:100}
+    connection-timeout: ${SERVER_TOMCAT_CONNECTION_TIMEOUT:5s}
+    keep-alive-timeout: ${SERVER_TOMCAT_KEEP_ALIVE_TIMEOUT:20s}
+    max-keep-alive-requests: ${SERVER_TOMCAT_MAX_KEEP_ALIVE_REQUESTS:1000}
 
 insurer:
   base-url: ${INSURER_BASE_URL:https://httpstat.us/200?sleep=500}
@@ -31,8 +68,53 @@ auth:
   demo:
     username: ${AUTH_DEMO_USERNAME:demo}
     password: ${AUTH_DEMO_PASSWORD:demo-password}
+    users:
+      - username: ${AUTH_DEMO_USERNAME:demo}
+        password: ${AUTH_DEMO_PASSWORD:demo-password}
+      - username: ${AUTH_DEMO_USERNAME_2:demo-two}
+        password: ${AUTH_DEMO_PASSWORD_2:demo-password-two}
+      - username: ${AUTH_DEMO_USERNAME_3:demo-three}
+        password: ${AUTH_DEMO_PASSWORD_3:demo-password-three}
+      - username: ${AUTH_DEMO_USERNAME_ADMIN:demo-admin}
+        password: ${AUTH_DEMO_PASSWORD_ADMIN:demo-admin-password}
+        role: ADMIN
+
+  webauthn:
+    origins: ${AUTH_WEBAUTHN_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:3100}
+
+web:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:3100}
+  rate-limit:
+    enabled: ${WEB_RATE_LIMIT_ENABLED:true}
+    trust-forwarded-headers: ${WEB_RATE_LIMIT_TRUST_FORWARDED_HEADERS:false}
+    fail-open: ${WEB_RATE_LIMIT_FAIL_OPEN:false}
+    auth:
+      limit: ${WEB_RATE_LIMIT_AUTH_LIMIT:10}
+      window: ${WEB_RATE_LIMIT_AUTH_WINDOW:1m}
+    quote-mutation:
+      limit: ${WEB_RATE_LIMIT_QUOTE_MUTATION_LIMIT:30}
+      window: ${WEB_RATE_LIMIT_QUOTE_MUTATION_WINDOW:1m}
 
 quote:
   expiration:
     draft-ttl: ${QUOTE_DRAFT_TTL:30m}
     check-interval: ${QUOTE_EXPIRATION_CHECK_INTERVAL:PT5M}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,modulith
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
