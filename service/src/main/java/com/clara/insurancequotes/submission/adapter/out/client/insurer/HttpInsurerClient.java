@@ -13,7 +13,7 @@ import org.springframework.web.client.RestClientException;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class HttpstatInsurerClient implements InsurerGateway {
+public class HttpInsurerClient implements InsurerGateway {
 
     private final RestClient restClient;
 

@@ -2,24 +2,3 @@ services:
   api:
     image: insurance-quotes-api:native
     mem_limit: 192m
-    environment:
-      SPRING_PROFILES_ACTIVE: docker,demo
-      OTEL_SDK_ENABLED: "${OTEL_SDK_ENABLED:-false}"
-      DB_USER: quotes_app
-      DB_PASSWORD: quotes_app
-      JWT_SECRET: docker-dev-secret-change-me-32-byte!
-      INSURER_BASE_URL: https://httpstat.us/200?sleep=500
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
-      interval: 10s
-      timeout: 5s
-      retries: 12

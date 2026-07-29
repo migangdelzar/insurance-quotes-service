@@ -272,14 +272,64 @@ mise run up jvm observability
 |---|---|---|
 | Actuator | http://localhost:8080/actuator | Health, metrics, Prometheus, Modulith |
 | Prometheus | http://localhost:9090 | Scraped time series |
-| Grafana | http://localhost:3001 | Dashboards; admin/admin locally |
-| Loki | http://localhost:3101 | Structured logs |
-| Tempo | http://localhost:3200 | Trace query |
+| Grafana | http://localhost:3001 | Dashboards; `admin` / `demo-grafana-password` locally |
+| Loki | http://localhost:3101 | Structured logs; no local login |
+| Tempo | http://localhost:3200 | Trace query; no local login |
 | Tempo OTLP | localhost:4317 / 4318 | gRPC / HTTP trace ingestion |
 
 Business meters cover quote lifecycle, submission latency and outcomes, cache
 failures, and rate-limit behavior. The dashboard is provisioned from
 deployment/compose/observability/grafana/dashboards/quotes.json.
+
+The demo prints the complete local access matrix after startup. The same
+development credentials are summarized here:
+
+| Service | Endpoint | Local credentials |
+|---|---|---|
+| PostgreSQL | `localhost:5432` | `postgres` / `postgres`; app `quotes_app` / `quotes_app` |
+| Redis | `localhost:6379` | No authentication |
+| Kafka | `localhost:9094` | No authentication |
+| WireMock | `http://localhost:8089/__admin` | No authentication |
+| Grafana | `http://localhost:3001` | `admin` / `demo-grafana-password` |
+| Prometheus | `http://localhost:9090` | No authentication |
+| Loki | `http://localhost:3101` | No authentication |
+| Tempo | `http://localhost:3200` | No authentication |
+
+### Reading logs and traces
+
+The Docker profile writes one JSON event per line to stdout. Each event keeps
+`level`, `logger_name`, `message`, `correlationId`, `traceId`, and `spanId`
+together so a request can be followed across the API and observability tools:
+
+~~~bash
+mise run logs          # follow API logs
+mise run logs-errors   # show recent warnings/errors
+mise run diagnose      # health and known infrastructure checks
+mise run logs-all      # follow every container, including Kafka and Redis
+~~~
+
+Use `mise run diagnose` after a demo journey. It treats unavailable Tempo,
+database/Flyway failures, Kafka failures, and Redis connection failures as
+configuration problems. Invalid credentials, an expired challenge, or an
+unregistered passkey can produce expected 4xx flow errors and are not treated
+as infrastructure failures.
+
+With the observability overlay, use Grafana at
+[http://localhost:3001](http://localhost:3001) (`admin` / `demo-grafana-password`):
+
+| Grafana area | What to use | What it proves |
+|---|---|---|
+| **Dashboards → Clara Quotes** | Provisioned quote panels | Business meters and API health are being scraped from Actuator/Micrometer into Prometheus. |
+| **Explore → Prometheus** | `http_server_requests_seconds_count`, `quote_*`, `rate_limit_*` | Request, quote, cache, and rate-limit time series. |
+| **Explore → Loki** | `{job="docker"} \|= "insurance-quotes-service"` | Container JSON logs; filter by `level`, `correlationId`, or `traceId`. |
+| **Explore → Tempo** | Service `insurance-quotes-service` | Distributed traces exported by the API through OTLP. |
+
+Loki receives Docker stdout through Alloy. Tempo receives traces only when
+the observability overlay is running. OTLP metric pushing is intentionally
+disabled because Prometheus scrapes the Actuator endpoint instead. Grafana
+links a `traceId` found in a Loki log to its Tempo trace; Tempo can also link a
+trace back to Loki logs. Prometheus stores measurements, Loki stores logs, and
+Tempo stores traces—none of them replaces the others.
 
 ## Verification
 

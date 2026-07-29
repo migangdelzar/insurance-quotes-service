@@ -9,8 +9,8 @@ import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.env.MockEnvironment;
 
 class PerformanceConfigurationTest {
 
@@ -52,14 +52,18 @@ class PerformanceConfigurationTest {
 
         assertThat(defaults.getProperty("management.opentelemetry.enabled", Boolean.class))
                 .isFalse();
+        assertThat(defaults.getProperty("management.otlp.metrics.export.enabled", Boolean.class))
+                .isFalse();
         assertThat(observability.getProperty("management.opentelemetry.enabled", Boolean.class))
                 .isTrue();
+        assertThat(observability.getProperty("management.otlp.metrics.export.enabled", Boolean.class))
+                .isFalse();
         assertThat(defaults.getProperty("management.opentelemetry.tracing.export.otlp.endpoint"))
                 .isEqualTo("http://tempo:4318/v1/traces");
     }
 
     private static ConfigurableEnvironment dockerEnvironment(Map<String, Object> overrides) {
-        var environment = new StandardEnvironment();
+        var environment = new MockEnvironment();
         environment.getPropertySources().addFirst(new MapPropertySource("test", overrides));
         var loader = new YamlPropertySourceLoader();
         var resource = new ClassPathResource("application-docker.yml");

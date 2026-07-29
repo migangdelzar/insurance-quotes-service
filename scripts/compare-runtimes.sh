@@ -18,9 +18,11 @@ declare -a rows=()
 cleanup() {
   "${compose[@]}" \
     -f deployment/compose/docker-compose.yml \
+    -f deployment/compose/docker-compose.api.yml \
     -f deployment/compose/docker-compose.jvm.yml down --volumes --remove-orphans >/dev/null 2>&1 || true
   "${compose[@]}" \
     -f deployment/compose/docker-compose.yml \
+    -f deployment/compose/docker-compose.api.yml \
     -f deployment/compose/docker-compose.native.yml down --volumes --remove-orphans >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
@@ -40,7 +42,7 @@ measure() {
   mise run up "$runtime" >/dev/null
 
   local container_id
-  container_id=$("${compose[@]}" -f deployment/compose/docker-compose.yml -f "$overlay" ps -q api)
+  container_id=$("${compose[@]}" -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.api.yml -f "$overlay" ps -q api)
   if [ -z "$container_id" ]; then
     echo "Unable to resolve the ${runtime} API container" >&2
     return 1
@@ -55,7 +57,7 @@ measure() {
     fi
     if [ "$attempt" -eq 60 ]; then
       echo "${runtime} API did not become healthy" >&2
-      "${compose[@]}" -f deployment/compose/docker-compose.yml -f "$overlay" logs api >&2
+      "${compose[@]}" -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.api.yml -f "$overlay" logs api >&2
       return 1
     fi
     sleep 1
@@ -75,7 +77,7 @@ measure() {
   rows+=("| ${runtime} | ${startup:-not reported} | ${elapsed_seconds}s | ${health_seconds:-not reported}s | ${rss} | ${image_size} bytes |")
   echo "${runtime}: startup=${startup:-not reported}, compose_elapsed=${elapsed_seconds}s, health=${health_seconds:-not reported}s, rss=${rss}, image=${image_size} bytes"
 
-  "${compose[@]}" -f deployment/compose/docker-compose.yml -f "$overlay" down --volumes --remove-orphans >/dev/null
+  "${compose[@]}" -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.api.yml -f "$overlay" down --volumes --remove-orphans >/dev/null
 }
 
 echo "Measuring JVM runtime"
