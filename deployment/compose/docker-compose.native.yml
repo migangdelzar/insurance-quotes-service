@@ -4,6 +4,7 @@ services:
     mem_limit: 192m
     environment:
       SPRING_PROFILES_ACTIVE: docker,demo
+      OTEL_SDK_ENABLED: "${OTEL_SDK_ENABLED:-false}"
       DB_USER: quotes_app
       DB_PASSWORD: quotes_app
       JWT_SECRET: docker-dev-secret-change-me-32-byte!

@@ -6,6 +6,7 @@ services:
     mem_limit: 512m
     environment:
       SPRING_PROFILES_ACTIVE: docker,demo
+      OTEL_SDK_ENABLED: "${OTEL_SDK_ENABLED:-false}"
       JAVA_TOOL_OPTIONS: "${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=50 -XX:InitialRAMPercentage=15 -XX:MaxMetaspaceSize=192m -XX:+UseSerialGC}"
       DB_USER: quotes_app
       DB_PASSWORD: quotes_app

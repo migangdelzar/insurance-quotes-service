@@ -40,6 +40,17 @@ class PerformanceConfigurationTest {
                 .containsEntry("spring.lifecycle.timeout-per-shutdown-phase", "${SERVER_SHUTDOWN_TIMEOUT:10s}");
     }
 
+    @Test
+    void dockerProfileDoesNotExportTracesUnlessObservabilityIsEnabled() {
+        var properties = applicationProperties("application-docker.yml");
+
+        assertThat(properties)
+                .containsEntry("management.opentelemetry.enabled", "${OTEL_SDK_ENABLED:false}")
+                .containsEntry(
+                        "management.opentelemetry.tracing.export.otlp.endpoint",
+                        "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://tempo:4318/v1/traces}");
+    }
+
     private static Properties applicationProperties(String resourceName) {
         var factory = new YamlPropertiesFactoryBean();
         factory.setResources(new ClassPathResource(resourceName));

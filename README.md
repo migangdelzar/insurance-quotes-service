@@ -147,9 +147,14 @@ the workspace directory; Mise requires this because the profile files can set
 environment variables and execute tasks:
 
 ~~~bash
-mise trust -y --all -C insurance-quotes-service
-mise trust -y --all -C insurance-quotes-web
+mise trust -y insurance-quotes-service/mise.toml
+mise trust -y insurance-quotes-service/.mise/config.local.toml
+mise trust -y insurance-quotes-web/mise.toml
 ~~~
+
+These commands trust only the files used by the default local demo. Trust a
+different `.mise/config.<profile>.toml` explicitly before selecting that
+profile.
 
 Then run this from `insurance-quotes-service`:
 

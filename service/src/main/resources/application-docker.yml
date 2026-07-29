@@ -10,6 +10,7 @@ spring:
 
 management:
   opentelemetry:
+    enabled: ${OTEL_SDK_ENABLED:false}
     tracing:
       export:
         otlp:
