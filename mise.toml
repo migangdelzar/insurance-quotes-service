@@ -74,11 +74,31 @@ set -euo pipefail
 print_access() {
   cat <<'EOF'
 
-Clara is running at: http://localhost:3100
-API health:          http://localhost:3100/api/actuator/health
-Demo user:           demo / demo-password
-Passkey setup:       use password login first, then enroll when prompted
-Stop the demo with:  mise run stop
+Clara demo is ready
+
+Web app       http://localhost:3100
+API health    http://localhost:3100/api/actuator/health
+Direct API    http://localhost:8080/actuator/health
+
+Demo users
+  demo         / demo-password          standard happy path
+  demo-two     / demo-password-two      independent passkey journey
+  demo-three   / demo-password-three    independent manual session
+  demo-admin   / demo-admin-password    read-only oversight
+
+First passkey use: sign in with a password, then enroll a passkey from the
+authenticated app before trying passwordless login.
+
+Local services
+  PostgreSQL   localhost:5432
+  Redis        localhost:6379
+  Kafka        localhost:9094
+  WireMock     http://localhost:8089/__admin
+
+Commands
+  Stop         mise run stop
+  Reset data   mise run reset-demo
+  Observability: mise run up jvm observability
 EOF
 }
 

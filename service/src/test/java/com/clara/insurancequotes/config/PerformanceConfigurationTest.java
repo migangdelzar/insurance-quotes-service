@@ -2,9 +2,14 @@ package com.clara.insurancequotes.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 
 class PerformanceConfigurationTest {
@@ -38,6 +43,32 @@ class PerformanceConfigurationTest {
                 .containsEntry("server.tomcat.threads.max-queue-capacity", "${SERVER_TOMCAT_THREADS_MAX_QUEUE:25}")
                 .containsEntry("server.tomcat.max-connections", "${SERVER_TOMCAT_MAX_CONNECTIONS:64}")
                 .containsEntry("spring.lifecycle.timeout-per-shutdown-phase", "${SERVER_SHUTDOWN_TIMEOUT:10s}");
+    }
+
+    @Test
+    void dockerProfileDoesNotExportTracesUnlessObservabilityIsEnabled() {
+        var defaults = dockerEnvironment(Map.of());
+        var observability = dockerEnvironment(Map.of("OTEL_SDK_ENABLED", "true"));
+
+        assertThat(defaults.getProperty("management.opentelemetry.enabled", Boolean.class))
+                .isFalse();
+        assertThat(observability.getProperty("management.opentelemetry.enabled", Boolean.class))
+                .isTrue();
+        assertThat(defaults.getProperty("management.opentelemetry.tracing.export.otlp.endpoint"))
+                .isEqualTo("http://tempo:4318/v1/traces");
+    }
+
+    private static ConfigurableEnvironment dockerEnvironment(Map<String, Object> overrides) {
+        var environment = new StandardEnvironment();
+        environment.getPropertySources().addFirst(new MapPropertySource("test", overrides));
+        var loader = new YamlPropertySourceLoader();
+        var resource = new ClassPathResource("application-docker.yml");
+        try {
+            loader.load("application-docker", resource).forEach(environment.getPropertySources()::addLast);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to load Docker profile", exception);
+        }
+        return environment;
     }
 
     private static Properties applicationProperties(String resourceName) {
