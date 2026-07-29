@@ -57,6 +57,27 @@ flowchart LR
 Kafka is not the metrics pipeline. Redis is not durable business state and is
 not used as a general-purpose distributed lock service.
 
+## Why this architecture
+
+The design optimizes for a credible production boundary while keeping the
+challenge easy to run as one deployable application:
+
+| Choice | Why it fits this system |
+|---|---|
+| Java 17 + Spring Boot | Java 17 is the required LTS runtime; Spring Boot provides mature HTTP, security, validation, observability, and test integration. |
+| Spring Modulith | Quote, auth, pricing, and submission are independently owned modules with explicit events, but remain one simple deployment for a demo. A future service split has clearer seams. |
+| DDD + hexagonal architecture | Aggregates enforce quote invariants; application services orchestrate use cases; ports isolate the domain from HTTP, persistence, Redis, Kafka, and insurer adapters. |
+| Responsibility-based packages | `api`, `application`, `domain`, and adapters communicate intent and ownership better than flat model/exception folders. |
+| PostgreSQL + Flyway | Quotes and identities are relational, transactional, and migration-driven; PostgreSQL is the durable source of truth. |
+| Redis | Shared ephemeral state—cache entries, WebAuthn ceremonies, and rate-limit buckets—works across instances without pretending Redis is business storage. |
+| Modulith outbox + Kafka | Business events are persisted before publication, then delivered asynchronously; Kafka is for integration and delivery, not metrics collection. |
+| Actuator, Micrometer, OpenTelemetry | Actuator exposes health and scrape endpoints, Micrometer records application/business meters, Prometheus stores time series, Grafana visualizes them, and Tempo/Loki complete trace/log diagnosis. |
+| Maven libraries | `platform` centralizes versions, while small `service-i18n` and `throwing-functions` libraries isolate reusable concerns from the business service without creating premature microservices. |
+
+This is a **modular monolith by choice**: it gives recruiters and future
+engineers visible domain boundaries, fast local feedback, and low operational
+overhead at the current scale.
+
 ## Quick start
 
 > **Full-stack runbook:** for the complete one-command setup, HMR workflow,
