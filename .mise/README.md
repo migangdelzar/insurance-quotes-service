@@ -1,5 +1,20 @@
 # Mise environments
 
+## First clone: trust the configuration
+
+Mise intentionally requires an explicit trust decision because these files can
+set environment variables and run tasks. From the workspace containing both
+repositories, run this once per checkout:
+
+```bash
+mise trust -y --all -C insurance-quotes-service
+mise trust -y --all -C insurance-quotes-web
+```
+
+After that, `mise run demo` and directory activation work without the
+`config.local.toml is not trusted` error. Only trust repositories whose
+configuration you have reviewed.
+
 Profile configuration is kept under `.mise/config.<environment>.toml` so
 profile selection is explicit and does not silently overwrite a caller's
 environment in the repository-wide task configuration.

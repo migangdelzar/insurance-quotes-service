@@ -142,7 +142,16 @@ http://localhost:8080/swagger-ui.html.
 ### One-command reviewer demo
 
 For the easiest full-stack setup, keep the sibling repositories in the layout
-shown above and run this from `insurance-quotes-service`:
+shown above. On a fresh clone, trust the reviewed Mise configuration once from
+the workspace directory; Mise requires this because the profile files can set
+environment variables and execute tasks:
+
+~~~bash
+mise trust -y --all -C insurance-quotes-service
+mise trust -y --all -C insurance-quotes-web
+~~~
+
+Then run this from `insurance-quotes-service`:
 
 ~~~bash
 mise run demo
