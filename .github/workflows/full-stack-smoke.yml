@@ -48,6 +48,7 @@ jobs:
         run: >-
           docker compose
           -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.api.yml
           -f deployment/compose/docker-compose.jvm.yml
           -f deployment/compose/docker-compose.ci.yml
           -f deployment/compose/compose.fullstack.yml
@@ -58,6 +59,7 @@ jobs:
         run: >-
           docker compose
           -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.api.yml
           -f deployment/compose/docker-compose.jvm.yml
           -f deployment/compose/docker-compose.ci.yml
           -f deployment/compose/compose.fullstack.yml
@@ -68,6 +70,7 @@ jobs:
         run: >-
           docker compose
           -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.api.yml
           -f deployment/compose/docker-compose.jvm.yml
           -f deployment/compose/docker-compose.ci.yml
           -f deployment/compose/compose.fullstack.yml
@@ -81,6 +84,7 @@ jobs:
           compose=(
             docker compose
             -f deployment/compose/docker-compose.yml
+            -f deployment/compose/docker-compose.api.yml
             -f deployment/compose/docker-compose.jvm.yml
             -f deployment/compose/docker-compose.ci.yml
             -f deployment/compose/compose.fullstack.yml
@@ -123,6 +127,7 @@ jobs:
           set -euo pipefail
           docker compose \
             -f deployment/compose/docker-compose.yml \
+            -f deployment/compose/docker-compose.api.yml \
             -f deployment/compose/docker-compose.jvm.yml \
             -f deployment/compose/docker-compose.ci.yml \
             -f deployment/compose/compose.fullstack.yml \
@@ -133,7 +138,7 @@ jobs:
               break
             fi
             if [ "$attempt" -eq 60 ]; then
-              docker compose -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.jvm.yml -f deployment/compose/docker-compose.ci.yml -f deployment/compose/compose.fullstack.yml logs api
+              docker compose -f deployment/compose/docker-compose.yml -f deployment/compose/docker-compose.api.yml -f deployment/compose/docker-compose.jvm.yml -f deployment/compose/docker-compose.ci.yml -f deployment/compose/compose.fullstack.yml logs api
               exit 1
             fi
             sleep 2
@@ -152,6 +157,7 @@ jobs:
         run: >-
           docker compose
           -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.api.yml
           -f deployment/compose/docker-compose.jvm.yml
           -f deployment/compose/docker-compose.ci.yml
           -f deployment/compose/compose.fullstack.yml

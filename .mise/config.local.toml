@@ -1,7 +1,7 @@
 [env]
 MISE_ENV = "local"
 SPRING_PROFILES_ACTIVE = "local"
-INSURER_BASE_URL = "https://httpstat.us/200?sleep=500"
+INSURER_BASE_URL = "https://httpbin.org/status/200"
 JWT_SECRET = "local-dev-secret-change-me-32-bytes!!"
 AUTH_DEMO_USERNAME = "demo"
 AUTH_DEMO_PASSWORD = "demo-password"

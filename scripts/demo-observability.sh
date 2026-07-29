@@ -17,6 +17,7 @@ fi
 
 compose_files=(
   -f "$compose_dir/docker-compose.yml"
+  -f "$compose_dir/docker-compose.api.yml"
   -f "$compose_dir/docker-compose.jvm.yml"
   -f "$compose_dir/compose.fullstack.yml"
   -f "$compose_dir/compose.e2e.yml"
@@ -65,8 +66,8 @@ case "$mode" in
 
     if [[ "$insurer_url" == *wiremock* ]]; then
       echo "PASS deterministic insurer: WireMock"
-    elif [[ "$insurer_url" == *httpstat.us* ]]; then
-      echo "INFO external insurer: httpstat.us"
+    elif [[ "$insurer_url" == *httpbin.org* ]]; then
+      echo "INFO external insurer: httpbin.org"
     else
       echo "WARN insurer endpoint is not recognized: ${insurer_url:-unknown}"
     fi

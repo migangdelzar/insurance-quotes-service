@@ -43,6 +43,7 @@ fi
 
 compose_files=(
   -f deployment/compose/docker-compose.yml
+  -f deployment/compose/docker-compose.api.yml
   -f deployment/compose/docker-compose.jvm.yml
   -f deployment/compose/compose.fullstack.yml
   -f deployment/compose/compose.e2e.yml

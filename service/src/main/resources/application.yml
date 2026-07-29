@@ -57,7 +57,7 @@ server:
     max-keep-alive-requests: ${SERVER_TOMCAT_MAX_KEEP_ALIVE_REQUESTS:1000}
 
 insurer:
-  base-url: ${INSURER_BASE_URL:https://httpstat.us/200?sleep=500}
+  base-url: ${INSURER_BASE_URL:https://httpbin.org/status/200}
   connect-timeout: 2s
   read-timeout: 5s
 

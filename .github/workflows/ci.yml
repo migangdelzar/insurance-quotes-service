@@ -75,6 +75,7 @@ jobs:
         run: >-
           docker compose
           -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.api.yml
           -f deployment/compose/docker-compose.jvm.yml
           config
 
@@ -93,6 +94,7 @@ jobs:
         run: >-
           docker compose
           -f deployment/compose/docker-compose.yml
+          -f deployment/compose/docker-compose.api.yml
           -f deployment/compose/docker-compose.jvm.yml
           -f deployment/compose/compose.observability.yml
           config
