@@ -4,6 +4,7 @@ set -euo pipefail
 mode="${1:-follow}"
 tail_lines="${LOG_TAIL:-200}"
 since="${LOG_SINCE:-15m}"
+export GF_SECURITY_ADMIN_PASSWORD="${GF_SECURITY_ADMIN_PASSWORD:-demo-grafana-password}"
 compose_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../deployment/compose" && pwd)"
 
 if docker compose version >/dev/null 2>&1; then
@@ -19,6 +20,7 @@ compose_files=(
   -f "$compose_dir/docker-compose.yml"
   -f "$compose_dir/docker-compose.api.yml"
   -f "$compose_dir/docker-compose.jvm.yml"
+  -f "$compose_dir/compose.observability.yml"
   -f "$compose_dir/compose.fullstack.yml"
   -f "$compose_dir/compose.e2e.yml"
 )

@@ -315,7 +315,7 @@ unregistered passkey can produce expected 4xx flow errors and are not treated
 as infrastructure failures.
 
 With the observability overlay, use Grafana at
-[http://localhost:3001](http://localhost:3001) (`admin` / `admin`):
+[http://localhost:3001](http://localhost:3001) (`admin` / `demo-grafana-password`):
 
 | Grafana area | What to use | What it proves |
 |---|---|---|
