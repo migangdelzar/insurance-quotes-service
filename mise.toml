@@ -72,34 +72,49 @@ run = '''
 set -euo pipefail
 
 print_access() {
-  cat <<'EOF'
+  grafana_password="${GF_SECURITY_ADMIN_PASSWORD:-demo-grafana-password}"
+  grafana_access="admin/${grafana_password}"
+  printf '\nClara demo is ready\n'
+  printf '┌──────────────────┬──────────────────────────────────────────────┬──────────────────────────────────────┐\n'
+  printf '│ %-16s │ %-44s │ %-36s │\n' "Resource" "Endpoint" "Credentials / purpose"
+  printf '├──────────────────┼──────────────────────────────────────────────┼──────────────────────────────────────┤\n'
+  printf '│ %-16s │ %-44s │ %-36s │\n' "Web app" "http://localhost:3100" "Browser entry point"
+  printf '│ %-16s │ %-44s │ %-36s │\n' "Vite HMR" "http://localhost:5173" "Optional fast-dev frontend"
+  printf '│ %-16s │ %-44s │ %-36s │\n' "API health" "http://localhost:3100/api/actuator/health" "Same-origin BFF check"
+  printf '│ %-16s │ %-44s │ %-36s │\n' "Direct API" "http://localhost:8080/actuator/health" "Backend debugging"
+  printf '│ %-16s │ %-44s │ %-36s │\n' "API docs" "http://localhost:8080/swagger-ui.html" "OpenAPI / Swagger UI"
+  printf '│ %-16s │ %-44s │ %-36s │\n' "API login" "POST /api/auth/login" "JWT issued after password login"
+  printf '└──────────────────┴──────────────────────────────────────────────┴──────────────────────────────────────┘\n'
 
-Clara demo is ready
+  printf '\nUsers\n'
+  printf '┌──────────────────┬────────────────────────┬──────────────────────────────────────┐\n'
+  printf '│ %-16s │ %-22s │ %-36s │\n' "Username" "Password" "Journey"
+  printf '├──────────────────┼────────────────────────┼──────────────────────────────────────┤\n'
+  printf '│ %-16s │ %-22s │ %-36s │\n' "demo" "demo-password" "Standard happy path"
+  printf '│ %-16s │ %-22s │ %-36s │\n' "demo-two" "demo-password-two" "Independent passkey journey"
+  printf '│ %-16s │ %-22s │ %-36s │\n' "demo-three" "demo-password-three" "Independent manual session"
+  printf '│ %-16s │ %-22s │ %-36s │\n' "demo-admin" "demo-admin-password" "Read-only oversight"
+  printf '└──────────────────┴────────────────────────┴──────────────────────────────────────┘\n'
 
-Web app       http://localhost:3100
-API health    http://localhost:3100/api/actuator/health
-Direct API    http://localhost:8080/actuator/health
+  printf '\nInfrastructure and observability\n'
+  printf '┌──────────────────┬────────────────────────────────┬──────────────────────────────────────────────┐\n'
+  printf '│ %-16s │ %-30s │ %-44s │\n' "Service" "Endpoint" "Credentials / purpose"
+  printf '├──────────────────┼────────────────────────────────┼──────────────────────────────────────────────┤\n'
+  printf '│ %-16s │ %-30s │ %-44s │\n' "PostgreSQL" "localhost:5432" "postgres/postgres; quotes_app/quotes_app"
+  printf '│ %-16s │ %-30s │ %-44s │\n' "Redis" "localhost:6379" "No authentication"
+  printf '│ %-16s │ %-30s │ %-44s │\n' "Kafka" "localhost:9094" "No authentication"
+  printf '│ %-16s │ %-30s │ %-44s │\n' "WireMock" "http://localhost:8089/__admin" "No authentication"
+  printf '│ %-16s │ %-30s │ %-44s │\n' "Grafana" "http://localhost:3001" "$grafana_access"
+  printf '│ %-16s │ %-30s │ %-44s │\n' "Prometheus" "http://localhost:9090" "No authentication"
+  printf '│ %-16s │ %-30s │ %-44s │\n' "Loki" "http://localhost:3101" "No authentication"
+  printf '│ %-16s │ %-30s │ %-44s │\n' "Tempo" "http://localhost:3200" "No authentication"
+  printf '│ %-16s │ %-30s │ %-44s │\n' "OTLP traces" "localhost:4317 / 4318" "Trace ingestion only"
+  printf '└──────────────────┴────────────────────────────────┴──────────────────────────────────────────────┘\n'
 
-Demo users
-  demo         / demo-password          standard happy path
-  demo-two     / demo-password-two      independent passkey journey
-  demo-three   / demo-password-three    independent manual session
-  demo-admin   / demo-admin-password    read-only oversight
-
-First passkey use: sign in with a password, then enroll a passkey from the
-authenticated app before trying passwordless login.
-
-Local services
-  PostgreSQL   localhost:5432
-  Redis        localhost:6379
-  Kafka        localhost:9094
-  WireMock     http://localhost:8089/__admin
-
-Commands
-  Stop         mise run stop
-  Reset data   mise run reset-demo
-  Observability: mise run up jvm observability
-EOF
+  printf '\nFirst passkey use: sign in with a password, then enroll a passkey before\ntrying passwordless login.\n'
+  printf 'Observability: mise run up jvm observability\n'
+  printf 'Stop:          mise run stop\n'
+  printf 'Reset data:    mise run reset-demo\n'
 }
 
 if curl --fail --silent --max-time 3 http://localhost:3100/api/actuator/health |

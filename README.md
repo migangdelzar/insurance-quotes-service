@@ -272,14 +272,28 @@ mise run up jvm observability
 |---|---|---|
 | Actuator | http://localhost:8080/actuator | Health, metrics, Prometheus, Modulith |
 | Prometheus | http://localhost:9090 | Scraped time series |
-| Grafana | http://localhost:3001 | Dashboards; admin/admin locally |
-| Loki | http://localhost:3101 | Structured logs |
-| Tempo | http://localhost:3200 | Trace query |
+| Grafana | http://localhost:3001 | Dashboards; `admin` / `demo-grafana-password` locally |
+| Loki | http://localhost:3101 | Structured logs; no local login |
+| Tempo | http://localhost:3200 | Trace query; no local login |
 | Tempo OTLP | localhost:4317 / 4318 | gRPC / HTTP trace ingestion |
 
 Business meters cover quote lifecycle, submission latency and outcomes, cache
 failures, and rate-limit behavior. The dashboard is provisioned from
 deployment/compose/observability/grafana/dashboards/quotes.json.
+
+The demo prints the complete local access matrix after startup. The same
+development credentials are summarized here:
+
+| Service | Endpoint | Local credentials |
+|---|---|---|
+| PostgreSQL | `localhost:5432` | `postgres` / `postgres`; app `quotes_app` / `quotes_app` |
+| Redis | `localhost:6379` | No authentication |
+| Kafka | `localhost:9094` | No authentication |
+| WireMock | `http://localhost:8089/__admin` | No authentication |
+| Grafana | `http://localhost:3001` | `admin` / `demo-grafana-password` |
+| Prometheus | `http://localhost:9090` | No authentication |
+| Loki | `http://localhost:3101` | No authentication |
+| Tempo | `http://localhost:3200` | No authentication |
 
 ### Reading logs and traces
 
