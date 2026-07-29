@@ -9,6 +9,10 @@ spring:
       port: 6379
 
 management:
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTEL_METRICS_EXPORT_ENABLED:false}
   opentelemetry:
     enabled: ${OTEL_SDK_ENABLED:false}
     tracing:

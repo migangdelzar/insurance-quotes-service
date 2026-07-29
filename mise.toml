@@ -133,3 +133,19 @@ docker compose \
 [tasks.reset-demo]
 description = "Reset local PostgreSQL, Redis, and Kafka demo state, then restart the stack"
 run = "./scripts/reset-demo.sh"
+
+[tasks.logs]
+description = "Follow API JSON logs from the full-stack demo"
+run = "./scripts/demo-observability.sh follow"
+
+[tasks.logs-all]
+description = "Follow logs from every local demo container"
+run = "./scripts/demo-observability.sh all"
+
+[tasks.logs-errors]
+description = "Print recent warnings and errors from the API"
+run = "./scripts/demo-observability.sh errors"
+
+[tasks.diagnose]
+description = "Check health, boundaries, tracing, and known infrastructure errors"
+run = "./scripts/demo-observability.sh check"

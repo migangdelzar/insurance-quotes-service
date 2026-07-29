@@ -52,6 +52,8 @@ class PerformanceConfigurationTest {
 
         assertThat(defaults.getProperty("management.opentelemetry.enabled", Boolean.class))
                 .isFalse();
+        assertThat(defaults.getProperty("management.otlp.metrics.export.enabled", Boolean.class))
+                .isFalse();
         assertThat(observability.getProperty("management.opentelemetry.enabled", Boolean.class))
                 .isTrue();
         assertThat(defaults.getProperty("management.opentelemetry.tracing.export.otlp.endpoint"))
