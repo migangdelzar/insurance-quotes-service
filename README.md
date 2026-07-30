@@ -76,7 +76,7 @@ challenge easy to run as one deployable application:
 
 For the package-by-package vocabulary and dependency direction, see the
 [module package structure design](docs/architecture/module-package-structure-design.md)
-and its [execution plan](docs/architecture/module-package-structure-plan.md).
+and its [architecture guide](docs/architecture/module-package-structure-design.md).
 
 This is a **modular monolith by choice**: it gives recruiters and future
 engineers visible domain boundaries, fast local feedback, and low operational
