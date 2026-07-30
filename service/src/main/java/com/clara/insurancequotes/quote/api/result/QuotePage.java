@@ -2,8 +2,9 @@ package com.clara.insurancequotes.quote.api.result;
 
 import java.util.List;
 
-public record QuotePageView(
-        List<QuoteView> content,
+/** Stable public page of quote search results. */
+public record QuotePage(
+        List<QuoteDetails> content,
         int page,
         int size,
         long totalElements,

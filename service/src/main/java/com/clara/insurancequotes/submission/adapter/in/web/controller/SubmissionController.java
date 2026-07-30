@@ -1,6 +1,6 @@
 package com.clara.insurancequotes.submission.adapter.in.web.controller;
 
-import com.clara.insurancequotes.quote.api.result.QuoteView;
+import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.submission.api.usecase.SubmissionApi;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class SubmissionController {
     private final SubmissionApi submissionApi;
 
     @PostMapping(value = "/quotes/{id}/submit", version = "1.0")
-    public QuoteView submit(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+    public QuoteDetails submit(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
         log.debug("Submitting quote {}", id);
         return submissionApi.submit(id, UUID.fromString(jwt.getClaimAsString("uid")));
     }

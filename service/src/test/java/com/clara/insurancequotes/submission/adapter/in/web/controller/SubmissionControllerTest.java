@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
-import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import com.clara.insurancequotes.submission.adapter.in.web.advice.SubmissionExceptionHandler;

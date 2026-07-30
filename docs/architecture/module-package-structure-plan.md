@@ -204,12 +204,16 @@ Keep the quote lifecycle capabilities required by submission as explicit,
 small quote API interfaces rather than reintroducing a broad facade. Preserve
 the existing owner-isolation and administrator behavior.
 
-- [ ] **Step 1: Add compile-level/controller contract tests for focused interfaces**
-- [ ] **Step 2: Run quote tests and verify they fail because the focused interfaces and target result names do not exist**
-- [ ] **Step 3: Rename result/query records and split `QuoteService` into focused services**
-- [ ] **Step 4: Update controller and submission callers; assert serialized JSON remains identical in controller tests**
-- [ ] **Step 5: Run quote unit/controller tests and expect PASS**
+- [x] **Step 1: Add compile-level/controller contract tests for focused interfaces**
+- [x] **Step 2: Run quote tests and verify they fail because the focused interfaces and target result names do not exist**
+- [x] **Step 3: Rename result/query records and split `QuoteService` into focused services**
+- [x] **Step 4: Update controller and submission callers; assert serialized JSON remains identical in controller tests**
+- [x] **Step 5: Run quote unit/controller tests and expect PASS**
 - [ ] **Step 6: Commit**
+
+The API split also moves `RequestingUser` into `quote.api.type`, exposes the
+real `quote.api.exception` package as a named interface, and keeps invalid query
+parameter parsing inside the web adapter rather than the application layer.
 
 ```bash
 git add service/src/main/java/com/clara/insurancequotes/quote service/src/test/java/com/clara/insurancequotes/quote service/src/main/java/com/clara/insurancequotes/submission

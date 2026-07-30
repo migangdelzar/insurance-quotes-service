@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
-import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.query.SearchQuotesQuery;
 import com.clara.insurancequotes.quote.api.type.HealthCondition;
 import com.clara.insurancequotes.quote.application.port.out.StaleQuoteRef;
 import com.clara.insurancequotes.quote.domain.model.HealthProfile;
@@ -115,7 +115,7 @@ class QuoteRepositoryIT {
         repository.save(QuoteMother.draftForOwner(ownerA));
         repository.save(QuoteMother.draftForOwner(ownerB));
 
-        var page = repository.findPage(QuoteQuery.defaults(), ownerA);
+        var page = repository.findPage(SearchQuotesQuery.defaults(), ownerA);
 
         assertThat(page.content()).hasSize(1);
         assertThat(page.content().get(0).userId()).isEqualTo(ownerA);

@@ -1,14 +1,15 @@
 package com.clara.insurancequotes.quote.api.query;
 
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
-import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
+import com.clara.insurancequotes.quote.api.type.QuoteStatusView;
 import java.util.Locale;
 
-public record QuoteQuery(
+/** Public query for filtering, ordering, and paging a caller's quotes. */
+public record SearchQuotesQuery(
         int page,
         int size,
         String search,
-        QuoteStatus status,
+        QuoteStatusView status,
         CoverageType coverage,
         QuoteSortField sortBy,
         SortDirection direction) {
@@ -16,7 +17,7 @@ public record QuoteQuery(
     public static final int DEFAULT_SIZE = 20;
     public static final int MAX_SIZE = 100;
 
-    public QuoteQuery {
+    public SearchQuotesQuery {
         if (page < 0) {
             throw new IllegalArgumentException("page must be zero or greater");
         }
@@ -28,20 +29,20 @@ public record QuoteQuery(
         direction = direction == null ? SortDirection.DESC : direction;
     }
 
-    public static QuoteQuery of(
+    public static SearchQuotesQuery of(
             int page, int size, String search, String status, String coverage, String sortBy, String direction) {
-        return new QuoteQuery(
+        return new SearchQuotesQuery(
                 page,
                 size,
                 search,
-                parseEnum(status, QuoteStatus.class, "status"),
+                parseEnum(status, QuoteStatusView.class, "status"),
                 parseEnum(coverage, CoverageType.class, "coverage"),
                 QuoteSortField.from(sortBy),
                 SortDirection.from(direction));
     }
 
-    public static QuoteQuery defaults() {
-        return new QuoteQuery(0, DEFAULT_SIZE, null, null, null, QuoteSortField.CREATED_AT, SortDirection.DESC);
+    public static SearchQuotesQuery defaults() {
+        return new SearchQuotesQuery(0, DEFAULT_SIZE, null, null, null, QuoteSortField.CREATED_AT, SortDirection.DESC);
     }
 
     private static String normalizeSearch(String value) {

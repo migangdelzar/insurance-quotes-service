@@ -1,6 +1,6 @@
 package com.clara.insurancequotes.quote.application.port.out;
 
-import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.query.SearchQuotesQuery;
 import com.clara.insurancequotes.quote.domain.model.Quote;
 import java.time.Instant;
 import java.util.List;
@@ -14,7 +14,7 @@ public interface QuoteRepository {
     /** {@code ownerId == null} means unscoped (admin); non-null scopes to that owner. */
     Optional<Quote> findById(UUID id, UUID ownerId);
 
-    QuoteSearchResult findPage(QuoteQuery query, UUID ownerId);
+    QuoteSearchResult findPage(SearchQuotesQuery query, UUID ownerId);
 
     QuoteSummaryData findSummary(Instant now, UUID ownerId);
 

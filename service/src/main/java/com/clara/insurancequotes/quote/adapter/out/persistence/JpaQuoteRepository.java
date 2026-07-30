@@ -1,7 +1,7 @@
 package com.clara.insurancequotes.quote.adapter.out.persistence;
 
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
-import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.query.SearchQuotesQuery;
 import com.clara.insurancequotes.quote.api.query.SortDirection;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.application.port.out.QuoteSearchResult;
@@ -44,7 +44,7 @@ public class JpaQuoteRepository implements QuoteRepository {
     }
 
     @Override
-    public QuoteSearchResult findPage(QuoteQuery query, UUID ownerId) {
+    public QuoteSearchResult findPage(SearchQuotesQuery query, UUID ownerId) {
         Specification<Quote> specification = (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.conjunction();
         if (ownerId != null) {
             specification = specification.and(
@@ -52,7 +52,7 @@ public class JpaQuoteRepository implements QuoteRepository {
         }
         if (query.status() != null) {
             specification = specification.and((root, criteriaQuery, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("status"), query.status()));
+                    criteriaBuilder.equal(root.get("status"), QuoteStatus.valueOf(query.status().name())));
         }
         if (query.coverage() != null) {
             specification = specification.and((root, criteriaQuery, criteriaBuilder) ->

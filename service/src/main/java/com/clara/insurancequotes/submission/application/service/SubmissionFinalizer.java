@@ -1,8 +1,8 @@
 package com.clara.insurancequotes.submission.application.service;
 
 import com.clara.insurancequotes.shared.observability.BusinessMetrics;
-import com.clara.insurancequotes.quote.api.result.QuoteView;
-import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
+import com.clara.insurancequotes.quote.api.result.QuoteDetails;
+import com.clara.insurancequotes.quote.api.usecase.MarkQuoteSubmittedUseCase;
 import com.clara.insurancequotes.submission.api.event.QuoteSubmitted;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class SubmissionFinalizer {
 
-    private final QuoteApi quoteApi;
+    private final MarkQuoteSubmittedUseCase markQuoteSubmittedUseCase;
     private final ApplicationEventPublisher events;
     private final BusinessMetrics metrics;
 
     @Transactional
-    public QuoteView completeSubmission(UUID quoteId, UUID ownerId) {
-        var view = quoteApi.markSubmitted(quoteId, ownerId);
+    public QuoteDetails completeSubmission(UUID quoteId, UUID ownerId) {
+        var view = markQuoteSubmittedUseCase.markSubmitted(quoteId, ownerId);
         events.publishEvent(new QuoteSubmitted(view.id(), view.monthlyPremium(), view.updatedAt()));
         metrics.domainEventPublished("quote_submitted");
         log.debug("Finalized quote submission {}", quoteId);

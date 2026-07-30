@@ -35,6 +35,8 @@ class ModularityTest {
         assertThat(quote.getNamedInterfaces().getByName("quote-api-result")).isPresent();
         assertThat(quote.getNamedInterfaces().getByName("quote-api-usecase")).isPresent();
         assertThat(quote.getNamedInterfaces().getByName("quote-api-type")).isPresent();
+        assertThat(quote.getNamedInterfaces().getByName("quote-api-exception")).isPresent();
+        assertThat(quote.getNamedInterfaces().getByName("quote-domain-model")).isEmpty();
     }
 
     @Test

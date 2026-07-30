@@ -1,8 +1,7 @@
 package com.clara.insurancequotes.quote.adapter.in.web.advice;
 
-import com.clara.insurancequotes.quote.application.exception.InvalidQuoteQueryException;
-import com.clara.insurancequotes.quote.application.exception.QuoteApplicationException;
-import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.adapter.in.web.exception.InvalidQuoteQueryException;
+import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.exception.IncompleteQuoteException;
 import com.clara.insurancequotes.quote.domain.exception.InvalidStateTransitionException;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class QuoteExceptionHandler {
 
-    @ExceptionHandler({QuoteException.class, QuoteApplicationException.class})
+    @ExceptionHandler({QuoteException.class, InvalidQuoteQueryException.class, QuoteNotFoundException.class})
     public ResponseEntity<ApiError> handle(RuntimeException exception) {
         var mapped = map(exception);
         return ResponseEntity.status(mapped.status())

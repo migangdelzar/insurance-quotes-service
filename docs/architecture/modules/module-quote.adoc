@@ -5,7 +5,15 @@
 |Spring components
 |_Services_
 
-* `c.c.i.q.api.usecase.QuoteApi` (via `c.c.i.q.application.service.QuoteService`)
+* `c.c.i.q.api.usecase.CreateQuoteUseCase` (via `c.c.i.q.application.service.CreateQuoteService`)
+* `c.c.i.q.api.usecase.EnsureQuoteSubmittableUseCase` (via `c.c.i.q.application.service.EnsureQuoteSubmittableService`)
+* `c.c.i.q.api.usecase.GetOwnedQuoteUseCase` (via `c.c.i.q.application.service.GetOwnedQuoteService`)
+* `c.c.i.q.api.usecase.GetQuoteUseCase` (via `c.c.i.q.application.service.GetQuoteService`)
+* `c.c.i.q.api.usecase.GetQuoteSummaryUseCase` (via `c.c.i.q.application.service.GetQuoteSummaryService`)
+* `c.c.i.q.api.usecase.MarkQuoteSubmissionFailedUseCase` (via `c.c.i.q.application.service.MarkQuoteSubmissionFailedService`)
+* `c.c.i.q.api.usecase.MarkQuoteSubmittedUseCase` (via `c.c.i.q.application.service.MarkQuoteSubmittedService`)
+* `c.c.i.q.api.usecase.SearchQuotesUseCase` (via `c.c.i.q.application.service.SearchQuotesService`)
+* `c.c.i.q.api.usecase.UpdateCoverageUseCase` (via `c.c.i.q.application.service.UpdateCoverageService`)
 |Bean references
 |* `c.c.i.s.observability.BusinessMetrics` (in Shared)
 * `c.c.i.p.api.usecase.CalculatePremiumUseCase` (in Pricing)

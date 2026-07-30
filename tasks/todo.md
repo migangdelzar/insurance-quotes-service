@@ -4,8 +4,8 @@
 
 - [ ] Every module follows the documented `api` / `application` / `domain` / `adapter` / `configuration` responsibilities.
 - [ ] Class names consistently communicate commands, queries, results, use cases, services, events, exceptions, ports, and adapters.
-- [ ] HTTP, persistence, Kafka, Redis, pricing, authentication, and submission behavior remains unchanged.
-- [ ] Spring Modulith and architecture tests pass.
+- [x] HTTP, persistence, Kafka, Redis, pricing, authentication, and submission behavior remains unchanged.
+- [x] Spring Modulith and architecture tests pass.
 - [ ] The PR is pushed and ready for review.
 
 ## Progress
@@ -15,7 +15,7 @@
 - [x] Task 1 — module metadata and package vocabulary (`dad1da4`, `39dba30`, `30b908f`).
 - [x] Task 2 — shared configuration and observability (`e6d7e83`).
 - [x] Task 3 — pricing naming (`dc3a172`, follow-up naming/docs fixes in this commit).
-- [ ] Task 4 — quote API split and public result naming.
+- [ ] Task 4 — quote API split and public result naming (tests passing; commit pending).
 - [ ] Task 5 — authentication transport boundary.
 - [ ] Task 6 — submission naming.
 - [ ] Task 7 — persistence/client/mapper naming.
@@ -46,6 +46,8 @@ Task 3 standardizes the Pricing module's command, use-case, and application
 service names while preserving premium calculation behavior and its public
 `Premium` result.
 
-The pricing and quote focused tests pass with 18 tests and 0 failures. The
-requirements traceability links and quote helper naming now use the target
-pricing terminology.
+Task 4 replaces the broad Quote API with focused use-case contracts and matching
+application services. Quote results use business names, and Submission consumes
+only public Quote API models and use cases; it no longer depends on Quote domain
+status types. Controller JSON fields, caching, metrics, pricing, ownership, and
+administrator behavior are covered by focused regression tests.

@@ -83,7 +83,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/QuotePageView"
+                $ref: "#/components/schemas/QuotePage"
     post:
       tags:
       - quote-controller
@@ -108,7 +108,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/QuoteView"
+                $ref: "#/components/schemas/QuoteDetails"
   /quotes/{id}/submit:
     post:
       tags:
@@ -134,7 +134,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/QuoteView"
+                $ref: "#/components/schemas/QuoteDetails"
   /quotes/summary:
     get:
       tags:
@@ -154,7 +154,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/QuoteSummaryView"
+                $ref: "#/components/schemas/QuoteSummary"
   /auth/webauthn/register:
     post:
       tags:
@@ -353,7 +353,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/QuoteView"
+                $ref: "#/components/schemas/QuoteDetails"
   /quotes/{id}:
     get:
       tags:
@@ -379,7 +379,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/QuoteView"
+                $ref: "#/components/schemas/QuoteDetails"
 components:
   schemas:
     CreateQuoteRequest:
@@ -406,13 +406,13 @@ components:
       - email
       - name
       - zipCode
-    QuotePageView:
+    QuotePage:
       type: object
       properties:
         content:
           type: array
           items:
-            $ref: "#/components/schemas/QuoteView"
+            $ref: "#/components/schemas/QuoteDetails"
         page:
           type: integer
           format: int32
@@ -437,7 +437,7 @@ components:
       - totalPages
       - hasNext
       - hasPrevious
-    QuoteDistributionView:
+    QuoteDistribution:
       type: object
       properties:
         key:
@@ -448,7 +448,7 @@ components:
       required:
       - key
       - count
-    QuoteTrendPointView:
+    QuoteTrendPoint:
       type: object
       properties:
         date:
@@ -468,7 +468,7 @@ components:
       - created
       - submitted
       - failed
-    QuoteSummaryView:
+    QuoteSummary:
       type: object
       properties:
         totalQuotes:
@@ -498,15 +498,15 @@ components:
         statusDistribution:
           type: array
           items:
-            $ref: "#/components/schemas/QuoteDistributionView"
+            $ref: "#/components/schemas/QuoteDistribution"
         coverageDistribution:
           type: array
           items:
-            $ref: "#/components/schemas/QuoteDistributionView"
+            $ref: "#/components/schemas/QuoteDistribution"
         trend:
           type: array
           items:
-            $ref: "#/components/schemas/QuoteTrendPointView"
+            $ref: "#/components/schemas/QuoteTrendPoint"
       required:
       - totalQuotes
       - draftQuotes
@@ -520,7 +520,7 @@ components:
       - statusDistribution
       - coverageDistribution
       - trend
-    QuoteView:
+    QuoteDetails:
       type: object
       properties:
         id:

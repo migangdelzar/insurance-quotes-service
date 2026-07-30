@@ -3,7 +3,8 @@ package com.clara.insurancequotes.quote.api.result;
 import java.math.BigDecimal;
 import java.util.List;
 
-public record QuoteSummaryView(
+/** Stable public analytics summary for quotes visible to a requester. */
+public record QuoteSummary(
         long totalQuotes,
         long draftQuotes,
         long submittedQuotes,
@@ -13,10 +14,10 @@ public record QuoteSummaryView(
         BigDecimal totalMonthlyPremium,
         BigDecimal averageMonthlyPremium,
         BigDecimal submissionRate,
-        List<QuoteDistributionView> statusDistribution,
-        List<QuoteDistributionView> coverageDistribution,
-        List<QuoteTrendPointView> trend) {
-    public QuoteSummaryView {
+        List<QuoteDistribution> statusDistribution,
+        List<QuoteDistribution> coverageDistribution,
+        List<QuoteTrendPoint> trend) {
+    public QuoteSummary {
         statusDistribution = statusDistribution == null ? null : List.copyOf(statusDistribution);
         coverageDistribution = coverageDistribution == null ? null : List.copyOf(coverageDistribution);
         trend = trend == null ? null : List.copyOf(trend);
