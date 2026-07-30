@@ -2,11 +2,11 @@
 
 ## Acceptance criteria
 
-- [ ] Every module follows the documented `api` / `application` / `domain` / `adapter` / `configuration` responsibilities.
-- [ ] Class names consistently communicate commands, queries, results, use cases, services, events, exceptions, ports, and adapters.
+- [x] Every module follows the documented `api` / `application` / `domain` / `adapter` / `configuration` responsibilities.
+- [x] Class names consistently communicate commands, queries, results, use cases, services, events, exceptions, ports, and adapters.
 - [x] HTTP, persistence, Kafka, Redis, pricing, authentication, and submission behavior remains unchanged.
 - [x] Spring Modulith and architecture tests pass.
-- [ ] The PR is pushed and ready for review.
+- [x] The PR is pushed and ready for review: https://github.com/migangdelzar/insurance-quotes-service/pull/7
 
 ## Progress
 
