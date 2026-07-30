@@ -13,6 +13,30 @@ Every row below was checked against real files, not assumed from the READMEs. Wh
 row is **Open**, the evidence for the gap is in the [Gaps](#gaps--recommendations)
 section.
 
+## Quote Lifecycle
+
+The state machine referenced throughout the FRs and business rules below (FR-010,
+FR-011, FR-015, BR-015, BR-017, BR-018, BR-019, BR-022):
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT: FR-001 create
+    DRAFT --> DRAFT: FR-006 update coverage
+    DRAFT --> SUBMITTED: FR-009 submit succeeds
+    DRAFT --> SUBMISSION_FAILED: FR-011 insurer call fails
+    DRAFT --> EXPIRED: FR-014 draft TTL elapsed
+    SUBMISSION_FAILED --> SUBMISSION_FAILED: FR-006 update coverage
+    SUBMISSION_FAILED --> SUBMITTED: FR-009 retry succeeds
+    SUBMISSION_FAILED --> EXPIRED: FR-014 draft TTL elapsed
+    SUBMITTED --> SUBMITTED: FR-010 resubmit (idempotent, no-op)
+    EXPIRED --> [*]: terminal, no further transitions
+    SUBMITTED --> [*]: terminal, no further transitions
+```
+
+`EXPIRED` and `SUBMITTED` are terminal — no FR or BR permits a transition out of
+either. Only `DRAFT` and `SUBMISSION_FAILED` allow coverage edits (BR-015) or a
+submit attempt (BR-017).
+
 ## Functional Requirements
 
 | ID     | Title | User Story | Priority | Status |
@@ -24,7 +48,7 @@ section.
 | FR-005 | View Dynamically Updated Premium | As an Applicant, I want to see my estimated monthly premium update as I change coverage or health selections so that I understand the cost impact before submitting. | High | Verified |
 | FR-006 | Recalculate Premium Server-Side on Coverage Update | As a System, I want `PATCH /quotes/{id}/coverage` to recalculate and persist the premium so that pricing is never trusted from the client. | High | Verified |
 | FR-007 | Enforce Age-Gated Health Data Rule Server-Side | As a System, I want to reject health data submitted for applicants aged 65 or under so that the conditional rule cannot be bypassed by a malicious or buggy client. | High | Verified |
-| FR-008 | Review Quote Summary | As an Applicant, I want a read-only summary of everything I entered plus my calculated premium so that I can confirm before submitting. | High | Verified |
+| FR-008 | Review Quote Summary | As an Applicant, I want a read-only summary of everything I entered plus my calculated premium so that I can confirm before submitting. | High | Implemented |
 | FR-009 | Submit Quote to Insurer | As an Applicant, I want to submit my finished quote to the insurer so that my application is formally filed. | High | Verified |
 | FR-010 | Idempotent Resubmission | As an Applicant, I want resubmitting an already-submitted quote to succeed without side effects so that accidental double-clicks don't trigger duplicate insurer calls. | High | Verified |
 | FR-011 | Retry After Submission Failure | As an Applicant, I want a failed submission to leave my quote resubmittable so that I can retry after a transient insurer or network failure. | High | Verified |
@@ -32,7 +56,7 @@ section.
 | FR-013 | List All Quotes | As an Admin, I want to list all quotes so that I can review submission activity across applicants. | Medium | Verified |
 | FR-014 | Expire Stale Draft Quotes | As a System, I want a scheduled job to transition drafts older than a configurable window to `EXPIRED` in one batch so that abandoned quotes don't linger indefinitely. | Medium | Verified |
 | FR-015 | Block Actions on Expired Quotes | As a System, I want `EXPIRED` quotes to be rejected from submission like any other invalid state so that stale data can never be finalized. | High | Verified |
-| FR-016 | Invalidate Cache on Expiration | As a System, I want a quote's cache entry evicted the moment it expires so that cached reads never return stale data for an `EXPIRED` quote. | Medium | Verified |
+| FR-016 | Invalidate Cache on Expiration | As a System, I want a quote's cache entry evicted the moment it expires so that cached reads never return stale data for an `EXPIRED` quote. | Medium | Implemented |
 | FR-017 | Authenticate Before Any Quote Action | As an Applicant, I want to log in before I can create, update, or submit a quote so that my data stays private to me. | High | Verified |
 | FR-018 | Handle Failed or Timed-Out Submission in the UI | As an Applicant, I want clear feedback — and, on a timeout, an automatic status recheck — when submission fails so that I know whether to retry or wait. | High | Verified |
 | FR-019 | Passwordless / Passkey Login | As an Applicant, I want to enroll and sign in with a passkey so that I can access my quotes without typing a password. | Low | Verified |
@@ -86,28 +110,30 @@ the implementation path and/or test named below rather than the status word alon
 
 | ID | Implementation | Test evidence |
 |----|-----------------|----------------|
-| FR-001 | `QuoteController.java:39` (`POST /quotes`) → `QuoteService.create()` | `QuoteControllerTest`, `QuoteServiceTest` |
-| FR-002 | `apps/web/src/features/quote-wizard/steps/personal/personalSchema.ts:3-21` (yup, all fields required) | `PersonalInfoStep.test.tsx` |
-| FR-003 | `apps/web/.../CoverageStep.tsx` (radio group BASIC/STANDARD/PREMIUM) | `CoverageStep.test.tsx` |
-| FR-004 | `apps/web/.../HealthQuestionsSection.tsx:11-25` (conditions multiselect, prescription, tobacco, spouse) | `HealthQuestionsSection.test.tsx` |
-| FR-005 | `apps/web/.../useDebouncedCoverageSync.ts` (400ms debounce → `PATCH /quotes/{id}/coverage`) | `useDebouncedCoverageSync.test.tsx`, `PremiumDisplay.test.tsx` |
-| FR-006 | `QuoteService.java:63-80` (`updateCoverage`) → `DefaultPremiumCalculator.java` | `DefaultPremiumCalculatorTest.specWorkedExample_age70StandardOneConditionSmokerWithSpouse_is327_60` |
-| FR-007 | `QuoteService.java:179-183` (`rejectHealthDataForNonSeniors`) → `HealthDataNotAllowedException` | `QuoteServiceTest` |
-| FR-008 | `apps/web/.../SummaryStep.tsx` (read-only review + `PremiumDisplay`) | covered via wizard integration tests |
-| FR-009 | `SubmissionController.java:21` (`POST /quotes/{id}/submit`) → `SubmissionService.submit()` → `HttpInsurerClient` (`https://httpbin.org/status/200`, confirmed reachable via curl) | `SubmissionControllerTest`, `SubmissionServiceTest.submit_insurerAccepts_finalizes` |
+| FR-001 | `service/.../quote/adapter/in/web/controller/QuoteController.java:39` (`POST /quotes`) → `QuoteService.create()` | `QuoteControllerTest`, `QuoteServiceTest` |
+| FR-002 | `apps/web/src/features/quote-wizard/steps/personal/personalSchema.ts:3-21` (yup, all fields required) | `apps/web/src/features/quote-wizard/steps/personal/PersonalInfoStep.test.tsx` |
+| FR-003 | `apps/web/src/features/quote-wizard/steps/coverage/CoverageStep.tsx` (radio group BASIC/STANDARD/PREMIUM) | `apps/web/src/features/quote-wizard/steps/coverage/CoverageStep.test.tsx` |
+| FR-004 | `apps/web/src/features/quote-wizard/steps/coverage/HealthQuestionsSection.tsx:11-25` (conditions multiselect, prescription, tobacco, spouse) | `apps/web/src/features/quote-wizard/steps/coverage/HealthQuestionsSection.test.tsx` |
+| FR-005 | `apps/web/src/features/quote-wizard/steps/coverage/useDebouncedCoverageSync.ts` (400ms debounce → `PATCH /quotes/{id}/coverage`) | `apps/web/src/features/quote-wizard/steps/coverage/useDebouncedCoverageSync.test.tsx`, `apps/web/src/features/quote-wizard/components/PremiumDisplay.test.tsx` |
+| FR-006 | `service/.../quote/application/service/QuoteService.java:63-80` (`updateCoverage`) → `service/.../pricing/application/service/DefaultPremiumCalculator.java` | `DefaultPremiumCalculatorTest.specWorkedExample_age70StandardOneConditionSmokerWithSpouse_is327_60` (reproduces the brief's $327.60 example exactly) |
+| FR-007 | `QuoteService.java:179-183` (`rejectHealthDataForNonSeniors`) → `HealthDataNotAllowedException` | `QuoteServiceTest` (rejection case) |
+| FR-008 | `apps/web/src/features/quote-wizard/steps/summary/SummaryStep.tsx` (read-only review + `PremiumDisplay`) | No dedicated component unit test exists for `SummaryStep.tsx` (confirmed: no `SummaryStep.test.tsx`, not imported by any other test file except the router). Exercised only via the Playwright e2e suite's "standard adult quote and successful submission" journey (`insurance-quotes-web` README, Test matrix). Downgrading confidence accordingly — see note below the table. |
+| FR-009 | `service/.../submission/adapter/in/web/controller/SubmissionController.java:21` (`POST /quotes/{id}/submit`) → `SubmissionService.submit()` → `HttpInsurerClient` (`insurer.base-url` default `https://httpbin.org/status/200`, confirmed reachable with `curl -X POST https://httpbin.org/status/200` → `200`) | `SubmissionControllerTest`, `SubmissionServiceTest.submit_insurerAccepts_finalizes` |
 | FR-010 | `SubmissionService.java:26-31` (already-`SUBMITTED` short-circuit) | `SubmissionServiceTest.submit_alreadySubmitted_isIdempotentAndSkipsInsurer` |
 | FR-011 | `SubmissionService.java:39-50` (`markSubmissionFailed` on `InsurerUnavailableException`) | `SubmissionServiceTest.submit_insurerFails_marksFailedAndRethrows`, `QuoteTest.markSubmissionFailed_thenSubmittable_again` |
 | FR-012 | `QuoteController.java:55` (`GET /quotes/{id}`), `@Cacheable` in `QuoteService.getQuote` | `QuoteControllerTest` |
 | FR-013 | `QuoteController.java:60` (`GET /quotes`) | `QuoteControllerTest` |
-| FR-014 | `DraftExpirationJob.java` (`expireStaleDrafts`), `ExpirationScheduleConfig.java`, `quote.expiration.draft-ttl` in `application.yml` | job unit coverage under `quote.application.service` test package |
+| FR-014 | `service/.../quote/application/service/DraftExpirationJob.java` (`expireStaleDrafts`), `ExpirationScheduleConfig.java`, `quote.expiration.draft-ttl` in `application.yml:99-102` | `DraftExpirationJobTest.expiresOnlyDraftsOlderThanTtl_andPublishesOneEventPerQuote`, `.noStaleDrafts_returnsZeroAndPublishesNothing` |
 | FR-015 | `QuoteTest.expiredQuote_isNeverSubmittable` | same |
-| FR-016 | `QuoteCacheEvictionListener.java:18-25` (`@EventListener` on `QuoteExpired`) | — |
-| FR-017 | `SecurityConfig.java:28-46` (`anyRequest().hasAuthority("SCOPE_api")`, 401 entry point) | — |
-| FR-018 | `apps/web/.../useSubmitQuote.ts` (timeout → `getQuote` recheck), `SubmissionResult.tsx` | `useSubmitQuote.test.tsx`, `SubmissionResult.test.tsx` |
-| FR-019 | `AuthController.java:60-78` (WebAuthn endpoints), `UC-002-enroll-a-passkey.md` | — |
-| FR-020 | `apps/web/.../QuotesListPage.tsx` (pagination/filter/sort) | `QuotesListPage.test.tsx` |
-| FR-021 | `QuoteService.java:103-139` (`getSummary`) | — |
-| FR-022 | `packages/app-i18n` (`t()`/`tid()`), browser locale detection | — |
+| FR-016 | `service/.../quote/adapter/in/messaging/consumer/QuoteCacheEvictionListener.java:18-25` (`@EventListener` on `QuoteExpired`) evicts the cache entry when the job's event fires (proven by `DraftExpirationJobTest.expiresOnlyDraftsOlderThanTtl_andPublishesOneEventPerQuote`) | No dedicated unit test exists for `QuoteCacheEvictionListener` itself — the listener's behavior is verified by code inspection only, not by a direct test. Downgrading confidence accordingly — see note below the table. |
+| FR-017 | `service/.../auth/configuration/SecurityConfig.java:28-46` (`anyRequest().hasAuthority("SCOPE_api")`, 401 entry point) | `QuoteControllerTest.getQuotes_withoutJwt_returns401` |
+| FR-018 | `apps/web/src/features/quote-wizard/steps/summary/useSubmitQuote.ts` (timeout → `getQuote` recheck), `SubmissionResult.tsx` | `apps/web/.../summary/useSubmitQuote.test.tsx`, `apps/web/.../summary/SubmissionResult.test.tsx` |
+| FR-019 | `service/.../auth/adapter/in/web/controller/AuthController.java:60-78` (WebAuthn endpoints) | `WebAuthnServiceTest.assertionWithValidCeremonyIssuesTokenPair`, `.assertionForKnownUserWithoutPasskeyRequiresPasswordSetup`, `.assertionMfaTokenMustCarryMfaPendingScope` |
+| FR-020 | `apps/web/src/pages/QuotesListPage.tsx` (pagination/filter/sort) | `apps/web/src/pages/QuotesListPage.test.tsx` |
+| FR-021 | `service/.../quote/application/service/QuoteService.java:103-139` (`getSummary`) | `QuoteServiceTest.getSummary_returnsAggregateMetricsAndSevenDayTrend` |
+| FR-022 | `packages/app-i18n` (`t()`/`tid()`), browser locale detection | `packages/app-i18n/src/index.test.ts` |
+
+FR-008 and FR-016 are marked `Implemented` rather than `Verified`: both are implemented correctly, but neither has a *direct* test (FR-008's `SummaryStep` has only indirect e2e coverage; FR-016's cache-eviction listener has no dedicated test, only an inference from the job that publishes the event it consumes). Per this catalog's own status definitions, `Verified` requires a passing direct check — downgraded per CodeRabbit review feedback on this document rather than left unsupported.
 
 ### Non-Functional Requirements
 
@@ -117,20 +143,21 @@ the implementation path and/or test named below rather than the status word alon
 | NFR-002 | `application.yml:59-62` — `insurer.connect-timeout: 2s`, `read-timeout: 5s`; enforced in `InsurerClientConfig.java` |
 | NFR-003 | `pom.xml:278-292` — JaCoCo `COVEREDRATIO` rule, `minimum: 0.80` |
 | NFR-004 | `SecurityConfig.java:57-65` — `restAuthenticationEntryPoint` returns 401 + `ApiError` JSON |
-| NFR-005 | `GlobalExceptionHandler.java`, plus module advices (`QuoteExceptionHandler`, `SubmissionExceptionHandler`, `AuthExceptionHandler`) |
+| NFR-005 | `service/src/main/java/com/clara/insurancequotes/shared/error/GlobalExceptionHandler.java`, plus module advices: `quote/adapter/in/web/advice/QuoteExceptionHandler.java`, `submission/adapter/in/web/advice/SubmissionExceptionHandler.java`, `auth/adapter/in/web/advice/AuthExceptionHandler.java` |
 | NFR-006 | `application.yml:92-97` — `web.rate-limit.quote-mutation.limit: 30`, `window: 1m` |
 | NFR-007 | `application.yml:99-102` — `quote.expiration.draft-ttl: 30m` |
-| NFR-008 | `apps/web/.../AppNavigation.tsx:50` (`useMediaQuery`), `AppShell.tsx` breakpoint `sx` props |
-| NFR-009 | `packages/build-config/eslint.config.js` (`jsx-a11y` recommended), `useFocusHeading.ts`, `WizardProgress.tsx` (`aria-current="step"`) |
-| NFR-010 | `deployment/compose/docker-compose.yml` + `mise run demo` |
-| NFR-011 | README "Reading logs and traces" section; JSON stdout → Alloy → Loki pipeline |
+| NFR-008 | `apps/web/src/shared/components/AppNavigation.tsx:50` (`useMediaQuery(theme.breakpoints.up('md'))`), `apps/web/src/shared/components/AppShell.tsx` breakpoint `sx` props |
+| NFR-009 | `packages/build-config/eslint.config.js` (`jsx-a11y` recommended ruleset), `apps/web/src/shared/hooks/useFocusHeading.ts`, `apps/web/src/features/quote-wizard/components/WizardProgress.tsx` (`aria-current="step"`) |
+| NFR-010 | `deployment/compose/docker-compose.yml` + `mise run demo` (verified: this catalog's own PR #4/#5 CI runs exercised the Compose config successfully) |
+| NFR-011 | `insurance-quotes-service/README.md`, "Reading logs and traces" section (line 298) — JSON stdout → Alloy → Loki pipeline |
 
 ### Constraints
 
 | ID | Evidence |
 |----|----------|
-| C-001–C-004 | `pom.xml` (`java.version`, Spring Boot parent, Maven build), Flyway migrations under `service/src/main/resources/db/migration` |
-| C-005–C-008 | `apps/web/package.json` — `react`, `typescript`, `@mui/material`, `react-hook-form`, `yup` |
+| C-001 | `platform/pom.xml:18` — `<java.version>17</java.version>` |
+| C-002–C-004 | `platform/pom.xml` (Spring Boot parent), Maven reactor build, Flyway migrations under `service/src/main/resources/db/migration` |
+| C-005–C-008 | `insurance-quotes-web/apps/web/package.json` — `react ^19`, `typescript ~5.7.2`, `@mui/material ^6.3.0`, `react-hook-form ^7.54.0`, `yup ^1.6.0` |
 | C-009 | `gh repo view migangdelzar/insurance-quotes-service --json visibility` → `PUBLIC`; same for `insurance-quotes-web`; each README links the other |
 | C-010 | `application.yml:60` — `INSURER_BASE_URL` default `https://httpbin.org/status/200`, confirmed reachable via direct `curl -X POST` |
 | C-011 | `AgeFactor.java`, `ConditionsFactor.java`, `TobaccoFactor.java`, `SpouseFactor.java` (constants `1.5`/`1.3`/`1.2`/`1.4`), `CoverageType` base premiums; `DefaultPremiumCalculatorTest.specWorkedExample_...` reproduces the brief's $327.60 worked example exactly |
