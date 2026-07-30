@@ -294,16 +294,24 @@ outbound adapter details. `SubmitQuoteService` coordinates the workflow and
 - Add or update `*PersistenceMapper`, `*WebMapper`, and `*MessageMapper` package placement where current code already performs that translation.
 - Update all tests and imports.
 
-- [ ] **Step 1: Add architecture assertions that application ports are implemented only by outbound adapters**
-- [ ] **Step 2: Run `mvn -pl service -Dtest=ModularityTest test` and verify the assertions fail for old adapter names/packages**
-- [ ] **Step 3: Apply names and package-info documentation without changing persistence queries or mappings**
-- [ ] **Step 4: Run persistence/controller tests and expect PASS**
-- [ ] **Step 5: Commit**
+- [x] **Step 1: Add architecture assertions that application ports are implemented only by outbound adapters**
+- [x] **Step 2: Run the new persistence structure test and verify it fails before the adapter names exist**
+- [x] **Step 3: Apply names and package-info documentation without changing persistence queries or mappings**
+- [x] **Step 4: Run persistence/controller tests and expect PASS** — architecture, authentication, quote controller, and persistence wiring checks pass; database-backed persistence integration remains Docker/Testcontainers dependent.
+- [x] **Step 5: Commit** (`99766aa`)
 
 ```bash
 git add service/src/main/java service/src/test/java
 git commit -m "refactor(adapters): make persistence and client roles explicit"
 ```
+
+Persistence naming distinguishes the application port from framework code:
+`QuoteRepository`, `UserRepository`, `RefreshTokenRepository`, and
+`CredentialRepository` are technology-neutral ports; `QuotePersistenceAdapter`,
+`UserPersistenceAdapter`, `RefreshTokenPersistenceAdapter`, and
+`PasskeyCredentialPersistenceAdapter` implement them; `SpringData*Repository`
+types contain the Spring Data queries. No mapper package was invented where
+the current JPA model is intentionally stored without a translation step.
 
 ## Task 8: Enforce boundaries and refresh architecture documentation
 

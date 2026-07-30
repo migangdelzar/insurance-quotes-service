@@ -18,7 +18,7 @@
 - [x] Task 4 — quote API split and public result naming (`4da421e`).
 - [x] Task 5 — authentication transport boundary (`d5a7e80`).
 - [x] Task 6 — submission naming (`1c32cbb`; formatting follow-up `d7edb33`).
-- [ ] Task 7 — persistence/client/mapper naming.
+- [x] Task 7 — persistence/client/mapper naming (`99766aa`).
 - [ ] Task 8 — architecture enforcement and generated docs.
 - [ ] Task 9 — full verification and PR handoff.
 
