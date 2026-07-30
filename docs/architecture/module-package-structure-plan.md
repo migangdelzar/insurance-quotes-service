@@ -244,7 +244,7 @@ annotations.
 - [x] **Step 3: Extract request records and introduce focused authentication use-case interfaces**
 - [x] **Step 4: Update controller wiring and preserve login, refresh, logout, and WebAuthn responses**
 - [x] **Step 5: Run all auth tests and expect PASS**
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit** (`d5a7e80`)
 
 The authentication result names also follow the public-result convention:
 `LoginResult`, `TokenPair`, and `WebAuthnChallenge`. Their JSON fields and
