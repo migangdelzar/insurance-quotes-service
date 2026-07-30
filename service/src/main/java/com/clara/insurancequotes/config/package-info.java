@@ -1,4 +1,5 @@
 /**
- * Temporary infrastructure configuration. It is documented here until Task 2 moves each class to its responsibility package.
+ * Temporary infrastructure configuration. It must remain wiring-only and must
+ * not contain business rules; classes move to responsibility packages in Task 2.
  */
 package com.clara.insurancequotes.config;

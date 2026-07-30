@@ -1,4 +1,5 @@
 /**
- * HTTP entry points. Controllers validate and map transport input, invoke use cases, and avoid persistence or domain rules.
+ * HTTP entry points. Controllers validate and map transport input, invoke use
+ * cases, and must not contain business rules or persistence access.
  */
 package com.clara.insurancequotes.auth.adapter.in.web.controller;
