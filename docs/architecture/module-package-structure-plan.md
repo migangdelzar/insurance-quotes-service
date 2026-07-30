@@ -132,7 +132,7 @@ filter behavior, or configuration properties.
 
 Run the command from Step 2 and expect all tests to pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add service/src/main/java service/src/test/java docs/architecture/modules
@@ -159,10 +159,10 @@ public interface CalculatePremiumUseCase {
 `CalculatePremiumService` implements this interface and preserves the existing
 factor calculation and `Premium` result.
 
-- [ ] **Step 1: Update the pricing service test to use target names**
-- [ ] **Step 2: Run `mvn -pl service -Dtest=DefaultPremiumCalculatorTest test` and verify the rename test does not compile**
-- [ ] **Step 3: Rename the command/interface/service and update imports**
-- [ ] **Step 4: Run `mvn -pl service -Dtest=DefaultPremiumCalculatorTest test` and the quote service tests; expect PASS**
+- [x] **Step 1: Update the pricing service test to use target names**
+- [x] **Step 2: Run `mvn -pl service -Dtest=CalculatePremiumServiceTest test` and verify the target names do not compile**
+- [x] **Step 3: Rename the command/interface/service and update imports**
+- [x] **Step 4: Run `mvn -pl service -Dtest=CalculatePremiumServiceTest,QuoteServiceTest test`; expect PASS**
 - [ ] **Step 5: Commit**
 
 ```bash

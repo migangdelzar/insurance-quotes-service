@@ -1,5 +1,6 @@
 /**
- * Public inbound-port interfaces. Callers depend on these capabilities rather
+ * Public inbound-port interfaces such as {@link CalculatePremiumUseCase}.
+ * Callers depend on these capabilities rather
  * than application services, repositories, or adapters; implementations remain
  * internal to the module.
  */

@@ -3,10 +3,9 @@ package com.clara.insurancequotes.quote.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.pricing.api.result.Premium;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
-import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
+import com.clara.insurancequotes.pricing.api.usecase.CalculatePremiumUseCase;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
@@ -15,6 +14,7 @@ import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
 import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.testsupport.InMemoryQuoteRepository;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.math.BigDecimal;
@@ -34,7 +34,7 @@ class QuoteServiceTest {
     private static final RequestingUser AS_ADMIN = new RequestingUser(UUID.randomUUID(), true);
 
     private final InMemoryQuoteRepository repository = new InMemoryQuoteRepository();
-    private final PremiumCalculator calculator = input -> new Premium(new BigDecimal("100.00"));
+    private final CalculatePremiumUseCase calculator = input -> new Premium(new BigDecimal("100.00"));
     private final SimpleMeterRegistry metricsRegistry = new SimpleMeterRegistry();
     private final QuoteService service = new QuoteService(
             repository, calculator, Clock.fixed(NOW, ZoneOffset.UTC), new BusinessMetrics(metricsRegistry));

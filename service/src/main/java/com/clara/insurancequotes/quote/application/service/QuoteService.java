@@ -1,9 +1,8 @@
 package com.clara.insurancequotes.quote.application.service;
 
-import com.clara.insurancequotes.shared.observability.BusinessMetrics;
-import com.clara.insurancequotes.pricing.api.command.PricingInput;
+import com.clara.insurancequotes.pricing.api.command.CalculatePremiumCommand;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
-import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;
+import com.clara.insurancequotes.pricing.api.usecase.CalculatePremiumUseCase;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.quote.api.query.QuoteQuery;
@@ -21,6 +20,7 @@ import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedExce
 import com.clara.insurancequotes.quote.domain.model.HealthProfile;
 import com.clara.insurancequotes.quote.domain.model.Quote;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
@@ -42,7 +42,7 @@ public class QuoteService implements QuoteApi {
     private static final int HEALTH_DATA_AGE_THRESHOLD = 65;
 
     private final QuoteRepository repository;
-    private final PremiumCalculator premiumCalculator;
+    private final CalculatePremiumUseCase premiumCalculator;
     private final Clock clock;
     private final BusinessMetrics metrics;
 
@@ -194,8 +194,8 @@ public class QuoteService implements QuoteApi {
                 command.needsSpouseCoverage());
     }
 
-    private static PricingInput pricingInputOf(Quote quote, UpdateCoverageCommand command) {
-        return new PricingInput(
+    private static CalculatePremiumCommand pricingInputOf(Quote quote, UpdateCoverageCommand command) {
+        return new CalculatePremiumCommand(
                 command.coverageType(),
                 quote.age(),
                 Boolean.TRUE.equals(command.hasPreexistingConditions()),

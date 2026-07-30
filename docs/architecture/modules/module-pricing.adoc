@@ -5,5 +5,5 @@
 |Spring components
 |_Services_
 
-* `c.c.i.p.api.usecase.PremiumCalculator` (via `c.c.i.p.application.service.DefaultPremiumCalculator`)
+* `c.c.i.p.api.usecase.CalculatePremiumUseCase` (via `c.c.i.p.application.service.CalculatePremiumService`)
 |===
