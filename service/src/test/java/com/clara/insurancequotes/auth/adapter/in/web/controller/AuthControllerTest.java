@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.clara.insurancequotes.auth.adapter.in.web.advice.AuthExceptionHandler;
 import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
+import com.clara.insurancequotes.auth.api.exception.InvalidRefreshTokenException;
 import com.clara.insurancequotes.auth.api.exception.PasskeyNotRegisteredException;
 import com.clara.insurancequotes.auth.api.result.LoginResponse;
 import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
@@ -97,6 +98,17 @@ class AuthControllerTest {
                         .content("{\"username\":\"demo\",\"password\":\"nope\"}"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTH_INVALID_CREDENTIALS"));
+    }
+
+    @Test
+    void invalidRefreshToken_returns401ApiError() throws Exception {
+        when(refreshTokenUseCase.refresh("stale-refresh-token")).thenThrow(new InvalidRefreshTokenException());
+
+        mockMvc.perform(post("/auth/refresh")
+                        .contentType("application/json")
+                        .content("{\"refreshToken\":\"stale-refresh-token\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_INVALID_REFRESH_TOKEN"));
     }
 
     @Test

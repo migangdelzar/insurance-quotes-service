@@ -35,7 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@SpringBootTest
+@SpringBootTest(properties = {"management.opentelemetry.enabled=false", "management.otlp.metrics.export.enabled=false"})
 class SubmissionFlowIT {
 
     private static final WireMockServer INSURER = new WireMockServer(0);

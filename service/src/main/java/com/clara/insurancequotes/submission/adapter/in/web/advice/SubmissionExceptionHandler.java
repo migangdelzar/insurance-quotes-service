@@ -4,11 +4,13 @@ import com.clara.insurancequotes.shared.error.ApiError;
 import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableException;
 import com.clara.insurancequotes.submission.api.exception.SubmissionException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Order(0)
 @Slf4j
 public class SubmissionExceptionHandler {
 
