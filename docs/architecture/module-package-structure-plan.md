@@ -188,6 +188,10 @@ git commit -m "refactor(pricing): use consistent command and use-case names"
 
 Create focused public ports with matching methods and services:
 
+Names in the task rename lists are historical source names used to describe
+the migration. They are not expected to remain as Java types after the task is
+complete.
+
 ```java
 CreateQuoteUseCase       → CreateQuoteService
 UpdateCoverageUseCase    → UpdateCoverageService

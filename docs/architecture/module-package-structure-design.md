@@ -140,6 +140,10 @@ contract, an application implementation, or a technical adapter.
 The following names are part of this refactor. They change Java ownership and
 clarity, not the HTTP or persistence contract:
 
+The names in the left column are intentional historical identifiers used to
+explain the migration; they are not references to classes that should still
+exist after implementation.
+
 | Current name | Target name or names | Reason |
 | --- | --- | --- |
 | `quote.api.usecase.QuoteApi` | `CreateQuoteUseCase`, `UpdateCoverageUseCase`, `GetQuoteUseCase`, `SearchQuotesUseCase`, `GetQuoteSummaryUseCase`, and focused submission-state use cases | Replaces a broad facade with capability-sized public ports |
