@@ -163,7 +163,7 @@ factor calculation and `Premium` result.
 - [x] **Step 2: Run `mvn -pl service -Dtest=CalculatePremiumServiceTest test` and verify the target names do not compile**
 - [x] **Step 3: Rename the command/interface/service and update imports**
 - [x] **Step 4: Run `mvn -pl service -Dtest=CalculatePremiumServiceTest,QuoteServiceTest test`; expect PASS**
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit** (`dc3a172`)
 
 ```bash
 git add service/src/main/java/com/clara/insurancequotes/pricing service/src/main/java/com/clara/insurancequotes/quote service/src/test/java/com/clara/insurancequotes/pricing

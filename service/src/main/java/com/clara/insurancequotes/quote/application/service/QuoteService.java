@@ -65,7 +65,8 @@ public class QuoteService implements QuoteApi {
             var quote = load(id, ownerId);
             rejectHealthDataForNonSeniors(quote, command);
             var premium =
-                    metrics.timePremiumCalculation(() -> premiumCalculator.calculate(pricingInputOf(quote, command)));
+                    metrics.timePremiumCalculation(
+                            () -> premiumCalculator.calculate(calculatePremiumCommandOf(quote, command)));
             quote.updateCoverage(command.coverageType(), healthProfileOf(command), premium.monthly(), clock.instant());
             var view = QuoteView.from(repository.save(quote));
             metrics.coverageUpdated("success", command.coverageType().name());
@@ -194,7 +195,7 @@ public class QuoteService implements QuoteApi {
                 command.needsSpouseCoverage());
     }
 
-    private static CalculatePremiumCommand pricingInputOf(Quote quote, UpdateCoverageCommand command) {
+    private static CalculatePremiumCommand calculatePremiumCommandOf(Quote quote, UpdateCoverageCommand command) {
         return new CalculatePremiumCommand(
                 command.coverageType(),
                 quote.age(),

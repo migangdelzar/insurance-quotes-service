@@ -14,7 +14,7 @@
 - [x] Implementation plan created at `docs/architecture/module-package-structure-plan.md`.
 - [x] Task 1 — module metadata and package vocabulary (`dad1da4`, `39dba30`, `30b908f`).
 - [x] Task 2 — shared configuration and observability (`e6d7e83`).
-- [x] Task 3 — pricing naming.
+- [x] Task 3 — pricing naming (`dc3a172`, follow-up naming/docs fixes in this commit).
 - [ ] Task 4 — quote API split and public result naming.
 - [ ] Task 5 — authentication transport boundary.
 - [ ] Task 6 — submission naming.
@@ -45,3 +45,7 @@ documentation checkpoint commit.
 Task 3 standardizes the Pricing module's command, use-case, and application
 service names while preserving premium calculation behavior and its public
 `Premium` result.
+
+The pricing and quote focused tests pass with 18 tests and 0 failures. The
+requirements traceability links and quote helper naming now use the target
+pricing terminology.
