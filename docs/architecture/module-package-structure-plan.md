@@ -209,7 +209,7 @@ the existing owner-isolation and administrator behavior.
 - [x] **Step 3: Rename result/query records and split `QuoteService` into focused services**
 - [x] **Step 4: Update controller and submission callers; assert serialized JSON remains identical in controller tests**
 - [x] **Step 5: Run quote unit/controller tests and expect PASS**
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit** (`4da421e`)
 
 The API split also moves `RequestingUser` into `quote.api.type`, exposes the
 real `quote.api.exception` package as a named interface, and keeps invalid query
