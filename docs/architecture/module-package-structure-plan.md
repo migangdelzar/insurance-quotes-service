@@ -44,10 +44,13 @@
 - [ ] **Step 1: Write the failing architecture assertions**
 
 Add tests that assert the application discovers `auth`, `pricing`, `quote`,
-`submission`, and `shared` as modules and that public named interfaces include
-`quote-api-command`, `quote-api-query`, `quote-api-result`,
-`quote-api-usecase`, `quote-api-event`, `quote-api-exception`, and
-`quote-api-type`.
+`submission`, and `shared` as modules and that the currently existing Quote
+public named interfaces include `quote-api-command`, `quote-api-query`,
+`quote-api-result`, `quote-api-usecase`, and `quote-api-type`.
+
+Do not create empty `quote.api.event` or `quote.api.exception` packages merely
+to satisfy the package template. Add their named interfaces only in a later
+task when the module contains real public events or public exceptions.
 
 - [ ] **Step 2: Run the focused test and verify it fails**
 
@@ -63,9 +66,11 @@ does not exist yet.
 - [ ] **Step 3: Add metadata and package documentation**
 
 Use `@ApplicationModule(displayName = "Quote")` on module package-info files
-and `@NamedInterface("quote-api-usecase")`-style annotations on public API
-subpackages. Each package-info must explain what belongs there and what must
-not be imported.
+and `@NamedInterface("quote-api-usecase")`-style annotations on existing
+public API subpackages. Each package-info must explain what belongs there and
+which implementation or framework concerns must not be imported. Add
+`quote.api.event` and `quote.api.exception` metadata only when those public
+packages contain real contracts.
 
 - [ ] **Step 4: Run the focused test and module verification**
 

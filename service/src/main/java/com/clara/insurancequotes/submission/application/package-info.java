@@ -1,4 +1,8 @@
 /**
- * Use-case orchestration. It coordinates domain behavior, transactions, ports, and events but does not own transport or persistence details.
+ * Insurer-submission use-case orchestration.
+ *
+ * <p>It coordinates Quote lifecycle changes, outbound ports, and events. It
+ * must not expose HTTP contracts, contain provider-specific request or response
+ * models, or implement technical adapters.</p>
  */
 package com.clara.insurancequotes.submission.application;

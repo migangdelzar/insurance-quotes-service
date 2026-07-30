@@ -1,4 +1,8 @@
 /**
- * Behavior owned by this layer. Application services orchestrate use cases; domain services contain only business policies spanning domain objects.
+ * Stateless pricing policies that span domain objects.
+ *
+ * <p>They contain only business calculations and must not orchestrate use
+ * cases or depend on transport, persistence, external clients, or Spring
+ * framework APIs.</p>
  */
 package com.clara.insurancequotes.pricing.domain.service;
