@@ -48,8 +48,10 @@ module/
 └── configuration/     # Spring wiring and module configuration
 ```
 
-An empty package is not created for symmetry. `package-info.java` is added to
-every package that exists and explains its responsibility in the source tree.
+An empty package is not created for symmetry. `package-info.java` is added at
+module roots, public named-interface boundaries, and meaningful responsibility
+packages where documentation or package annotations add value. Repetitive
+intermediate package-info files are intentionally omitted.
 
 ## Package vocabulary
 

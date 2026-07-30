@@ -384,6 +384,15 @@ The workflows validate deployable images and full-stack behavior. Cloud
 deployment is intentionally target-neutral until a registry, hosting target,
 and credentials are selected.
 
+For Docker-backed Maven integration tests on Colima, use:
+
+```bash
+TESTCONTAINERS_RYUK_DISABLED=true mise exec -- mvn -pl service verify
+```
+
+This local-only flag avoids Testcontainers Ryuk mounting Colima's host socket;
+CI runners with a native Docker socket should omit it.
+
 ## Architecture decisions
 
 The maintained catalogue is in [docs/decisions](docs/decisions/README.md).

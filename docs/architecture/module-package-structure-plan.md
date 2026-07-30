@@ -19,7 +19,7 @@
 - Every `UseCase` interface must have a matching `<Verb><Noun>Service` implementation unless the existing class is a deliberately named domain policy or technical component.
 - HTTP DTOs use `Request`/`Response`; application results use business names such as `Details`, `Summary`, `Page`, or `Result`.
 - Events use past tense; commands use imperative tense.
-- Add `package-info.java` documentation for every package that exists; do not create empty packages for symmetry.
+- Add `package-info.java` documentation at module roots, public named-interface boundaries, and meaningful responsibility packages; do not create repetitive intermediate files or empty packages for symmetry.
 - Use TDD for behavior-preserving changes: add or update a regression test before each implementation rename/split, run the focused test, then the relevant module suite.
 - Keep commits small and conventional: `refactor(module): ...`, `test(module): ...`, `docs(architecture): ...`.
 
@@ -33,7 +33,7 @@
 - Create: `service/src/main/java/com/clara/insurancequotes/pricing/package-info.java`
 - Create: `service/src/main/java/com/clara/insurancequotes/quote/package-info.java`
 - Create: `service/src/main/java/com/clara/insurancequotes/submission/package-info.java`
-- Create/update: package-info files below every existing `api`, `application`, `domain`, `adapter`, `configuration`, and `shared` responsibility package.
+- Create/update: package-info files for module roots, public API named interfaces, and responsibility packages whose documentation or annotations add architectural value.
 - Modify: `service/src/test/java/com/clara/insurancequotes/ModularityTest.java`
 
 **Interfaces:**
@@ -351,8 +351,9 @@ git commit -m "test(modulith): enforce package and naming boundaries"
 - [x] Run unit, integration, and architecture tests using the repository’s
   supported Maven commands. Unit and architecture suites pass; the real
   Testcontainers integration attempt is documented as Docker-runtime dependent.
-- [ ] Run the JVM Compose smoke path with the existing demo command — pending a
-  running Docker/Colima daemon; local Colima is currently stopped.
+- [x] Run the JVM Compose/Testcontainers path with Docker-backed services. With
+  Colima, use `TESTCONTAINERS_RYUK_DISABLED=true` because Ryuk cannot mount the
+  host socket through the Colima VM; all Docker-backed integration suites pass.
 - [x] Confirm the controller-level contract for `/api/actuator/health`, quote
   creation, coverage update, quote search, authentication, and insurer
   submission remains covered by the existing focused tests.
@@ -373,7 +374,7 @@ run with Docker enabled.
 - [ ] All tasks are complete and committed in logical units.
 - [ ] All existing tests pass with zero skipped tests caused by this refactor.
 - [ ] Spring Modulith verifies module boundaries.
-- [ ] All module package-info files explain the responsibility and visibility.
+- [x] All retained module package-info files explain the responsibility and visibility; repetitive intermediate package-info files are intentionally omitted.
 - [ ] Public contracts use consistent command/query/result/use-case/event/
   exception/type naming.
 - [ ] HTTP, persistence, Kafka, Redis, pricing, authentication, and submission

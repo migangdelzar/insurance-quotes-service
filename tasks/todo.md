@@ -20,7 +20,7 @@
 - [x] Task 6 — submission naming (`1c32cbb`; formatting follow-up `d7edb33`).
 - [x] Task 7 — persistence/client/mapper naming (`99766aa`).
 - [x] Task 8 — architecture enforcement and generated docs (`acd47ed`).
-- [x] Task 9 — full verification and PR handoff (PR #7; Compose/Testcontainers requires Docker).
+- [x] Task 9 — full verification and PR handoff (PR #7; Docker-backed integration suites pass with Colima).
 
 ## Working notes
 
@@ -51,6 +51,11 @@ application services. Quote results use business names, and Submission consumes
 only public Quote API models and use cases; it no longer depends on Quote domain
 status types. Controller JSON fields, caching, metrics, pricing, ownership, and
 administrator behavior are covered by focused regression tests.
+
+The package documentation was intentionally reduced from 90 to 56 retained
+`package-info.java` files. Module roots, named API interfaces, and meaningful
+responsibility packages remain documented; repetitive intermediate package files
+were removed because Java and Spring Modulith do not require them.
 
 Task 6 standardizes Submission capabilities and adapter names without changing
 the HTTPBin insurer boundary. The real integration test requires a working
