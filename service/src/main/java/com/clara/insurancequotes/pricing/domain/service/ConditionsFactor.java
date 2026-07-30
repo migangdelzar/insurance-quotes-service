@@ -1,16 +1,14 @@
 package com.clara.insurancequotes.pricing.domain.service;
 
-import com.clara.insurancequotes.pricing.api.command.PricingInput;
+import com.clara.insurancequotes.pricing.api.command.CalculatePremiumCommand;
 import java.math.BigDecimal;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ConditionsFactor implements PremiumFactor {
 
     private static final BigDecimal ANY_CONDITION = new BigDecimal("1.3");
 
     @Override
-    public BigDecimal multiplier(PricingInput input) {
-        return input.hasPreexistingConditions() ? ANY_CONDITION : BigDecimal.ONE;
+    public BigDecimal multiplier(CalculatePremiumCommand command) {
+        return command.hasPreexistingConditions() ? ANY_CONDITION : BigDecimal.ONE;
     }
 }

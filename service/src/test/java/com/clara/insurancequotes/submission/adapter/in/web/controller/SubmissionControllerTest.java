@@ -9,11 +9,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
-import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import com.clara.insurancequotes.submission.adapter.in.web.advice.SubmissionExceptionHandler;
-import com.clara.insurancequotes.submission.api.usecase.SubmissionApi;
+import com.clara.insurancequotes.submission.api.usecase.SubmitQuoteUseCase;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +39,14 @@ class SubmissionControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private SubmissionApi submissionApi;
+    private SubmitQuoteUseCase submitQuoteUseCase;
 
     private static final UUID QUOTE_ID = UUID.fromString("f7d9a1c2-0000-0000-0000-000000000001");
     private static final UUID OWNER_ID = UUID.fromString("b2222222-0000-0000-0000-000000000002");
 
     @Test
     void submit_onAnotherUsersQuote_returns404() throws Exception {
-        when(submissionApi.submit(eq(QUOTE_ID), eq(OWNER_ID))).thenThrow(new QuoteNotFoundException(QUOTE_ID));
+        when(submitQuoteUseCase.submit(eq(QUOTE_ID), eq(OWNER_ID))).thenThrow(new QuoteNotFoundException(QUOTE_ID));
 
         mockMvc.perform(post("/quotes/{id}/submit", QUOTE_ID)
                         .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_api"))

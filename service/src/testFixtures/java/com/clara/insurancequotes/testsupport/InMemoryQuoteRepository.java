@@ -1,7 +1,7 @@
 package com.clara.insurancequotes.testsupport;
 
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
-import com.clara.insurancequotes.quote.api.query.QuoteQuery;
+import com.clara.insurancequotes.quote.api.query.SearchQuotesQuery;
 import com.clara.insurancequotes.quote.api.query.SortDirection;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.application.port.out.QuoteSearchResult;
@@ -40,10 +40,11 @@ public final class InMemoryQuoteRepository implements QuoteRepository {
     }
 
     @Override
-    public QuoteSearchResult findPage(QuoteQuery query, UUID ownerId) {
+    public QuoteSearchResult findPage(SearchQuotesQuery query, UUID ownerId) {
         var filtered = store.values().stream()
                 .filter(quote -> ownerId == null || quote.userId().equals(ownerId))
-                .filter(quote -> query.status() == null || quote.status() == query.status())
+                .filter(quote -> query.status() == null
+                        || quote.status().name().equals(query.status().name()))
                 .filter(quote -> query.coverage() == null || quote.coverageType() == query.coverage())
                 .filter(quote -> query.search() == null || containsSearch(quote, query.search()))
                 .sorted(comparatorFor(query))
@@ -130,7 +131,7 @@ public final class InMemoryQuoteRepository implements QuoteRepository {
                 || quote.email().toLowerCase(Locale.ROOT).contains(value);
     }
 
-    private static Comparator<Quote> comparatorFor(QuoteQuery query) {
+    private static Comparator<Quote> comparatorFor(SearchQuotesQuery query) {
         Comparator<Quote> comparator =
                 switch (query.sortBy()) {
                     case CREATED_AT -> Comparator.comparing(Quote::createdAt);

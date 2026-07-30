@@ -12,7 +12,7 @@ Accepted
 
 Implement the backend as one Spring Boot deployment composed of responsibility-based Spring Modulith modules. Each business module follows DDD and hexagonal boundaries: public \`api\`, use-case orchestration in \`application\`, business invariants in \`domain\`, and technology integrations in \`adapter\` packages.
 
-The current modules are \`quote\`, \`auth\`, \`pricing\`, \`submission\`, \`shared\`, and \`config\`. \`ApplicationModules\` tests enforce the allowed dependency graph.
+The current modules are \`quote\`, \`auth\`, \`pricing\`, \`submission\`, and \`shared\`. Cross-cutting configuration and observability live in responsibility-based packages inside \`shared\` or the owning module; there is no flat \`config\` module. \`ApplicationModules\` and ArchUnit tests enforce the allowed dependency graph.
 
 ## Context and decision drivers
 
@@ -29,6 +29,7 @@ The challenge needs a deployable service without losing the seams required for i
 - \`service/src/main/java/com/clara/insurancequotes/{quote,auth,pricing,submission}\`
 - \`service/src/test/java/com/clara/insurancequotes/ModularityTest.java\`
 - \`docs/architecture/modules/\`
+- [Module package structure design](../architecture/module-package-structure-design.md)
 
 ## Consequences
 
@@ -37,6 +38,9 @@ The challenge needs a deployable service without losing the seams required for i
 - Domain rules remain transport-neutral and unit-testable.
 - Inbound and outbound adapters are replaceable through application ports.
 - Spring Modulith makes illegal module dependencies fail during verification.
+- Package-level tests keep API/application/domain code from reaching adapter or
+  transport/infrastructure packages, while intentionally preserving the
+  JSON-facing authentication response names.
 
 ### Negative and operational
 

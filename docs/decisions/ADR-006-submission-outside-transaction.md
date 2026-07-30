@@ -24,8 +24,8 @@ The insurer call is remote, slow, and failure-prone. Holding a database connecti
 
 ## Implementation evidence
 
-- \`submission/application/service/SubmissionService.java\`
-- \`submission/application/service/SubmissionFinalizer.java\`
+- \`submission/application/service/SubmitQuoteService.java\`
+- \`submission/application/service/FinalizeQuoteSubmissionService.java\`
 - \`submission/adapter/out/client/insurer/\`
 - \`service/src/test/java/com/clara/insurancequotes/submission/application/service/\`
 - \`service/src/integrationTest/java/com/clara/insurancequotes/submission/\`

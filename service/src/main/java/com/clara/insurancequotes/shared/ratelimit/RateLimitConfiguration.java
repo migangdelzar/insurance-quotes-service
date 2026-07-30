@@ -1,6 +1,6 @@
 package com.clara.insurancequotes.shared.ratelimit;
 
-import com.clara.insurancequotes.config.BusinessMetrics;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

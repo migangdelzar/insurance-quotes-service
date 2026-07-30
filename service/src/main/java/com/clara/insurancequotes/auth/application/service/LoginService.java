@@ -3,6 +3,7 @@ package com.clara.insurancequotes.auth.application.service;
 import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
 import com.clara.insurancequotes.auth.api.result.LoginResponse;
 import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
+import com.clara.insurancequotes.auth.api.usecase.LoginUseCase;
 import com.clara.insurancequotes.auth.application.port.out.CredentialRepository;
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.auth.domain.model.User;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class LoginService {
+public class LoginService implements LoginUseCase {
 
     private final UserRepository users;
     private final CredentialRepository credentials;
@@ -33,6 +34,7 @@ public class LoginService {
     }
 
     @Transactional
+    @Override
     public LoginResponse login(String username, String password) {
         var user = users.findByUsername(username).orElseThrow(InvalidCredentialsException::new);
         if (!passwordEncoder.matches(password, user.passwordHash())) {

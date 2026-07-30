@@ -17,13 +17,10 @@ top to bottom direction
 
 System_Boundary("Application_boundary", "Application", $tags="") {
   Container_Boundary("Application.Application_boundary", "Application", $tags="") {
-    Component(Application.Application.Config, "Config", $techn="Module", $descr="", $tags="", $link="")
     Component(Application.Application.Shared, "Shared", $techn="Module", $descr="", $tags="", $link="")
   }
 
 }
-
-Rel(Application.Application.Shared, Application.Application.Config, "uses", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes

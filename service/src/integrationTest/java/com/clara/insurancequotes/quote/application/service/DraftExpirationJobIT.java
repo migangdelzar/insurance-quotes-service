@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
-import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
-import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
-import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
+import com.clara.insurancequotes.quote.api.type.QuoteStatusView;
+import com.clara.insurancequotes.quote.api.type.RequestingUser;
+import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
+import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.clara.insurancequotes.testsupport.TestUsers;
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +32,10 @@ class DraftExpirationJobIT {
     }
 
     @Autowired
-    private QuoteApi quoteApi;
+    private CreateQuoteUseCase createQuoteUseCase;
+
+    @Autowired
+    private GetQuoteUseCase getQuoteUseCase;
 
     @Autowired
     private DraftExpirationJob job;
@@ -40,6 +45,9 @@ class DraftExpirationJobIT {
 
     @Autowired
     private CacheManager cacheManager;
+
+    @Autowired
+    private Clock clock;
 
     @Autowired
     private UserRepository users;
@@ -54,18 +62,19 @@ class DraftExpirationJobIT {
     @Test
     void staleDraft_getsExpired_andItsCacheEntryEvicted() {
         var requester = new RequestingUser(ownerId, false);
-        var id = quoteApi.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
+        var id = createQuoteUseCase
+                .create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         jdbcTemplate.update(
                 "update quotes set created_at = ? where id = ?",
-                OffsetDateTime.now().minusHours(2),
+                OffsetDateTime.ofInstant(clock.instant().minusSeconds(2 * 60 * 60), java.time.ZoneOffset.UTC),
                 id);
-        quoteApi.getQuote(id, requester);
+        getQuoteUseCase.getQuote(id, requester);
 
         var expired = job.expireStaleDrafts();
 
         assertThat(expired).isGreaterThanOrEqualTo(1);
         assertThat(cacheManager.getCache("quotes").get(id + "|" + ownerId)).isNull();
-        assertThat(quoteApi.getQuote(id, requester).status()).isEqualTo(QuoteStatus.EXPIRED);
+        assertThat(getQuoteUseCase.getQuote(id, requester).status()).isEqualTo(QuoteStatusView.EXPIRED);
     }
 }

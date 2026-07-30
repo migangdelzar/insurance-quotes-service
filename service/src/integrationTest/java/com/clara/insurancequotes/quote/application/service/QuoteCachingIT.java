@@ -7,8 +7,11 @@ import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
-import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
-import com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.api.type.RequestingUser;
+import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
+import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
+import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.clara.insurancequotes.testsupport.TestUsers;
 import java.util.UUID;
@@ -31,7 +34,13 @@ class QuoteCachingIT {
     }
 
     @Autowired
-    private QuoteService service;
+    private CreateQuoteUseCase createQuoteUseCase;
+
+    @Autowired
+    private GetQuoteUseCase getQuoteUseCase;
+
+    @Autowired
+    private UpdateCoverageUseCase updateCoverageUseCase;
 
     @Autowired
     private CacheManager cacheManager;
@@ -51,29 +60,31 @@ class QuoteCachingIT {
 
     @Test
     void getQuote_populatesCache_updateCoverageEvicts() {
-        var id = service.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
+        var id = createQuoteUseCase
+                .create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         var cache = cacheManager.getCache("quotes");
         var owner = new RequestingUser(ownerId, false);
 
-        service.getQuote(id, owner);
+        getQuoteUseCase.getQuote(id, owner);
         assertThat(redis.keys("*")).isNotEmpty();
         assertThat(cache.get(id + "|" + ownerId)).isNotNull();
 
-        service.updateCoverage(
+        updateCoverageUseCase.updateCoverage(
                 id, new UpdateCoverageCommand(CoverageType.BASIC, null, null, null, null, null), ownerId);
         assertThat(cache.get(id + "|" + ownerId)).isNull();
     }
 
     @Test
     void getQuote_cacheEntryIsIsolatedPerRequester() {
-        var id = service.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
+        var id = createQuoteUseCase
+                .create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         var admin = new RequestingUser(UUID.randomUUID(), true);
         var otherUser = new RequestingUser(UUID.randomUUID(), false);
 
-        service.getQuote(id, admin);
+        getQuoteUseCase.getQuote(id, admin);
 
-        assertThatThrownBy(() -> service.getQuote(id, otherUser)).isInstanceOf(QuoteNotFoundException.class);
+        assertThatThrownBy(() -> getQuoteUseCase.getQuote(id, otherUser)).isInstanceOf(QuoteNotFoundException.class);
     }
 }

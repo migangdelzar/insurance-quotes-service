@@ -99,6 +99,12 @@ public class Quote {
         }
     }
 
+    public void ensureHealthDataAllowed(boolean carriesHealthData) {
+        if (age <= 65 && carriesHealthData) {
+            throw new com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException(age);
+        }
+    }
+
     public void markSubmitted(Instant now) {
         ensureSubmittable();
         this.status = QuoteStatus.SUBMITTED;

@@ -246,6 +246,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <includes><include>**/*IT.java</include></includes>
+          <systemPropertyVariables>
+            <management.opentelemetry.enabled>false</management.opentelemetry.enabled>
+            <management.otlp.metrics.export.enabled>false</management.otlp.metrics.export.enabled>
+          </systemPropertyVariables>
+        </configuration>
         <executions>
           <execution>
             <id>integration-tests</id>
@@ -311,7 +318,7 @@
                 <id>e2e-tests</id>
                 <goals><goal>integration-test</goal><goal>verify</goal></goals>
                 <configuration>
-                  <includes><include>**/*E2E.java</include></includes>
+                  <includes><include>**/e2e/*E2E.java</include></includes>
                 </configuration>
               </execution>
             </executions>

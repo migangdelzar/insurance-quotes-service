@@ -1,14 +1,18 @@
 package com.clara.insurancequotes.quote.adapter.in.web.controller;
 
+import com.clara.insurancequotes.quote.adapter.in.web.exception.InvalidQuoteQueryException;
 import com.clara.insurancequotes.quote.adapter.in.web.request.CreateQuoteRequest;
 import com.clara.insurancequotes.quote.adapter.in.web.request.UpdateCoverageRequest;
-import com.clara.insurancequotes.quote.api.query.QuoteQuery;
-import com.clara.insurancequotes.quote.api.result.QuotePageView;
-import com.clara.insurancequotes.quote.api.result.QuoteSummaryView;
-import com.clara.insurancequotes.quote.api.result.QuoteView;
-import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
-import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
-import com.clara.insurancequotes.quote.application.exception.InvalidQuoteQueryException;
+import com.clara.insurancequotes.quote.api.query.SearchQuotesQuery;
+import com.clara.insurancequotes.quote.api.result.QuoteDetails;
+import com.clara.insurancequotes.quote.api.result.QuotePage;
+import com.clara.insurancequotes.quote.api.result.QuoteSummary;
+import com.clara.insurancequotes.quote.api.type.RequestingUser;
+import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
+import com.clara.insurancequotes.quote.api.usecase.GetQuoteSummaryUseCase;
+import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
+import com.clara.insurancequotes.quote.api.usecase.SearchQuotesUseCase;
+import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.UUID;
@@ -34,31 +38,36 @@ public class QuoteController {
 
     private static final String ADMIN_ROLE = "ADMIN";
 
-    private final QuoteApi quoteApi;
+    private final CreateQuoteUseCase createQuoteUseCase;
+    private final UpdateCoverageUseCase updateCoverageUseCase;
+    private final GetQuoteUseCase getQuoteUseCase;
+    private final SearchQuotesUseCase searchQuotesUseCase;
+    private final GetQuoteSummaryUseCase getQuoteSummaryUseCase;
 
     @PostMapping
-    public ResponseEntity<QuoteView> create(
+    public ResponseEntity<QuoteDetails> create(
             @Valid @RequestBody CreateQuoteRequest request, @AuthenticationPrincipal Jwt jwt) {
-        var view = quoteApi.create(request.toCommand(), requester(jwt).id());
+        var view = createQuoteUseCase.create(request.toCommand(), requester(jwt).id());
         log.debug("Created quote response {}", view.id());
         return ResponseEntity.created(URI.create("/quotes/" + view.id())).body(view);
     }
 
     @PatchMapping("/{id}/coverage")
-    public QuoteView updateCoverage(
+    public QuoteDetails updateCoverage(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateCoverageRequest request,
             @AuthenticationPrincipal Jwt jwt) {
-        return quoteApi.updateCoverage(id, request.toCommand(), requester(jwt).id());
+        return updateCoverageUseCase.updateCoverage(
+                id, request.toCommand(), requester(jwt).id());
     }
 
     @GetMapping("/{id}")
-    public QuoteView getQuote(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
-        return quoteApi.getQuote(id, requester(jwt));
+    public QuoteDetails getQuote(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+        return getQuoteUseCase.getQuote(id, requester(jwt));
     }
 
     @GetMapping
-    public QuotePageView listQuotes(
+    public QuotePage listQuotes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String search,
@@ -67,17 +76,18 @@ public class QuoteController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String direction,
             @AuthenticationPrincipal Jwt jwt) {
+        final SearchQuotesQuery query;
         try {
-            return quoteApi.listQuotes(
-                    QuoteQuery.of(page, size, search, status, coverage, sortBy, direction), requester(jwt));
+            query = SearchQuotesQuery.of(page, size, search, status, coverage, sortBy, direction);
         } catch (IllegalArgumentException exception) {
-            throw new InvalidQuoteQueryException(exception.getMessage());
+            throw new InvalidQuoteQueryException(exception.getMessage(), exception);
         }
+        return searchQuotesUseCase.searchQuotes(query, requester(jwt));
     }
 
     @GetMapping("/summary")
-    public QuoteSummaryView getSummary(@AuthenticationPrincipal Jwt jwt) {
-        return quoteApi.getSummary(requester(jwt));
+    public QuoteSummary getSummary(@AuthenticationPrincipal Jwt jwt) {
+        return getQuoteSummaryUseCase.getSummary(requester(jwt));
     }
 
     private static RequestingUser requester(Jwt jwt) {

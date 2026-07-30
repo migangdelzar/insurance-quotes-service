@@ -28,7 +28,7 @@ flowchart LR
   quote --> postgres[(PostgreSQL)]
   auth --> postgres
   api --> redis[(Redis)]
-  submission --> insurer[InsurerGateway / WireMock]
+  submission --> insurer[InsurerSubmissionPort / HTTPBin or WireMock]
   submission --> outbox[Spring Modulith outbox]
   outbox --> kafka[(Kafka)]
   api --> metrics[Actuator + Micrometer]
@@ -73,6 +73,9 @@ challenge easy to run as one deployable application:
 | Modulith outbox + Kafka | Business events are persisted before publication, then delivered asynchronously; Kafka is for integration and delivery, not metrics collection. |
 | Actuator, Micrometer, OpenTelemetry | Actuator exposes health and scrape endpoints, Micrometer records application/business meters, Prometheus stores time series, Grafana visualizes them, and Tempo/Loki complete trace/log diagnosis. |
 | Maven libraries | `platform` centralizes versions, while small `service-i18n` and `throwing-functions` libraries isolate reusable concerns from the business service without creating premature microservices. |
+
+For the package-by-package vocabulary and dependency direction, see the
+[module package structure design](docs/architecture/module-package-structure-design.md).
 
 This is a **modular monolith by choice**: it gives recruiters and future
 engineers visible domain boundaries, fast local feedback, and low operational
@@ -339,7 +342,12 @@ mvn -B verify
 mvn -B verify -Pe2e
 ~~~
 
-The service JaCoCo gate is 80%. For the real browser journeys:
+The `e2e` profile runs real HTTP requests against a Spring application backed
+by Testcontainers for PostgreSQL, Redis, and Kafka, with WireMock standing in
+for the insurer boundary. Docker must be available; no web application is
+required for this API-only suite. The service JaCoCo gate is 80%.
+
+For the real browser journeys:
 
 ~~~bash
 cd ../insurance-quotes-web
@@ -379,6 +387,15 @@ adding a required CI check.
 The workflows validate deployable images and full-stack behavior. Cloud
 deployment is intentionally target-neutral until a registry, hosting target,
 and credentials are selected.
+
+For Docker-backed Maven integration tests on Colima, use:
+
+~~~bash
+TESTCONTAINERS_RYUK_DISABLED=true mise exec -- mvn -pl service verify
+~~~
+
+This local-only flag avoids Testcontainers Ryuk mounting Colima's host socket;
+CI runners with a native Docker socket should omit it.
 
 ## Architecture decisions
 

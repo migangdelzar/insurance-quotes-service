@@ -3,6 +3,7 @@ package com.clara.insurancequotes.quote.adapter.in.web.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -15,13 +16,18 @@ import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.adapter.in.web.advice.QuoteExceptionHandler;
-import com.clara.insurancequotes.quote.api.result.QuotePageView;
-import com.clara.insurancequotes.quote.api.result.QuoteSummaryView;
-import com.clara.insurancequotes.quote.api.result.QuoteView;
-import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
-import com.clara.insurancequotes.quote.api.usecase.RequestingUser;
+import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.api.result.QuoteDetails;
+import com.clara.insurancequotes.quote.api.result.QuotePage;
+import com.clara.insurancequotes.quote.api.result.QuoteSummary;
+import com.clara.insurancequotes.quote.api.type.QuoteStatusView;
+import com.clara.insurancequotes.quote.api.type.RequestingUser;
+import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
+import com.clara.insurancequotes.quote.api.usecase.GetQuoteSummaryUseCase;
+import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
+import com.clara.insurancequotes.quote.api.usecase.SearchQuotesUseCase;
+import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
-import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import java.math.BigDecimal;
@@ -29,6 +35,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -53,7 +60,19 @@ class QuoteControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private QuoteApi quoteApi;
+    private CreateQuoteUseCase createQuoteUseCase;
+
+    @MockitoBean
+    private UpdateCoverageUseCase updateCoverageUseCase;
+
+    @MockitoBean
+    private GetQuoteUseCase getQuoteUseCase;
+
+    @MockitoBean
+    private SearchQuotesUseCase searchQuotesUseCase;
+
+    @MockitoBean
+    private GetQuoteSummaryUseCase getQuoteSummaryUseCase;
 
     private static final UUID QUOTE_ID = UUID.fromString("f7d9a1c2-0000-0000-0000-000000000001");
     private static final UUID OWNER_ID = UUID.fromString("b2222222-0000-0000-0000-000000000002");
@@ -67,8 +86,8 @@ class QuoteControllerTest {
         return new RequestingUser(OWNER_ID, false);
     }
 
-    private static QuoteView draftView() {
-        return new QuoteView(
+    private static QuoteDetails draftView() {
+        return new QuoteDetails(
                 QUOTE_ID,
                 "Jane Roe",
                 "jane@example.com",
@@ -81,14 +100,14 @@ class QuoteControllerTest {
                 null,
                 null,
                 null,
-                QuoteStatus.DRAFT,
+                QuoteStatusView.DRAFT,
                 Instant.now(),
                 Instant.now());
     }
 
     @Test
     void createQuote_valid_returns201WithId() throws Exception {
-        when(quoteApi.create(any(), eq(OWNER_ID))).thenReturn(draftView());
+        when(createQuoteUseCase.create(any(), eq(OWNER_ID))).thenReturn(draftView());
 
         mockMvc.perform(
                         post("/quotes")
@@ -114,7 +133,7 @@ class QuoteControllerTest {
 
     @Test
     void updateCoverage_healthDataRejected_returns422() throws Exception {
-        when(quoteApi.updateCoverage(eq(QUOTE_ID), any(), eq(OWNER_ID)))
+        when(updateCoverageUseCase.updateCoverage(eq(QUOTE_ID), any(), eq(OWNER_ID)))
                 .thenThrow(new HealthDataNotAllowedException(34));
 
         mockMvc.perform(patch("/quotes/{id}/coverage", QUOTE_ID)
@@ -127,7 +146,7 @@ class QuoteControllerTest {
 
     @Test
     void updateCoverage_valid_returnsPremium() throws Exception {
-        var view = new QuoteView(
+        var view = new QuoteDetails(
                 QUOTE_ID,
                 "Jane Roe",
                 "jane@example.com",
@@ -140,10 +159,11 @@ class QuoteControllerTest {
                 null,
                 null,
                 new BigDecimal("100.00"),
-                QuoteStatus.DRAFT,
+                QuoteStatusView.DRAFT,
                 Instant.now(),
                 Instant.now());
-        when(quoteApi.updateCoverage(eq(QUOTE_ID), any(), eq(OWNER_ID))).thenReturn(view);
+        when(updateCoverageUseCase.updateCoverage(eq(QUOTE_ID), any(), eq(OWNER_ID)))
+                .thenReturn(view);
 
         mockMvc.perform(patch("/quotes/{id}/coverage", QUOTE_ID)
                         .with(asOwner())
@@ -155,8 +175,8 @@ class QuoteControllerTest {
 
     @Test
     void getQuote_ownedByOtherUser_returns404() throws Exception {
-        when(quoteApi.getQuote(eq(QUOTE_ID), eq(requestingOwner())))
-                .thenThrow(new com.clara.insurancequotes.quote.application.exception.QuoteNotFoundException(QUOTE_ID));
+        when(getQuoteUseCase.getQuote(eq(QUOTE_ID), eq(requestingOwner())))
+                .thenThrow(new QuoteNotFoundException(QUOTE_ID));
 
         mockMvc.perform(get("/quotes/{id}", QUOTE_ID).with(asOwner()))
                 .andExpect(status().isNotFound())
@@ -176,9 +196,9 @@ class QuoteControllerTest {
 
     @Test
     void supportedApiVersion_routesToController() throws Exception {
-        doReturn(new QuotePageView(List.of(), 0, 20, 0, 0, false, false))
-                .when(quoteApi)
-                .listQuotes(any(), eq(requestingOwner()));
+        doReturn(new QuotePage(List.of(), 0, 20, 0, 0, false, false))
+                .when(searchQuotesUseCase)
+                .searchQuotes(any(), eq(requestingOwner()));
 
         mockMvc.perform(get("/quotes").with(asOwner()).header("API-Version", "1.0"))
                 .andExpect(status().isOk())
@@ -194,9 +214,9 @@ class QuoteControllerTest {
 
     @Test
     void listQuotes_acceptsFilteringAndOrderingParameters() throws Exception {
-        doReturn(new QuotePageView(List.of(), 1, 10, 1, 1, false, true))
-                .when(quoteApi)
-                .listQuotes(any(), eq(requestingOwner()));
+        doReturn(new QuotePage(List.of(), 1, 10, 1, 1, false, true))
+                .when(searchQuotesUseCase)
+                .searchQuotes(any(), eq(requestingOwner()));
 
         mockMvc.perform(get("/quotes")
                         .with(asOwner())
@@ -211,12 +231,23 @@ class QuoteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page").value(1))
                 .andExpect(jsonPath("$.size").value(10));
+
+        var queryCaptor = ArgumentCaptor.forClass(com.clara.insurancequotes.quote.api.query.SearchQuotesQuery.class);
+        verify(searchQuotesUseCase).searchQuotes(queryCaptor.capture(), eq(requestingOwner()));
+        var query = queryCaptor.getValue();
+        org.assertj.core.api.Assertions.assertThat(query.page()).isEqualTo(1);
+        org.assertj.core.api.Assertions.assertThat(query.size()).isEqualTo(10);
+        org.assertj.core.api.Assertions.assertThat(query.search()).isEqualTo("jane");
+        org.assertj.core.api.Assertions.assertThat(query.status()).isEqualTo(QuoteStatusView.SUBMITTED);
+        org.assertj.core.api.Assertions.assertThat(query.coverage()).isEqualTo(CoverageType.STANDARD);
+        org.assertj.core.api.Assertions.assertThat(query.sortBy().property()).isEqualTo("name");
+        org.assertj.core.api.Assertions.assertThat(query.direction().name()).isEqualTo("DESC");
     }
 
     @Test
     void getQuoteSummary_returnsAnalyticsEnvelope() throws Exception {
-        when(quoteApi.getSummary(requestingOwner()))
-                .thenReturn(new QuoteSummaryView(
+        when(getQuoteSummaryUseCase.getSummary(requestingOwner()))
+                .thenReturn(new QuoteSummary(
                         3,
                         1,
                         1,
