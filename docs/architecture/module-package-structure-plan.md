@@ -339,7 +339,7 @@ mvn -pl service test
 mvn -pl service verify
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit** (`acd47ed`)
 
 ```bash
 git add docs service/src/test/java/com/clara/insurancequotes/ModularityTest.java README.md

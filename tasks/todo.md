@@ -19,7 +19,7 @@
 - [x] Task 5 — authentication transport boundary (`d5a7e80`).
 - [x] Task 6 — submission naming (`1c32cbb`; formatting follow-up `d7edb33`).
 - [x] Task 7 — persistence/client/mapper naming (`99766aa`).
-- [x] Task 8 — architecture enforcement and generated docs (pending final commit).
+- [x] Task 8 — architecture enforcement and generated docs (`acd47ed`).
 - [ ] Task 9 — full verification and PR handoff.
 
 ## Working notes
