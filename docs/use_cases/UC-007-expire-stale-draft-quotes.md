@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Use Case ID:** UC-006
+**Use Case ID:** UC-007
 **Use Case Name:** Expire Stale Draft Quotes
 **Primary Actor:** Scheduler
 **Goal:** The system automatically reclaims draft quotes that were abandoned for too long, so they stop cluttering active history and cannot be submitted later with stale pricing.
@@ -33,7 +33,7 @@
 ### Success Postconditions
 
 - Every draft quote inactive longer than the configured lifetime is now in the Expired status.
-- Expired quotes can no longer be edited (UC-003) or submitted (UC-004).
+- Expired quotes can no longer be edited (UC-004) or submitted (UC-005).
 
 ### Failure Postconditions
 

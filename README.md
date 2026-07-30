@@ -408,6 +408,53 @@ The most important decisions are:
 | Operability | Actuator, Prometheus, Grafana, Loki, Tempo, Alloy |
 | Packaging | Java 17 JVM default and optional native image |
 
+## Approach and challenges
+
+A full requirements traceability audit — every functional/non-functional
+requirement and constraint from the challenge brief, cross-checked against real
+code and tests rather than assumed from this README — lives in
+[docs/requirements.md](docs/requirements.md). It also documents this section's
+own gap and its resolution.
+
+### Thought process
+
+Before writing code, the brief was read as two separable concerns: a fixed,
+non-negotiable contract (the API shapes, the exact premium formula, the
+age-gated health rule, the submission state machine) and an open architecture
+decision (how to structure a service that enforces that contract safely). The
+fixed parts were treated as literal constraints — the pricing formula in
+particular is implemented as a composed set of independent
+[`PremiumFactor`](service/src/main/java/com/clara/insurancequotes/pricing/domain/service)
+strategies (age, conditions, tobacco, spouse) rather than one method, so each
+multiplier is independently unit-testable and the formula can't silently drift.
+The open parts were resolved with DDD + hexagonal boundaries inside a single
+Spring Modulith deployable: enough separation that quote, pricing, submission,
+and auth are independently reasoned about and tested, without the operational
+cost of splitting them into real services for a take-home exercise. See
+[Architecture decisions](docs/decisions/README.md) for the per-decision
+rationale (JWT + WebAuthn, PostgreSQL/Flyway, Redis, Kafka outbox,
+Actuator/Micrometer/OpenTelemetry).
+
+### Challenges and open items
+
+- A requirements traceability pass against the challenge brief found the
+  insurer stand-in (`httpstat.us`) was down (confirmed with `curl`), swapped to
+  `https://httpbin.org/status/200` across every config location and
+  re-verified against the live endpoint. It also found this repo and the
+  sibling frontend had substantial unmerged work sitting on a feature branch
+  while GitHub's default `main` branch was stale — merged via reviewed,
+  CI- and CodeRabbit-gated pull requests. The use case specifications under
+  `docs/use_cases/` bundled multiple independent actor goals (draft creation
+  and coverage/pricing) into one document; split into properly independent use
+  cases with renumbered, cross-referenced IDs.
+- **Native image packaging is a manual comparison path, not a CI gate** (see
+  [JVM versus native](#jvm-versus-native)) — it works, but isn't held to the
+  same automated bar as the JVM path, by design, given the memory cost of
+  native builds in CI.
+- **No budget or deadline was specified in the brief**, so none is claimed as
+  met or missed; scope decisions instead favored a credible production
+  boundary (auth, caching, messaging, observability) over feature breadth.
+
 ## Troubleshooting
 
 - **Port 3000 is occupied:** use the application’s Nginx port 3100.

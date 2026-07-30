@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Use Case ID:** UC-005
+**Use Case ID:** UC-006
 **Use Case Name:** Review Quote History and Analytics
 **Primary Actor:** Registered User / Administrator (read-only)
 **Goal:** A signed-in user browses their past and in-progress quotes, or an administrator reviews quote activity across users, inspects details, and sees the applicable summary analytics.

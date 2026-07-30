@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Use Case ID:** UC-004
+**Use Case ID:** UC-005
 **Use Case Name:** Submit Quote to Insurer
 **Primary Actor:** Registered User
 **Secondary Actor:** Insurer
@@ -11,7 +11,7 @@
 
 ## Preconditions
 
-- A quote exists with a coverage tier selected and a current premium calculated (see UC-003).
+- A quote exists with a coverage tier selected and a current premium calculated (see UC-004).
 - The user is signed in (UC-001).
 
 ## Main Success Scenario
@@ -39,7 +39,7 @@
 **Flow:**
 
 1. The system rejects the submission, explaining why the quote cannot be submitted yet.
-2. Use case ends; the user must complete the quote (UC-003) or, if expired, start a new one.
+2. Use case ends; the user must complete the quote (UC-004) or, if expired, start a new one (UC-003).
 
 ### A3: Insurer Unavailable, Rejects, or Times Out
 

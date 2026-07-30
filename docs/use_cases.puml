@@ -10,10 +10,11 @@ actor "Insurer" as insurer
 rectangle "Insurance Quotes" {
     usecase "UC-001\nAuthenticate" as UC001
     usecase "UC-002\nEnroll a Passkey" as UC002
-    usecase "UC-003\nRequest an Insurance Quote" as UC003
-    usecase "UC-004\nSubmit Quote to Insurer" as UC004
-    usecase "UC-005\nReview Quote History and Analytics" as UC005
-    usecase "UC-006\nExpire Stale Draft Quotes" as UC006
+    usecase "UC-003\nStart a New Quote" as UC003
+    usecase "UC-004\nSelect Coverage and Calculate Premium" as UC004
+    usecase "UC-005\nSubmit Quote to Insurer" as UC005
+    usecase "UC-006\nReview Quote History and Analytics" as UC006
+    usecase "UC-007\nExpire Stale Draft Quotes" as UC007
 }
 
 visitor --> UC001
@@ -22,8 +23,11 @@ user --> UC002
 user --> UC003
 user --> UC004
 user --> UC005
-admin --> UC005
-scheduler --> UC006
-insurer --> UC004
+user --> UC006
+admin --> UC006
+scheduler --> UC007
+insurer --> UC005
+UC004 ..> UC003 : <<extend>>
+UC005 ..> UC004 : <<extend>>
 
 @enduml
