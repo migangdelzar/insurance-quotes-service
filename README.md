@@ -343,7 +343,12 @@ mvn -B verify
 mvn -B verify -Pe2e
 ~~~
 
-The service JaCoCo gate is 80%. For the real browser journeys:
+The `e2e` profile runs real HTTP requests against a Spring application backed
+by Testcontainers for PostgreSQL, Redis, and Kafka, with WireMock standing in
+for the insurer boundary. Docker must be available; no web application is
+required for this API-only suite. The service JaCoCo gate is 80%.
+
+For the real browser journeys:
 
 ~~~bash
 cd ../insurance-quotes-web

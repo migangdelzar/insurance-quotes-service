@@ -39,6 +39,28 @@ jobs:
       - name: Verify service
         run: mvn -B -pl service -am verify
 
+  api-e2e:
+    name: REST API end-to-end journeys
+    needs: verify
+    runs-on: ubuntu-latest
+    env:
+      TESTCONTAINERS_RYUK_DISABLED: "true"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Run REST API E2E suite
+        run: mvn -B -pl service -am -Pe2e verify
+
   docker:
     name: Build JVM API image
     needs: verify
