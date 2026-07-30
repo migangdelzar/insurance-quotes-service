@@ -1,10 +1,12 @@
 package com.clara.insurancequotes.auth.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.clara.insurancequotes.auth.api.exception.InvalidRefreshTokenException;
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.auth.domain.model.User;
 import com.clara.insurancequotes.auth.domain.model.UserRole;
@@ -36,5 +38,13 @@ class RefreshAccessTokenServiceTest {
         assertThat(result.refreshToken()).isEqualTo("new-refresh");
         assertThat(result.expiresInSeconds()).isEqualTo(1800);
         verify(refreshTokens).rotate("old-refresh");
+    }
+
+    @Test
+    void refresh_rejectsTokenWhenUserNoLongerExists() {
+        when(refreshTokens.rotate("old-refresh")).thenReturn(new RefreshTokenService.Rotation(USER_ID, "new-refresh"));
+        when(users.findById(USER_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.refresh("old-refresh")).isInstanceOf(InvalidRefreshTokenException.class);
     }
 }

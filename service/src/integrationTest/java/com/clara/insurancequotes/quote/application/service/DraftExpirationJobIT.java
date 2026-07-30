@@ -10,6 +10,7 @@ import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.clara.insurancequotes.testsupport.TestUsers;
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +47,9 @@ class DraftExpirationJobIT {
     private CacheManager cacheManager;
 
     @Autowired
+    private Clock clock;
+
+    @Autowired
     private UserRepository users;
 
     private UUID ownerId;
@@ -63,7 +67,7 @@ class DraftExpirationJobIT {
                 .id();
         jdbcTemplate.update(
                 "update quotes set created_at = ? where id = ?",
-                OffsetDateTime.now().minusHours(2),
+                OffsetDateTime.ofInstant(clock.instant().minusSeconds(2 * 60 * 60), java.time.ZoneOffset.UTC),
                 id);
         getQuoteUseCase.getQuote(id, requester);
 

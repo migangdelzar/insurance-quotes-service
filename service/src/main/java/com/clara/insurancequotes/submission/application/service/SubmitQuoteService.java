@@ -1,6 +1,7 @@
 package com.clara.insurancequotes.submission.application.service;
 
 import com.clara.insurancequotes.quote.api.result.QuoteDetails;
+import com.clara.insurancequotes.quote.api.type.QuoteStatusView;
 import com.clara.insurancequotes.quote.api.usecase.EnsureQuoteSubmittableUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetOwnedQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.MarkQuoteSubmissionFailedUseCase;
@@ -29,7 +30,7 @@ public class SubmitQuoteService implements SubmitQuoteUseCase {
     @Override
     public QuoteDetails submit(UUID quoteId, UUID ownerId) {
         var current = getOwnedQuoteUseCase.getOwnedQuote(quoteId, ownerId);
-        if (current.status().alreadySubmitted()) {
+        if (current.status() == QuoteStatusView.SUBMITTED) {
             log.debug("Ignoring duplicate submission for quote {}", quoteId);
             return current;
         }

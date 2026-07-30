@@ -2,9 +2,7 @@ package com.clara.insurancequotes.pricing.domain.service;
 
 import com.clara.insurancequotes.pricing.api.command.CalculatePremiumCommand;
 import java.math.BigDecimal;
-import org.springframework.stereotype.Component;
 
-@Component
 public class AgeFactor implements PremiumFactor {
 
     private static final BigDecimal OVER_65 = new BigDecimal("1.5");

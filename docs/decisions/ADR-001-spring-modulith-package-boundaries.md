@@ -30,7 +30,6 @@ The challenge needs a deployable service without losing the seams required for i
 - \`service/src/test/java/com/clara/insurancequotes/ModularityTest.java\`
 - \`docs/architecture/modules/\`
 - [Module package structure design](../architecture/module-package-structure-design.md)
-- [Module package structure architecture guide](../architecture/module-package-structure-design.md)
 
 ## Consequences
 

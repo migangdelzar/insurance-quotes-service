@@ -75,8 +75,7 @@ challenge easy to run as one deployable application:
 | Maven libraries | `platform` centralizes versions, while small `service-i18n` and `throwing-functions` libraries isolate reusable concerns from the business service without creating premature microservices. |
 
 For the package-by-package vocabulary and dependency direction, see the
-[module package structure design](docs/architecture/module-package-structure-design.md)
-and its [architecture guide](docs/architecture/module-package-structure-design.md).
+[module package structure design](docs/architecture/module-package-structure-design.md).
 
 This is a **modular monolith by choice**: it gives recruiters and future
 engineers visible domain boundaries, fast local feedback, and low operational
@@ -391,9 +390,9 @@ and credentials are selected.
 
 For Docker-backed Maven integration tests on Colima, use:
 
-```bash
+~~~bash
 TESTCONTAINERS_RYUK_DISABLED=true mise exec -- mvn -pl service verify
-```
+~~~
 
 This local-only flag avoids Testcontainers Ryuk mounting Colima's host socket;
 CI runners with a native Docker socket should omit it.

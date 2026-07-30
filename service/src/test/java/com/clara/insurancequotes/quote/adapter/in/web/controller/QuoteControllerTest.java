@@ -3,6 +3,7 @@ package com.clara.insurancequotes.quote.adapter.in.web.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,6 +35,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -229,6 +231,17 @@ class QuoteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page").value(1))
                 .andExpect(jsonPath("$.size").value(10));
+
+        var queryCaptor = ArgumentCaptor.forClass(com.clara.insurancequotes.quote.api.query.SearchQuotesQuery.class);
+        verify(searchQuotesUseCase).searchQuotes(queryCaptor.capture(), eq(requestingOwner()));
+        var query = queryCaptor.getValue();
+        org.assertj.core.api.Assertions.assertThat(query.page()).isEqualTo(1);
+        org.assertj.core.api.Assertions.assertThat(query.size()).isEqualTo(10);
+        org.assertj.core.api.Assertions.assertThat(query.search()).isEqualTo("jane");
+        org.assertj.core.api.Assertions.assertThat(query.status()).isEqualTo(QuoteStatusView.SUBMITTED);
+        org.assertj.core.api.Assertions.assertThat(query.coverage()).isEqualTo(CoverageType.STANDARD);
+        org.assertj.core.api.Assertions.assertThat(query.sortBy().property()).isEqualTo("name");
+        org.assertj.core.api.Assertions.assertThat(query.direction().name()).isEqualTo("DESC");
     }
 
     @Test

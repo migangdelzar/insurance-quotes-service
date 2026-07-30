@@ -6,8 +6,4 @@ public enum QuoteStatusView {
     SUBMITTED,
     SUBMISSION_FAILED,
     EXPIRED;
-
-    public boolean alreadySubmitted() {
-        return this == SUBMITTED;
-    }
 }

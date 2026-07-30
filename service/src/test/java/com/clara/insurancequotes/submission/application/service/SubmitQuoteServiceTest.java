@@ -84,6 +84,7 @@ class SubmitQuoteServiceTest {
 
         assertThat(view.status()).isEqualTo(QuoteStatusView.SUBMITTED);
         verify(insurerSubmissionPort).submit(QUOTE_ID);
+        verify(finalizer).completeSubmission(QUOTE_ID, OWNER_ID);
     }
 
     @Test

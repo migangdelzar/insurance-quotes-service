@@ -118,7 +118,7 @@ contract, an application implementation, or a technical adapter.
 | Spring Data repository | `SpringData<Noun>Repository` | `SpringDataQuoteRepository` | Framework-specific database repository |
 | HTTP client | `<Provider>HttpClient` | `InsurerHttpClient` | Performs only the external HTTP call |
 | Client adapter | `<Provider><Capability>Adapter` | `InsurerSubmissionAdapter` | Implements the application port around the client |
-| External DTO | `<Provider><Request|Response>` | `PricingResponse` | External contract; never leaks into the domain |
+| External DTO | `<Provider><Request or Response>` | `PricingResponse` | External contract; never leaks into the domain |
 | Mapper | `<Boundary>Mapper` | `QuoteWebMapper` | Translates one boundary; do not create generic `Mapper` |
 | Configuration | `<Module><Concern>Configuration` | `QuoteCacheConfiguration` | Spring/framework wiring only |
 | Exception advice | `<Module>ExceptionHandler` | `QuoteExceptionHandler` | Maps failures to Problem Details/HTTP responses |
@@ -247,10 +247,10 @@ exist after implementation.
 
 Existing names that already communicate their role, such as `QuoteRepository`,
 `QuoteExpired`, and domain exception names, are retained unless a package move
-is required. Names such as `PremiumCalculator`, `DefaultPremiumCalculator`,
-and `InsurerSubmissionPort` are renamed because their interface/implementation roles
-are clearer as `CalculatePremiumUseCase`, `CalculatePremiumService`, and
-`InsurerSubmissionPort`.
+is required. Names such as `PremiumCalculator` and `DefaultPremiumCalculator`
+are renamed because their interface/implementation roles are clearer as
+`CalculatePremiumUseCase` and `CalculatePremiumService`. The former
+`InsurerGateway` is now the technology-neutral `InsurerSubmissionPort`.
 
 ### Consistency across modules
 
@@ -270,7 +270,7 @@ Examples applied consistently to each module:
 
 | Module | Public contract | Application implementation | Technical edge |
 | --- | --- | --- | --- |
-| `auth` | `AuthenticateUserUseCase`, `RefreshSessionUseCase`, `CompletePasskeyAssertionUseCase` | `AuthenticateUserService`, `RefreshSessionService`, `CompletePasskeyAssertionService` | `AuthController`, `JwtTokenIssuer`, `UserPersistenceAdapter`, `PasskeyAdapter` |
+| `auth` | `LoginUseCase`, `RefreshTokenUseCase`, `AssertPasskeyUseCase` | `LoginService`, `RefreshAccessTokenService`, `WebAuthnService` | `AuthController`, `TokenService`, `UserPersistenceAdapter`, `YubicoPasskeyAdapter` |
 | `pricing` | `CalculatePremiumUseCase`, `CalculatePremiumCommand`, `Premium` | `CalculatePremiumService` | `PricingMetricsAdapter` if metrics are module-specific |
 | `quote` | `CreateQuoteUseCase`, `UpdateCoverageUseCase`, `SearchQuotesUseCase` | `CreateQuoteService`, `UpdateCoverageService`, `SearchQuotesService` | `QuoteController`, `QuotePersistenceAdapter`, `SpringDataQuoteRepository` |
 | `submission` | `SubmitQuoteUseCase`, `QuoteSubmitted`, `InsurerSubmissionPort` | `SubmitQuoteService`, `FinalizeQuoteSubmissionService` | `InsurerHttpClient`, `InsurerSubmissionAdapter` |

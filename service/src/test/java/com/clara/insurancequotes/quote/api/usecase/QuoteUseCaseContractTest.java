@@ -49,7 +49,10 @@ class QuoteUseCaseContractTest {
                 UUID.class);
 
         assertThat(QuoteDetails.class.getRecordComponents())
-                .anyMatch(component -> component.getType().equals(QuoteStatusView.class));
+                .filteredOn(component -> component.getName().equals("status"))
+                .singleElement()
+                .extracting(component -> component.getType())
+                .isEqualTo(QuoteStatusView.class);
         assertThat(QuotePage.class.getRecordComponents()[0].getGenericType().getTypeName())
                 .contains(QuoteDetails.class.getName());
         assertThat(QuoteSummary.class.getSimpleName()).isEqualTo("QuoteSummary");

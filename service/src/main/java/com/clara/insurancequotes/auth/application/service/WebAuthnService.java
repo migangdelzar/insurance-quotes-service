@@ -1,5 +1,6 @@
 package com.clara.insurancequotes.auth.application.service;
 
+import com.clara.insurancequotes.auth.api.command.RegisterPasskeyCommand;
 import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
 import com.clara.insurancequotes.auth.api.exception.PasskeyNotRegisteredException;
 import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
@@ -82,8 +83,8 @@ public class WebAuthnService
 
     @Transactional
     @Override
-    public void register(String challengeId, String credentialJson) {
-        finishRegistration(challengeId, credentialJson);
+    public void register(RegisterPasskeyCommand command) {
+        finishRegistration(command.challengeId(), command.credential());
     }
 
     @Transactional

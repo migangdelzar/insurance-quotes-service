@@ -51,8 +51,8 @@ public class QuotePersistenceAdapter implements QuoteRepository {
                     (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get("userId"), ownerId));
         }
         if (query.status() != null) {
-            specification = specification.and((root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(
-                    root.get("status"), QuoteStatus.valueOf(query.status().name())));
+            specification = specification.and((root, criteriaQuery, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("status"), toDomainStatus(query.status())));
         }
         if (query.coverage() != null) {
             specification = specification.and((root, criteriaQuery, criteriaBuilder) ->
@@ -68,6 +68,15 @@ public class QuotePersistenceAdapter implements QuoteRepository {
         var sort = Sort.by(direction, query.sortBy().property()).and(Sort.by(Sort.Direction.ASC, "id"));
         var page = delegate.findAll(specification, PageRequest.of(query.page(), query.size(), sort));
         return new QuoteSearchResult(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
+    }
+
+    private static QuoteStatus toDomainStatus(com.clara.insurancequotes.quote.api.type.QuoteStatusView status) {
+        return switch (status) {
+            case DRAFT -> QuoteStatus.DRAFT;
+            case SUBMITTED -> QuoteStatus.SUBMITTED;
+            case SUBMISSION_FAILED -> QuoteStatus.SUBMISSION_FAILED;
+            case EXPIRED -> QuoteStatus.EXPIRED;
+        };
     }
 
     @Override

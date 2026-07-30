@@ -25,7 +25,7 @@ public final class QuoteApplicationMapper {
                 health.usesTobacco(),
                 health.needsSpouseCoverage(),
                 quote.monthlyPremium(),
-                QuoteStatusView.valueOf(quote.status().name()),
+                toStatusView(quote.status()),
                 quote.createdAt(),
                 quote.updatedAt());
     }
@@ -33,5 +33,14 @@ public final class QuoteApplicationMapper {
     private static Set<com.clara.insurancequotes.quote.api.type.HealthCondition> copyConditions(
             Set<com.clara.insurancequotes.quote.api.type.HealthCondition> conditions) {
         return conditions == null ? null : Set.copyOf(conditions);
+    }
+
+    private static QuoteStatusView toStatusView(com.clara.insurancequotes.quote.domain.model.QuoteStatus status) {
+        return switch (status) {
+            case DRAFT -> QuoteStatusView.DRAFT;
+            case SUBMITTED -> QuoteStatusView.SUBMITTED;
+            case SUBMISSION_FAILED -> QuoteStatusView.SUBMISSION_FAILED;
+            case EXPIRED -> QuoteStatusView.EXPIRED;
+        };
     }
 }

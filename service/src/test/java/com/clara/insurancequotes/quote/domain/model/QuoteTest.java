@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
+import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.exception.IncompleteQuoteException;
 import com.clara.insurancequotes.quote.domain.exception.InvalidStateTransitionException;
 import java.math.BigDecimal;
@@ -77,6 +78,13 @@ class QuoteTest {
         assertThatThrownBy(() ->
                         quote.updateCoverage(CoverageType.BASIC, HealthProfile.none(), new BigDecimal("50.00"), NOW))
                 .isInstanceOf(InvalidStateTransitionException.class);
+    }
+
+    @Test
+    void healthData_forNonSeniorQuote_isRejectedByTheDomain() {
+        var quote = QuoteMother.draft();
+
+        assertThatThrownBy(() -> quote.ensureHealthDataAllowed(true)).isInstanceOf(HealthDataNotAllowedException.class);
     }
 
     @Test

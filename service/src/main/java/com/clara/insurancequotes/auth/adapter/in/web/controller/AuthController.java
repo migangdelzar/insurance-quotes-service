@@ -5,6 +5,7 @@ import com.clara.insurancequotes.auth.adapter.in.web.request.LoginRequest;
 import com.clara.insurancequotes.auth.adapter.in.web.request.RefreshRequest;
 import com.clara.insurancequotes.auth.adapter.in.web.request.WebAuthnAssertRequest;
 import com.clara.insurancequotes.auth.adapter.in.web.request.WebAuthnRegisterRequest;
+import com.clara.insurancequotes.auth.api.command.RegisterPasskeyCommand;
 import com.clara.insurancequotes.auth.api.result.LoginResponse;
 import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
 import com.clara.insurancequotes.auth.api.result.WebAuthnChallengeResponse;
@@ -74,6 +75,6 @@ public class AuthController {
     @PostMapping("/webauthn/register")
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.NO_CONTENT)
     public void register(@Valid @RequestBody WebAuthnRegisterRequest request) {
-        registerPasskeyUseCase.register(request.challengeId(), request.credentialJson());
+        registerPasskeyUseCase.register(new RegisterPasskeyCommand(request.challengeId(), request.credentialJson()));
     }
 }

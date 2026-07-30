@@ -84,6 +84,8 @@ class ModularityTest {
                 .resideInAnyPackage(
                         "..api.command..",
                         "..api.query..",
+                        "..api.result..",
+                        "..api.event..",
                         "..api.usecase..",
                         "..api.type..",
                         "..api.exception..",

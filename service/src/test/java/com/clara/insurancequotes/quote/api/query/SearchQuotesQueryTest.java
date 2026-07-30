@@ -34,4 +34,31 @@ class SearchQuotesQueryTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("size must be between");
     }
+
+    @Test
+    void rejectsNegativePage() {
+        assertThatThrownBy(() -> SearchQuotesQuery.of(-1, 20, null, null, null, null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("page must be zero or greater");
+    }
+
+    @Test
+    void rejectsUnsupportedFilterValues() {
+        assertThatThrownBy(() -> SearchQuotesQuery.of(0, 20, null, "unknown", null, null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported quote status");
+        assertThatThrownBy(() -> SearchQuotesQuery.of(0, 20, null, null, "unknown", null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported quote coverage");
+    }
+
+    @Test
+    void rejectsUnsupportedOrderingValues() {
+        assertThatThrownBy(() -> SearchQuotesQuery.of(0, 20, null, null, null, "unknown", null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported quote sort field");
+        assertThatThrownBy(() -> SearchQuotesQuery.of(0, 20, null, null, null, null, "unknown"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported quote sort direction");
+    }
 }

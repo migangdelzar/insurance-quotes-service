@@ -21,7 +21,10 @@ public class GetQuoteService implements GetQuoteUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #requester.id()")
+    @Cacheable(
+            cacheNames = CacheConfig.QUOTES_CACHE,
+            key = "#id + '|' + #requester.id()",
+            condition = "!#requester.admin()")
     public QuoteDetails getQuote(UUID id, RequestingUser requester) {
         return QuoteApplicationMapper.toDetails(repository
                 .findById(id, requester.admin() ? null : requester.id())

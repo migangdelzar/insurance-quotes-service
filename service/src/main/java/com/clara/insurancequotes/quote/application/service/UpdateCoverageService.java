@@ -24,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UpdateCoverageService implements UpdateCoverageUseCase {
 
-    private static final int HEALTH_DATA_AGE_THRESHOLD = 65;
-
     private final QuoteRepository repository;
     private final CalculatePremiumUseCase premiumCalculator;
     private final Clock clock;
@@ -37,7 +35,7 @@ public class UpdateCoverageService implements UpdateCoverageUseCase {
     public QuoteDetails updateCoverage(UUID id, UpdateCoverageCommand command, UUID ownerId) {
         try {
             var quote = load(id, ownerId);
-            rejectHealthDataForNonSeniors(quote, command);
+            quote.ensureHealthDataAllowed(command.carriesHealthData());
             var premium = metrics.timePremiumCalculation(
                     () -> premiumCalculator.calculate(calculatePremiumCommandOf(quote, command)));
             quote.updateCoverage(command.coverageType(), healthProfileOf(command), premium.monthly(), clock.instant());
@@ -55,12 +53,6 @@ public class UpdateCoverageService implements UpdateCoverageUseCase {
 
     private Quote load(UUID id, UUID ownerId) {
         return repository.findById(id, ownerId).orElseThrow(() -> new QuoteNotFoundException(id));
-    }
-
-    private static void rejectHealthDataForNonSeniors(Quote quote, UpdateCoverageCommand command) {
-        if (quote.age() <= HEALTH_DATA_AGE_THRESHOLD && command.carriesHealthData()) {
-            throw new HealthDataNotAllowedException(quote.age());
-        }
     }
 
     private static HealthProfile healthProfileOf(UpdateCoverageCommand command) {

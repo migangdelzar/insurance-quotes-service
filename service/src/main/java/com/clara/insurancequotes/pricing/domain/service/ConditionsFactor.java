@@ -2,9 +2,7 @@ package com.clara.insurancequotes.pricing.domain.service;
 
 import com.clara.insurancequotes.pricing.api.command.CalculatePremiumCommand;
 import java.math.BigDecimal;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ConditionsFactor implements PremiumFactor {
 
     private static final BigDecimal ANY_CONDITION = new BigDecimal("1.3");

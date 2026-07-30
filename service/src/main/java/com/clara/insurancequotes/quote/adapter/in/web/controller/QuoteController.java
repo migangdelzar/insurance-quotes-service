@@ -76,12 +76,13 @@ public class QuoteController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String direction,
             @AuthenticationPrincipal Jwt jwt) {
+        final SearchQuotesQuery query;
         try {
-            return searchQuotesUseCase.searchQuotes(
-                    SearchQuotesQuery.of(page, size, search, status, coverage, sortBy, direction), requester(jwt));
+            query = SearchQuotesQuery.of(page, size, search, status, coverage, sortBy, direction);
         } catch (IllegalArgumentException exception) {
-            throw new InvalidQuoteQueryException(exception.getMessage());
+            throw new InvalidQuoteQueryException(exception.getMessage(), exception);
         }
+        return searchQuotesUseCase.searchQuotes(query, requester(jwt));
     }
 
     @GetMapping("/summary")

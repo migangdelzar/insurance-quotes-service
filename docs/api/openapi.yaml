@@ -22,6 +22,7 @@ paths:
           type: integer
           format: int32
           default: 0
+          minimum: 0
       - name: size
         in: query
         required: false
@@ -29,6 +30,8 @@ paths:
           type: integer
           format: int32
           default: 20
+          minimum: 1
+          maximum: 100
       - name: search
         in: query
         required: false
@@ -39,28 +42,46 @@ paths:
         required: false
         schema:
           type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - SUBMISSION_FAILED
+          - EXPIRED
       - name: coverage
         in: query
         required: false
         schema:
           type: string
+          enum:
+          - BASIC
+          - STANDARD
+          - PREMIUM
       - name: sortBy
         in: query
         required: false
         schema:
           type: string
           default: createdAt
+          enum:
+          - createdAt
+          - updatedAt
+          - name
+          - monthlyPremium
+          - status
       - name: direction
         in: query
         required: false
         schema:
           type: string
           default: desc
+          enum:
+          - asc
+          - desc
       - name: API-Version
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       responses:
@@ -79,7 +100,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       requestBody:
@@ -111,7 +132,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       responses:
@@ -131,7 +152,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       requestBody:
@@ -153,7 +174,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       responses:
@@ -173,7 +194,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       requestBody:
@@ -198,7 +219,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       requestBody:
@@ -224,7 +245,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       requestBody:
@@ -250,7 +271,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       requestBody:
@@ -272,7 +293,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       requestBody:
@@ -304,7 +325,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       requestBody:
@@ -336,7 +357,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       responses:
@@ -356,7 +377,7 @@ paths:
         in: header
         schema:
           type: string
-          default: 1.0.0
+          default: "1.0"
           enum:
           - "1.0"
       responses:

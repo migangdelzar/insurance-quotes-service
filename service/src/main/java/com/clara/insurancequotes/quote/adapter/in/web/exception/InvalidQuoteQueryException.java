@@ -6,4 +6,8 @@ public class InvalidQuoteQueryException extends RuntimeException {
     public InvalidQuoteQueryException(String message) {
         super(message);
     }
+
+    public InvalidQuoteQueryException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
