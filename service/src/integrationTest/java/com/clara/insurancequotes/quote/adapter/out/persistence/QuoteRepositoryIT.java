@@ -2,6 +2,7 @@ package com.clara.insurancequotes.quote.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.clara.insurancequotes.auth.adapter.out.persistence.UserPersistenceAdapter;
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.api.query.SearchQuotesQuery;
@@ -28,7 +29,7 @@ import org.springframework.test.context.DynamicPropertySource;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(QuotePersistenceAdapter.class)
+@Import({QuotePersistenceAdapter.class, UserPersistenceAdapter.class})
 class QuoteRepositoryIT {
 
     @DynamicPropertySource
