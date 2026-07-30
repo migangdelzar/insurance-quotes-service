@@ -2,7 +2,7 @@
 
 ## Status
 
-Approved for implementation
+Implemented on `feat-modulith-package-structure`
 
 ## Goal
 
@@ -10,6 +10,13 @@ Make every Spring Modulith module express the same DDD + hexagonal architecture
 through its package names, public API, and package-level documentation. The
 refactor is behavior-neutral: HTTP paths, JSON fields, persistence schema,
 business rules, and runtime configuration remain unchanged.
+
+The current persistence model keeps JPA annotations on the domain aggregate
+classes to preserve the existing schema and migration behavior. The enforced
+boundary is that application and domain code does not reach persistence
+repositories, adapters, transport DTOs, or infrastructure clients. Splitting
+JPA entities from pure domain objects would be a separate schema-safe migration,
+not a naming/package refactor.
 
 ## Guiding structure
 

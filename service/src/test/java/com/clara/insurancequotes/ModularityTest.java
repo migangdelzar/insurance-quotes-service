@@ -1,8 +1,12 @@
 package com.clara.insurancequotes;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModule;
@@ -11,6 +15,8 @@ import org.springframework.modulith.core.ApplicationModules;
 class ModularityTest {
 
     private static final ApplicationModules MODULES = ApplicationModules.of(Application.class);
+    private static final JavaClasses APPLICATION_CLASSES =
+            new ClassFileImporter().importPath(Path.of("target", "classes"));
 
     @Test
     void moduleBoundariesAreRespected() {
@@ -69,6 +75,67 @@ class ModularityTest {
         assertLegacyConfigClassIsAbsent("CorrelationIdFilter");
         assertLegacyConfigClassIsAbsent("OpenApiConfig");
         assertLegacyConfigClassIsAbsent("WebVersioningConfig");
+    }
+
+    @Test
+    void corePackagesDoNotDependOnOutboundOrInboundAdapterPackages() {
+        noClasses()
+                .that()
+                .resideInAnyPackage(
+                        "..api.command..",
+                        "..api.query..",
+                        "..api.usecase..",
+                        "..api.type..",
+                        "..api.exception..",
+                        "..application..",
+                        "..domain..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage("..adapter..")
+                .check(APPLICATION_CLASSES);
+    }
+
+    @Test
+    void corePackagesDoNotDependOnTransportOrInfrastructureTypes() {
+        noClasses()
+                .that()
+                .resideInAnyPackage(
+                        "..api.command..",
+                        "..api.query..",
+                        "..api.usecase..",
+                        "..api.type..",
+                        "..api.exception..",
+                        "..application..",
+                        "..domain..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(
+                        "org.springframework.web..",
+                        "org.springframework.http..",
+                        "org.springframework.kafka..",
+                        "org.springframework.data.redis..",
+                        "com.fasterxml.jackson..")
+                .check(APPLICATION_CLASSES);
+    }
+
+    @Test
+    void transportRequestsRemainInboundWebAdapterDetails() {
+        classes()
+                .that()
+                .haveSimpleNameEndingWith("Request")
+                .should()
+                .resideInAnyPackage("..adapter.in.web.request..")
+                .check(APPLICATION_CLASSES);
+    }
+
+    @Test
+    void persistenceAdaptersAreNamedByTheirApplicationCapability() {
+        classes()
+                .that()
+                .haveSimpleNameEndingWith("PersistenceAdapter")
+                .should()
+                .resideInAnyPackage("..adapter.out.persistence..")
+                .check(APPLICATION_CLASSES);
     }
 
     @Test

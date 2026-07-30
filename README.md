@@ -28,7 +28,7 @@ flowchart LR
   quote --> postgres[(PostgreSQL)]
   auth --> postgres
   api --> redis[(Redis)]
-  submission --> insurer[InsurerGateway / WireMock]
+  submission --> insurer[InsurerSubmissionPort / HTTPBin or WireMock]
   submission --> outbox[Spring Modulith outbox]
   outbox --> kafka[(Kafka)]
   api --> metrics[Actuator + Micrometer]
@@ -73,6 +73,10 @@ challenge easy to run as one deployable application:
 | Modulith outbox + Kafka | Business events are persisted before publication, then delivered asynchronously; Kafka is for integration and delivery, not metrics collection. |
 | Actuator, Micrometer, OpenTelemetry | Actuator exposes health and scrape endpoints, Micrometer records application/business meters, Prometheus stores time series, Grafana visualizes them, and Tempo/Loki complete trace/log diagnosis. |
 | Maven libraries | `platform` centralizes versions, while small `service-i18n` and `throwing-functions` libraries isolate reusable concerns from the business service without creating premature microservices. |
+
+For the package-by-package vocabulary and dependency direction, see the
+[module package structure design](docs/architecture/module-package-structure-design.md)
+and its [execution plan](docs/architecture/module-package-structure-plan.md).
 
 This is a **modular monolith by choice**: it gives recruiters and future
 engineers visible domain boundaries, fast local feedback, and low operational
