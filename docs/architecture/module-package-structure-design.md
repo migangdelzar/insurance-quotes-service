@@ -159,7 +159,6 @@ exist after implementation.
 | `auth.api.request.*` | `auth.adapter.in.web.request.*` | HTTP DTOs are inbound adapter details |
 | controller-nested `LoginRequest`, `RefreshRequest`, `AssertionOptionsRequest` | `auth.adapter.in.web.request.*Request` | Keeps transport models out of controllers and API contracts |
 | concrete auth services injected into `AuthController` | focused `auth.api.usecase.*UseCase` interfaces | Controllers depend on public capabilities, not implementations |
-| `auth.api.result.*Response` | business-named `LoginResult`, `TokenPair`, and `WebAuthnChallenge` | Keeps application results distinct from HTTP request/response DTO naming |
 | `submission.api.usecase.SubmissionApi` | `SubmitQuoteUseCase` | Uses the standard use-case suffix and business verb |
 | `submission.adapter.out.client.insurer.HttpInsurerClient` | `InsurerHttpClient` | Provider first, technology second |
 | `config.BusinessMetrics` | `shared.observability.BusinessMetrics` | Metrics are cross-cutting observability, not a business module |
@@ -170,7 +169,7 @@ exist after implementation.
 Existing names that already communicate their role, such as `QuoteRepository`,
 `QuoteExpired`, and domain exception names, are retained unless a package move
 is required. Names such as `PremiumCalculator`, `DefaultPremiumCalculator`,
-and `InsurerGateway` are renamed because their interface/implementation roles
+and `InsurerSubmissionPort` are renamed because their interface/implementation roles
 are clearer as `CalculatePremiumUseCase`, `CalculatePremiumService`, and
 `InsurerSubmissionPort`.
 
@@ -245,9 +244,8 @@ Transport-only invalid query parsing remains inside the web adapter.
 Authentication request records are HTTP wire models, not module API types. They
 move from `auth.api.request` to `auth.adapter.in.web.request`. Authentication
 operations are exposed through focused `auth.api.usecase` interfaces, while
-token and WebAuthn results remain stable public result models, with business
-names (`LoginResult`, `TokenPair`, and `WebAuthnChallenge`) instead of generic
-`Response` suffixes.
+token and WebAuthn results remain stable public result models with `Response`
+suffixes because they are the JSON-facing authentication contract.
 
 The move changes Java ownership only; `/auth/**` routes and JSON fields do not
 change.
@@ -263,7 +261,7 @@ factor-based domain policy and application implementation.
 
 Submission keeps its public event, expected external failures, and focused
 submit use case. The HTTP insurer integration remains an outbound client
-adapter; the application layer depends only on `InsurerGateway`.
+adapter; the application layer depends only on `InsurerSubmissionPort`.
 
 ### Shared and configuration
 

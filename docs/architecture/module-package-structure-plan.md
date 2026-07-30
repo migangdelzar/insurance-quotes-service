@@ -246,9 +246,10 @@ annotations.
 - [x] **Step 5: Run all auth tests and expect PASS**
 - [x] **Step 6: Commit** (`d5a7e80`)
 
-The authentication result names also follow the public-result convention:
-`LoginResult`, `TokenPair`, and `WebAuthnChallenge`. Their JSON fields and
-endpoint behavior remain unchanged.
+Authentication results retain `Response` suffixes because they are the
+JSON-facing transport contract: `LoginResponse`, `TokenPairResponse`, and
+`WebAuthnChallengeResponse`. Their JSON fields and endpoint behavior remain
+unchanged.
 
 ```bash
 git add service/src/main/java/com/clara/insurancequotes/auth service/src/test/java/com/clara/insurancequotes/auth

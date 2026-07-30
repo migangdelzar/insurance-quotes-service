@@ -1,9 +1,9 @@
 package com.clara.insurancequotes.auth.api.usecase;
 
-import com.clara.insurancequotes.auth.api.result.TokenPair;
+import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
 
 /** Rotates a refresh token and issues a new access-token pair. */
 public interface RefreshTokenUseCase {
 
-    TokenPair refresh(String refreshToken);
+    TokenPairResponse refresh(String refreshToken);
 }

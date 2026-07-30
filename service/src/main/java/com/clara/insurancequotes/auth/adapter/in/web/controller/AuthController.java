@@ -5,9 +5,9 @@ import com.clara.insurancequotes.auth.adapter.in.web.request.LoginRequest;
 import com.clara.insurancequotes.auth.adapter.in.web.request.RefreshRequest;
 import com.clara.insurancequotes.auth.adapter.in.web.request.WebAuthnAssertRequest;
 import com.clara.insurancequotes.auth.adapter.in.web.request.WebAuthnRegisterRequest;
-import com.clara.insurancequotes.auth.api.result.LoginResult;
-import com.clara.insurancequotes.auth.api.result.TokenPair;
-import com.clara.insurancequotes.auth.api.result.WebAuthnChallenge;
+import com.clara.insurancequotes.auth.api.result.LoginResponse;
+import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
+import com.clara.insurancequotes.auth.api.result.WebAuthnChallengeResponse;
 import com.clara.insurancequotes.auth.api.usecase.AssertPasskeyUseCase;
 import com.clara.insurancequotes.auth.api.usecase.LoginUseCase;
 import com.clara.insurancequotes.auth.api.usecase.LogoutUseCase;
@@ -38,12 +38,12 @@ public class AuthController {
     private final StartPasskeyRegistrationUseCase startPasskeyRegistrationUseCase;
 
     @PostMapping("/login")
-    public LoginResult login(@Valid @RequestBody LoginRequest request) {
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return loginUseCase.login(request.username(), request.password());
     }
 
     @PostMapping("/refresh")
-    public TokenPair refresh(@Valid @RequestBody RefreshRequest request) {
+    public TokenPairResponse refresh(@Valid @RequestBody RefreshRequest request) {
         return refreshTokenUseCase.refresh(request.refreshToken());
     }
 
@@ -54,18 +54,18 @@ public class AuthController {
     }
 
     @PostMapping("/webauthn/assertion-options")
-    public WebAuthnChallenge assertionOptions(@RequestBody(required = false) AssertionOptionsRequest request) {
+    public WebAuthnChallengeResponse assertionOptions(@RequestBody(required = false) AssertionOptionsRequest request) {
         var username = Optional.ofNullable(request).map(AssertionOptionsRequest::username);
         return startPasskeyAssertionUseCase.startAssertion(username.orElse(null));
     }
 
     @PostMapping("/webauthn/assert")
-    public TokenPair assertPasskey(@Valid @RequestBody WebAuthnAssertRequest request) {
+    public TokenPairResponse assertPasskey(@Valid @RequestBody WebAuthnAssertRequest request) {
         return assertPasskeyUseCase.assertPasskey(request.challengeId(), request.credentialJson(), request.mfaToken());
     }
 
     @PostMapping("/webauthn/register-options")
-    public WebAuthnChallenge registerOptions(
+    public WebAuthnChallengeResponse registerOptions(
             @org.springframework.security.core.annotation.AuthenticationPrincipal
                     org.springframework.security.oauth2.jwt.Jwt jwt) {
         return startPasskeyRegistrationUseCase.startRegistration(jwt.getSubject());

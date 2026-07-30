@@ -196,7 +196,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/WebAuthnChallenge"
+                $ref: "#/components/schemas/WebAuthnChallengeResponse"
   /auth/webauthn/assertion-options:
     post:
       tags:
@@ -221,7 +221,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/WebAuthnChallenge"
+                $ref: "#/components/schemas/WebAuthnChallengeResponse"
   /auth/webauthn/assert:
     post:
       tags:
@@ -247,7 +247,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/TokenPair"
+                $ref: "#/components/schemas/TokenPairResponse"
   /auth/refresh:
     post:
       tags:
@@ -273,7 +273,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/TokenPair"
+                $ref: "#/components/schemas/TokenPairResponse"
   /auth/logout:
     post:
       tags:
@@ -321,7 +321,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/LoginResult"
+                $ref: "#/components/schemas/LoginResponse"
   /quotes/{id}/coverage:
     patch:
       tags:
@@ -587,7 +587,7 @@ components:
       required:
       - challengeId
       - credentialJson
-    WebAuthnChallenge:
+    WebAuthnChallengeResponse:
       type: object
       properties:
         challengeId:
@@ -613,7 +613,7 @@ components:
       required:
       - challengeId
       - credentialJson
-    TokenPair:
+    TokenPairResponse:
       type: object
       properties:
         accessToken:
@@ -643,7 +643,7 @@ components:
       required:
       - password
       - username
-    LoginResult:
+    LoginResponse:
       type: object
       properties:
         status:
@@ -651,7 +651,7 @@ components:
         mfaToken:
           type: string
         tokens:
-          $ref: "#/components/schemas/TokenPair"
+          $ref: "#/components/schemas/TokenPairResponse"
     UpdateCoverageRequest:
       type: object
       properties:

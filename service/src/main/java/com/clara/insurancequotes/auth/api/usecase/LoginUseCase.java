@@ -1,9 +1,9 @@
 package com.clara.insurancequotes.auth.api.usecase;
 
-import com.clara.insurancequotes.auth.api.result.LoginResult;
+import com.clara.insurancequotes.auth.api.result.LoginResponse;
 
 /** Authenticates a user with username and password. */
 public interface LoginUseCase {
 
-    LoginResult login(String username, String password);
+    LoginResponse login(String username, String password);
 }

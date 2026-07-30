@@ -2,8 +2,8 @@ package com.clara.insurancequotes.auth.application.service;
 
 import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
 import com.clara.insurancequotes.auth.api.exception.PasskeyNotRegisteredException;
-import com.clara.insurancequotes.auth.api.result.TokenPair;
-import com.clara.insurancequotes.auth.api.result.WebAuthnChallenge;
+import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
+import com.clara.insurancequotes.auth.api.result.WebAuthnChallengeResponse;
 import com.clara.insurancequotes.auth.api.usecase.AssertPasskeyUseCase;
 import com.clara.insurancequotes.auth.api.usecase.RegisterPasskeyUseCase;
 import com.clara.insurancequotes.auth.api.usecase.StartPasskeyAssertionUseCase;
@@ -44,11 +44,11 @@ public class WebAuthnService
     }
 
     @Override
-    public WebAuthnChallenge startAssertion(String username) {
+    public WebAuthnChallengeResponse startAssertion(String username) {
         return startAssertion(Optional.ofNullable(username).filter(value -> !value.isBlank()));
     }
 
-    public WebAuthnChallenge startAssertion(Optional<String> username) {
+    public WebAuthnChallengeResponse startAssertion(Optional<String> username) {
         if (username.isPresent()) {
             var user = users.findByUsername(username.get()).orElseThrow(InvalidCredentialsException::new);
             if (!credentials.existsForUser(user.id())) {
@@ -56,17 +56,17 @@ public class WebAuthnService
             }
         }
         var ceremony = passkeyPort.startAssertion(username);
-        return new WebAuthnChallenge(ceremony.challengeId(), ceremony.publicKeyOptionsJson());
+        return new WebAuthnChallengeResponse(ceremony.challengeId(), ceremony.publicKeyOptionsJson());
     }
 
     @Transactional
     @Override
-    public TokenPair assertPasskey(String challengeId, String credentialJson, String mfaToken) {
+    public TokenPairResponse assertPasskey(String challengeId, String credentialJson, String mfaToken) {
         return finishAssertion(challengeId, credentialJson, mfaToken);
     }
 
     @Transactional
-    public TokenPair finishAssertion(String challengeId, String credentialJson, String mfaToken) {
+    public TokenPairResponse finishAssertion(String challengeId, String credentialJson, String mfaToken) {
         requireMfaScopeIfPresent(mfaToken);
         var username = passkeyPort.finishAssertion(challengeId, credentialJson);
         var user = users.findByUsername(username).orElseThrow(InvalidCredentialsException::new);
@@ -74,10 +74,10 @@ public class WebAuthnService
     }
 
     @Override
-    public WebAuthnChallenge startRegistration(String username) {
+    public WebAuthnChallengeResponse startRegistration(String username) {
         var user = users.findByUsername(username).orElseThrow(InvalidCredentialsException::new);
         var ceremony = passkeyPort.startRegistration(user);
-        return new WebAuthnChallenge(ceremony.challengeId(), ceremony.publicKeyOptionsJson());
+        return new WebAuthnChallengeResponse(ceremony.challengeId(), ceremony.publicKeyOptionsJson());
     }
 
     @Transactional

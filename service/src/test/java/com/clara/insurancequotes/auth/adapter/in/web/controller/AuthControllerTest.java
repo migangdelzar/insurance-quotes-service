@@ -19,8 +19,8 @@ import com.clara.insurancequotes.auth.api.usecase.RefreshTokenUseCase;
 import com.clara.insurancequotes.auth.api.usecase.RegisterPasskeyUseCase;
 import com.clara.insurancequotes.auth.api.usecase.StartPasskeyAssertionUseCase;
 import com.clara.insurancequotes.auth.api.usecase.StartPasskeyRegistrationUseCase;
-import com.clara.insurancequotes.auth.api.result.LoginResult;
-import com.clara.insurancequotes.auth.api.result.TokenPair;
+import com.clara.insurancequotes.auth.api.result.LoginResponse;
+import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
 import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
@@ -78,7 +78,7 @@ class AuthControllerTest {
     @Test
     void validCredentials_returnTokenPair() throws Exception {
         when(loginUseCase.login("demo", "demo-password"))
-                .thenReturn(LoginResult.tokensIssued(new TokenPair("access", "refresh", 1800)));
+                .thenReturn(LoginResponse.tokensIssued(new TokenPairResponse("access", "refresh", 1800)));
 
         mockMvc.perform(post("/auth/login")
                         .contentType("application/json")
