@@ -12,7 +12,7 @@
 
 - [x] Design approved and committed (`ddee007`).
 - [x] Implementation plan created at `docs/architecture/module-package-structure-plan.md`.
-- [ ] Task 1 — module metadata and package vocabulary.
+- [x] Task 1 — module metadata and package vocabulary (`dad1da4`, `39dba30`, `30b908f`).
 - [ ] Task 2 — shared configuration and observability.
 - [ ] Task 3 — pricing naming.
 - [ ] Task 4 — quote API split and public result naming.
@@ -31,4 +31,6 @@
 
 ## Results
 
-Implementation not started.
+Task 1 is complete. Focused Modulith verification passes with 4 tests and 0
+failures. The generated PlantUML relationship ordering was refreshed after
+package metadata generation and is committed with the Task 1 documentation.
