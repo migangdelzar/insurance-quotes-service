@@ -46,23 +46,23 @@ class ModularityTest {
         assertThat(auth.getNamedInterfaces().getByName("auth-api-usecase")).isPresent();
         assertThat(auth.getNamedInterfaces().getByName("auth-api-result")).isPresent();
         assertThat(auth.getNamedInterfaces().getByName("auth-api-exception")).isPresent();
-        assertThat(auth.getNamedInterfaces().getByName("auth-adapter-in-web-request")).isEmpty();
+        assertThat(auth.getNamedInterfaces().getByName("auth-adapter-in-web-request"))
+                .isEmpty();
     }
 
     @Test
     void placesSharedCrossCuttingComponentsInResponsibilityPackages() throws Exception {
         var shared = MODULES.getModuleByName("shared").orElseThrow();
 
-        assertThat(shared.getNamedInterfaces().getByName("shared-observability")).isPresent();
+        assertThat(shared.getNamedInterfaces().getByName("shared-observability"))
+                .isPresent();
         assertThat(Class.forName("com.clara.insurancequotes.shared.observability.BusinessMetrics"))
                 .isNotNull();
-        assertThat(Class.forName(
-                        "com.clara.insurancequotes.shared.adapter.in.web.filter.CorrelationIdFilter"))
+        assertThat(Class.forName("com.clara.insurancequotes.shared.adapter.in.web.filter.CorrelationIdFilter"))
                 .isNotNull();
         assertThat(Class.forName("com.clara.insurancequotes.shared.configuration.OpenApiConfiguration"))
                 .isNotNull();
-        assertThat(Class.forName(
-                        "com.clara.insurancequotes.shared.configuration.WebVersioningConfiguration"))
+        assertThat(Class.forName("com.clara.insurancequotes.shared.configuration.WebVersioningConfiguration"))
                 .isNotNull();
 
         assertLegacyConfigClassIsAbsent("BusinessMetrics");

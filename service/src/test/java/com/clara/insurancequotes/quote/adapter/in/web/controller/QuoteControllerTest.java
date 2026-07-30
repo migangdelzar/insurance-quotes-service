@@ -20,10 +20,10 @@ import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.quote.api.result.QuotePage;
 import com.clara.insurancequotes.quote.api.result.QuoteSummary;
 import com.clara.insurancequotes.quote.api.type.QuoteStatusView;
+import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetQuoteSummaryUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
-import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.quote.api.usecase.SearchQuotesUseCase;
 import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
@@ -160,7 +160,8 @@ class QuoteControllerTest {
                 QuoteStatusView.DRAFT,
                 Instant.now(),
                 Instant.now());
-        when(updateCoverageUseCase.updateCoverage(eq(QUOTE_ID), any(), eq(OWNER_ID))).thenReturn(view);
+        when(updateCoverageUseCase.updateCoverage(eq(QUOTE_ID), any(), eq(OWNER_ID)))
+                .thenReturn(view);
 
         mockMvc.perform(patch("/quotes/{id}/coverage", QUOTE_ID)
                         .with(asOwner())

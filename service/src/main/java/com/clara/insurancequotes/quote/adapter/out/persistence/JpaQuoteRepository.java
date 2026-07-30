@@ -51,8 +51,8 @@ public class JpaQuoteRepository implements QuoteRepository {
                     (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get("userId"), ownerId));
         }
         if (query.status() != null) {
-            specification = specification.and((root, criteriaQuery, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("status"), QuoteStatus.valueOf(query.status().name())));
+            specification = specification.and((root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(
+                    root.get("status"), QuoteStatus.valueOf(query.status().name())));
         }
         if (query.coverage() != null) {
             specification = specification.and((root, criteriaQuery, criteriaBuilder) ->

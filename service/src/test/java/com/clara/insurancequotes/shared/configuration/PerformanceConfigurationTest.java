@@ -7,18 +7,18 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 class PerformanceConfigurationTest {
 
     @Test
     void retainsConfigurationBeanNamesWhileClassesUseConsistentNames() {
-        try (var context = new AnnotationConfigApplicationContext(
-                OpenApiConfiguration.class, WebVersioningConfiguration.class)) {
+        try (var context =
+                new AnnotationConfigApplicationContext(OpenApiConfiguration.class, WebVersioningConfiguration.class)) {
             assertThat(context.containsBean("openApiConfig")).isTrue();
             assertThat(context.containsBean("webVersioningConfig")).isTrue();
         }

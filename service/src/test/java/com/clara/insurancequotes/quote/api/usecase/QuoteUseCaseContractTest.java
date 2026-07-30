@@ -18,19 +18,35 @@ class QuoteUseCaseContractTest {
 
     @Test
     void exposesFocusedQuoteCapabilitiesWithStablePublicModels() throws NoSuchMethodException {
-        assertSingleMethod(CreateQuoteUseCase.class, QuoteDetails.class, "create", CreateQuoteCommand.class, UUID.class);
         assertSingleMethod(
-                UpdateCoverageUseCase.class, QuoteDetails.class, "updateCoverage", UUID.class, UpdateCoverageCommand.class, UUID.class);
+                CreateQuoteUseCase.class, QuoteDetails.class, "create", CreateQuoteCommand.class, UUID.class);
+        assertSingleMethod(
+                UpdateCoverageUseCase.class,
+                QuoteDetails.class,
+                "updateCoverage",
+                UUID.class,
+                UpdateCoverageCommand.class,
+                UUID.class);
         assertSingleMethod(GetQuoteUseCase.class, QuoteDetails.class, "getQuote", UUID.class, RequestingUser.class);
         assertSingleMethod(
-                SearchQuotesUseCase.class, QuotePage.class, "searchQuotes", SearchQuotesQuery.class, RequestingUser.class);
+                SearchQuotesUseCase.class,
+                QuotePage.class,
+                "searchQuotes",
+                SearchQuotesQuery.class,
+                RequestingUser.class);
         assertSingleMethod(GetQuoteSummaryUseCase.class, QuoteSummary.class, "getSummary", RequestingUser.class);
 
         assertSingleMethod(GetOwnedQuoteUseCase.class, QuoteDetails.class, "getOwnedQuote", UUID.class, UUID.class);
-        assertSingleMethod(EnsureQuoteSubmittableUseCase.class, QuoteDetails.class, "ensureSubmittable", UUID.class, UUID.class);
-        assertSingleMethod(MarkQuoteSubmittedUseCase.class, QuoteDetails.class, "markSubmitted", UUID.class, UUID.class);
         assertSingleMethod(
-                MarkQuoteSubmissionFailedUseCase.class, QuoteDetails.class, "markSubmissionFailed", UUID.class, UUID.class);
+                EnsureQuoteSubmittableUseCase.class, QuoteDetails.class, "ensureSubmittable", UUID.class, UUID.class);
+        assertSingleMethod(
+                MarkQuoteSubmittedUseCase.class, QuoteDetails.class, "markSubmitted", UUID.class, UUID.class);
+        assertSingleMethod(
+                MarkQuoteSubmissionFailedUseCase.class,
+                QuoteDetails.class,
+                "markSubmissionFailed",
+                UUID.class,
+                UUID.class);
 
         assertThat(QuoteDetails.class.getRecordComponents())
                 .anyMatch(component -> component.getType().equals(QuoteStatusView.class));

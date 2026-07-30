@@ -43,7 +43,8 @@ public final class InMemoryQuoteRepository implements QuoteRepository {
     public QuoteSearchResult findPage(SearchQuotesQuery query, UUID ownerId) {
         var filtered = store.values().stream()
                 .filter(quote -> ownerId == null || quote.userId().equals(ownerId))
-                .filter(quote -> query.status() == null || quote.status().name().equals(query.status().name()))
+                .filter(quote -> query.status() == null
+                        || quote.status().name().equals(query.status().name()))
                 .filter(quote -> query.coverage() == null || quote.coverageType() == query.coverage())
                 .filter(quote -> query.search() == null || containsSearch(quote, query.search()))
                 .sorted(comparatorFor(query))

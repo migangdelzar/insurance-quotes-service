@@ -8,9 +8,9 @@ import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.command.UpdateCoverageCommand;
 import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
+import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
-import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.clara.insurancequotes.testsupport.TestUsers;
@@ -60,7 +60,8 @@ class QuoteCachingIT {
 
     @Test
     void getQuote_populatesCache_updateCoverageEvicts() {
-        var id = createQuoteUseCase.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
+        var id = createQuoteUseCase
+                .create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         var cache = cacheManager.getCache("quotes");
         var owner = new RequestingUser(ownerId, false);
@@ -76,7 +77,8 @@ class QuoteCachingIT {
 
     @Test
     void getQuote_cacheEntryIsIsolatedPerRequester() {
-        var id = createQuoteUseCase.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
+        var id = createQuoteUseCase
+                .create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         var admin = new RequestingUser(UUID.randomUUID(), true);
         var otherUser = new RequestingUser(UUID.randomUUID(), false);

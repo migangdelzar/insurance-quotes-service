@@ -30,8 +30,7 @@ class SearchQuotesQueryTest {
 
     @Test
     void rejectsPageSizeAboveTheConfiguredBound() {
-        assertThatThrownBy(() -> SearchQuotesQuery.of(
-                        0, SearchQuotesQuery.MAX_SIZE + 1, null, null, null, null, null))
+        assertThatThrownBy(() -> SearchQuotesQuery.of(0, SearchQuotesQuery.MAX_SIZE + 1, null, null, null, null, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("size must be between");
     }

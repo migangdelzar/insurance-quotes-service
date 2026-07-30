@@ -2,8 +2,8 @@ package com.clara.insurancequotes.quote.application.service;
 
 import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
 import com.clara.insurancequotes.quote.api.result.QuoteDetails;
-import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
 import com.clara.insurancequotes.quote.api.type.RequestingUser;
+import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
 import com.clara.insurancequotes.quote.application.mapper.QuoteApplicationMapper;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.configuration.CacheConfig;
@@ -23,7 +23,8 @@ public class GetQuoteService implements GetQuoteUseCase {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #requester.id()")
     public QuoteDetails getQuote(UUID id, RequestingUser requester) {
-        return QuoteApplicationMapper.toDetails(
-                repository.findById(id, requester.admin() ? null : requester.id()).orElseThrow(() -> new QuoteNotFoundException(id)));
+        return QuoteApplicationMapper.toDetails(repository
+                .findById(id, requester.admin() ? null : requester.id())
+                .orElseThrow(() -> new QuoteNotFoundException(id)));
     }
 }

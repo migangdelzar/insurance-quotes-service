@@ -4,8 +4,8 @@ import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.api.result.QuoteDistribution;
 import com.clara.insurancequotes.quote.api.result.QuoteSummary;
 import com.clara.insurancequotes.quote.api.result.QuoteTrendPoint;
-import com.clara.insurancequotes.quote.api.usecase.GetQuoteSummaryUseCase;
 import com.clara.insurancequotes.quote.api.type.RequestingUser;
+import com.clara.insurancequotes.quote.api.usecase.GetQuoteSummaryUseCase;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
 import java.math.BigDecimal;
@@ -36,10 +36,12 @@ public class GetQuoteSummaryService implements GetQuoteSummaryUseCase {
                         .multiply(BigDecimal.valueOf(100))
                         .divide(BigDecimal.valueOf(attempts), 2, RoundingMode.HALF_UP);
         var statusDistribution = Arrays.stream(QuoteStatus.values())
-                .map(status -> new QuoteDistribution(status.name(), data.statusCounts().getOrDefault(status, 0L)))
+                .map(status ->
+                        new QuoteDistribution(status.name(), data.statusCounts().getOrDefault(status, 0L)))
                 .toList();
         var coverageDistribution = Arrays.stream(CoverageType.values())
-                .map(coverage -> new QuoteDistribution(coverage.name(), data.coverageCounts().getOrDefault(coverage, 0L)))
+                .map(coverage -> new QuoteDistribution(
+                        coverage.name(), data.coverageCounts().getOrDefault(coverage, 0L)))
                 .toList();
         var trend = data.trend().stream()
                 .map(point -> new QuoteTrendPoint(point.date(), point.created(), point.submitted(), point.failed()))

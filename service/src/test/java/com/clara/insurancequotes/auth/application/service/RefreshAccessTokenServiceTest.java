@@ -26,8 +26,7 @@ class RefreshAccessTokenServiceTest {
     @Test
     void refresh_rotatesTokenAndIssuesAccessTokenPair() {
         var user = User.create("demo", "hash", UserRole.USER, NOW);
-        when(refreshTokens.rotate("old-refresh"))
-                .thenReturn(new RefreshTokenService.Rotation(USER_ID, "new-refresh"));
+        when(refreshTokens.rotate("old-refresh")).thenReturn(new RefreshTokenService.Rotation(USER_ID, "new-refresh"));
         when(users.findById(USER_ID)).thenReturn(Optional.of(user));
         when(tokenService.issueApiToken(user)).thenReturn(new TokenService.IssuedAccess("access", 1800));
 

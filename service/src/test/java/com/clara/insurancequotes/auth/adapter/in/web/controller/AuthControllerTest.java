@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.clara.insurancequotes.auth.adapter.in.web.advice.AuthExceptionHandler;
 import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
 import com.clara.insurancequotes.auth.api.exception.PasskeyNotRegisteredException;
+import com.clara.insurancequotes.auth.api.result.LoginResponse;
+import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
 import com.clara.insurancequotes.auth.api.usecase.AssertPasskeyUseCase;
 import com.clara.insurancequotes.auth.api.usecase.LoginUseCase;
 import com.clara.insurancequotes.auth.api.usecase.LogoutUseCase;
@@ -19,8 +21,6 @@ import com.clara.insurancequotes.auth.api.usecase.RefreshTokenUseCase;
 import com.clara.insurancequotes.auth.api.usecase.RegisterPasskeyUseCase;
 import com.clara.insurancequotes.auth.api.usecase.StartPasskeyAssertionUseCase;
 import com.clara.insurancequotes.auth.api.usecase.StartPasskeyRegistrationUseCase;
-import com.clara.insurancequotes.auth.api.result.LoginResponse;
-import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
 import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
@@ -101,8 +101,7 @@ class AuthControllerTest {
 
     @Test
     void passkeyAssertionForUnregisteredUser_returnsSetupError() throws Exception {
-        when(startPasskeyAssertionUseCase.startAssertion("demo"))
-                .thenThrow(new PasskeyNotRegisteredException());
+        when(startPasskeyAssertionUseCase.startAssertion("demo")).thenThrow(new PasskeyNotRegisteredException());
 
         mockMvc.perform(post("/auth/webauthn/assertion-options")
                         .contentType("application/json")

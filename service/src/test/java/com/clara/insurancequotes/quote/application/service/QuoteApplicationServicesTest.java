@@ -45,7 +45,8 @@ class QuoteApplicationServicesTest {
     private final GetQuoteService getQuoteService = new GetQuoteService(repository);
     private final SearchQuotesService searchQuotesService = new SearchQuotesService(repository);
     private final GetQuoteSummaryService getQuoteSummaryService = new GetQuoteSummaryService(repository, clock);
-    private final MarkQuoteSubmittedService markQuoteSubmittedService = new MarkQuoteSubmittedService(repository, clock);
+    private final MarkQuoteSubmittedService markQuoteSubmittedService =
+            new MarkQuoteSubmittedService(repository, clock);
     private final MarkQuoteSubmissionFailedService markQuoteSubmissionFailedService =
             new MarkQuoteSubmissionFailedService(repository, clock);
 
@@ -114,7 +115,8 @@ class QuoteApplicationServicesTest {
         var details = updateCoverageService.updateCoverage(id, seniorCoverage(), OWNER);
 
         assertThat(details.usesTobacco()).isTrue();
-        assertThat(details.conditions()).containsExactlyInAnyOrder(HealthCondition.DIABETES, HealthCondition.HYPERTENSION);
+        assertThat(details.conditions())
+                .containsExactlyInAnyOrder(HealthCondition.DIABETES, HealthCondition.HYPERTENSION);
     }
 
     @Test
@@ -175,8 +177,14 @@ class QuoteApplicationServicesTest {
         createQuoteService.create(ADULT, OWNER);
         createQuoteService.create(SENIOR, OTHER_OWNER);
 
-        assertThat(searchQuotesService.searchQuotes(SearchQuotesQuery.defaults(), AS_OWNER).totalElements()).isEqualTo(1);
-        assertThat(searchQuotesService.searchQuotes(SearchQuotesQuery.defaults(), AS_ADMIN).totalElements()).isEqualTo(2);
+        assertThat(searchQuotesService
+                        .searchQuotes(SearchQuotesQuery.defaults(), AS_OWNER)
+                        .totalElements())
+                .isEqualTo(1);
+        assertThat(searchQuotesService
+                        .searchQuotes(SearchQuotesQuery.defaults(), AS_ADMIN)
+                        .totalElements())
+                .isEqualTo(2);
     }
 
     @Test

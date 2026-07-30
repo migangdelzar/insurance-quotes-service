@@ -2,10 +2,10 @@ package com.clara.insurancequotes.quote.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.quote.domain.event.QuoteExpired;
 import com.clara.insurancequotes.quote.domain.model.QuoteMother;
 import com.clara.insurancequotes.quote.domain.model.QuoteStatus;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.testsupport.InMemoryQuoteRepository;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;

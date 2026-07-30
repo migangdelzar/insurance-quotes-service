@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
 import com.clara.insurancequotes.quote.api.command.CreateQuoteCommand;
 import com.clara.insurancequotes.quote.api.type.QuoteStatusView;
+import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
-import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.clara.insurancequotes.testsupport.TestUsers;
 import java.time.OffsetDateTime;
@@ -58,7 +58,8 @@ class DraftExpirationJobIT {
     @Test
     void staleDraft_getsExpired_andItsCacheEntryEvicted() {
         var requester = new RequestingUser(ownerId, false);
-        var id = createQuoteUseCase.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
+        var id = createQuoteUseCase
+                .create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         jdbcTemplate.update(
                 "update quotes set created_at = ? where id = ?",

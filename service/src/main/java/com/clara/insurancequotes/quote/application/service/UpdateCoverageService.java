@@ -14,7 +14,6 @@ import com.clara.insurancequotes.quote.domain.model.HealthProfile;
 import com.clara.insurancequotes.quote.domain.model.Quote;
 import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import java.time.Clock;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;

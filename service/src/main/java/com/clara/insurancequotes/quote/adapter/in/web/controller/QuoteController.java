@@ -1,18 +1,18 @@
 package com.clara.insurancequotes.quote.adapter.in.web.controller;
 
+import com.clara.insurancequotes.quote.adapter.in.web.exception.InvalidQuoteQueryException;
 import com.clara.insurancequotes.quote.adapter.in.web.request.CreateQuoteRequest;
 import com.clara.insurancequotes.quote.adapter.in.web.request.UpdateCoverageRequest;
 import com.clara.insurancequotes.quote.api.query.SearchQuotesQuery;
 import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.quote.api.result.QuotePage;
 import com.clara.insurancequotes.quote.api.result.QuoteSummary;
+import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetQuoteSummaryUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
-import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.quote.api.usecase.SearchQuotesUseCase;
 import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
-import com.clara.insurancequotes.quote.adapter.in.web.exception.InvalidQuoteQueryException;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.UUID;
@@ -57,7 +57,8 @@ public class QuoteController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateCoverageRequest request,
             @AuthenticationPrincipal Jwt jwt) {
-        return updateCoverageUseCase.updateCoverage(id, request.toCommand(), requester(jwt).id());
+        return updateCoverageUseCase.updateCoverage(
+                id, request.toCommand(), requester(jwt).id());
     }
 
     @GetMapping("/{id}")
