@@ -239,12 +239,16 @@ The controller depends only on public use-case interfaces. Request records stay
 HTTP-specific and keep the current JSON property names and validation
 annotations.
 
-- [ ] **Step 1: Add controller tests proving the existing request JSON maps to the target request classes**
-- [ ] **Step 2: Run `mvn -pl service -Dtest=AuthControllerTest test` and verify target imports fail**
-- [ ] **Step 3: Extract request records and introduce focused authentication use-case interfaces**
-- [ ] **Step 4: Update controller wiring and preserve login, refresh, logout, and WebAuthn responses**
-- [ ] **Step 5: Run all auth tests and expect PASS**
+- [x] **Step 1: Add controller tests proving the existing request JSON maps to the target request classes**
+- [x] **Step 2: Run `mvn -pl service -Dtest=AuthControllerTest test` and verify target imports fail**
+- [x] **Step 3: Extract request records and introduce focused authentication use-case interfaces**
+- [x] **Step 4: Update controller wiring and preserve login, refresh, logout, and WebAuthn responses**
+- [x] **Step 5: Run all auth tests and expect PASS**
 - [ ] **Step 6: Commit**
+
+The authentication result names also follow the public-result convention:
+`LoginResult`, `TokenPair`, and `WebAuthnChallenge`. Their JSON fields and
+endpoint behavior remain unchanged.
 
 ```bash
 git add service/src/main/java/com/clara/insurancequotes/auth service/src/test/java/com/clara/insurancequotes/auth

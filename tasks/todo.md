@@ -16,7 +16,7 @@
 - [x] Task 2 — shared configuration and observability (`e6d7e83`).
 - [x] Task 3 — pricing naming (`dc3a172`, follow-up naming/docs fixes in this commit).
 - [x] Task 4 — quote API split and public result naming (`4da421e`).
-- [ ] Task 5 — authentication transport boundary.
+- [ ] Task 5 — authentication transport boundary (tests passing; commit pending).
 - [ ] Task 6 — submission naming.
 - [ ] Task 7 — persistence/client/mapper naming.
 - [ ] Task 8 — architecture enforcement and generated docs.

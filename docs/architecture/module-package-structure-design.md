@@ -159,6 +159,7 @@ exist after implementation.
 | `auth.api.request.*` | `auth.adapter.in.web.request.*` | HTTP DTOs are inbound adapter details |
 | controller-nested `LoginRequest`, `RefreshRequest`, `AssertionOptionsRequest` | `auth.adapter.in.web.request.*Request` | Keeps transport models out of controllers and API contracts |
 | concrete auth services injected into `AuthController` | focused `auth.api.usecase.*UseCase` interfaces | Controllers depend on public capabilities, not implementations |
+| `auth.api.result.*Response` | business-named `LoginResult`, `TokenPair`, and `WebAuthnChallenge` | Keeps application results distinct from HTTP request/response DTO naming |
 | `submission.api.usecase.SubmissionApi` | `SubmitQuoteUseCase` | Uses the standard use-case suffix and business verb |
 | `submission.adapter.out.client.insurer.HttpInsurerClient` | `InsurerHttpClient` | Provider first, technology second |
 | `config.BusinessMetrics` | `shared.observability.BusinessMetrics` | Metrics are cross-cutting observability, not a business module |
@@ -244,7 +245,9 @@ Transport-only invalid query parsing remains inside the web adapter.
 Authentication request records are HTTP wire models, not module API types. They
 move from `auth.api.request` to `auth.adapter.in.web.request`. Authentication
 operations are exposed through focused `auth.api.usecase` interfaces, while
-token and WebAuthn results remain stable public result models.
+token and WebAuthn results remain stable public result models, with business
+names (`LoginResult`, `TokenPair`, and `WebAuthnChallenge`) instead of generic
+`Response` suffixes.
 
 The move changes Java ownership only; `/auth/**` routes and JSON fields do not
 change.

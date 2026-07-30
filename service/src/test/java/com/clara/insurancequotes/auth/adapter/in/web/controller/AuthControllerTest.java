@@ -12,18 +12,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.clara.insurancequotes.auth.adapter.in.web.advice.AuthExceptionHandler;
 import com.clara.insurancequotes.auth.api.exception.InvalidCredentialsException;
 import com.clara.insurancequotes.auth.api.exception.PasskeyNotRegisteredException;
-import com.clara.insurancequotes.auth.api.result.LoginResponse;
-import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
-import com.clara.insurancequotes.auth.application.port.out.UserRepository;
-import com.clara.insurancequotes.auth.application.service.LoginService;
-import com.clara.insurancequotes.auth.application.service.RefreshTokenService;
-import com.clara.insurancequotes.auth.application.service.TokenService;
-import com.clara.insurancequotes.auth.application.service.WebAuthnService;
+import com.clara.insurancequotes.auth.api.usecase.AssertPasskeyUseCase;
+import com.clara.insurancequotes.auth.api.usecase.LoginUseCase;
+import com.clara.insurancequotes.auth.api.usecase.LogoutUseCase;
+import com.clara.insurancequotes.auth.api.usecase.RefreshTokenUseCase;
+import com.clara.insurancequotes.auth.api.usecase.RegisterPasskeyUseCase;
+import com.clara.insurancequotes.auth.api.usecase.StartPasskeyAssertionUseCase;
+import com.clara.insurancequotes.auth.api.usecase.StartPasskeyRegistrationUseCase;
+import com.clara.insurancequotes.auth.api.result.LoginResult;
+import com.clara.insurancequotes.auth.api.result.TokenPair;
 import com.clara.insurancequotes.auth.configuration.JwtConfig;
 import com.clara.insurancequotes.auth.configuration.SecurityConfig;
 import com.clara.insurancequotes.shared.configuration.I18nConfig;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -54,24 +55,30 @@ class AuthControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private LoginService loginService;
+    private LoginUseCase loginUseCase;
 
     @MockitoBean
-    private RefreshTokenService refreshTokenService;
+    private RefreshTokenUseCase refreshTokenUseCase;
 
     @MockitoBean
-    private TokenService tokenService;
+    private LogoutUseCase logoutUseCase;
 
     @MockitoBean
-    private WebAuthnService webAuthnService;
+    private AssertPasskeyUseCase assertPasskeyUseCase;
 
     @MockitoBean
-    private UserRepository users;
+    private RegisterPasskeyUseCase registerPasskeyUseCase;
+
+    @MockitoBean
+    private StartPasskeyAssertionUseCase startPasskeyAssertionUseCase;
+
+    @MockitoBean
+    private StartPasskeyRegistrationUseCase startPasskeyRegistrationUseCase;
 
     @Test
     void validCredentials_returnTokenPair() throws Exception {
-        when(loginService.login("demo", "demo-password"))
-                .thenReturn(LoginResponse.tokensIssued(new TokenPairResponse("access", "refresh", 1800)));
+        when(loginUseCase.login("demo", "demo-password"))
+                .thenReturn(LoginResult.tokensIssued(new TokenPair("access", "refresh", 1800)));
 
         mockMvc.perform(post("/auth/login")
                         .contentType("application/json")
@@ -83,7 +90,7 @@ class AuthControllerTest {
 
     @Test
     void wrongCredentials_return401ApiError() throws Exception {
-        when(loginService.login("demo", "nope")).thenThrow(new InvalidCredentialsException());
+        when(loginUseCase.login("demo", "nope")).thenThrow(new InvalidCredentialsException());
 
         mockMvc.perform(post("/auth/login")
                         .contentType("application/json")
@@ -94,7 +101,8 @@ class AuthControllerTest {
 
     @Test
     void passkeyAssertionForUnregisteredUser_returnsSetupError() throws Exception {
-        when(webAuthnService.startAssertion(Optional.of("demo"))).thenThrow(new PasskeyNotRegisteredException());
+        when(startPasskeyAssertionUseCase.startAssertion("demo"))
+                .thenThrow(new PasskeyNotRegisteredException());
 
         mockMvc.perform(post("/auth/webauthn/assertion-options")
                         .contentType("application/json")

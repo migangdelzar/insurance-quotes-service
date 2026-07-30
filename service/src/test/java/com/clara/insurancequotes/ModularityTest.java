@@ -40,6 +40,16 @@ class ModularityTest {
     }
 
     @Test
+    void exposesAuthenticationUseCasesAsThePublicAuthContract() {
+        var auth = MODULES.getModuleByName("auth").orElseThrow();
+
+        assertThat(auth.getNamedInterfaces().getByName("auth-api-usecase")).isPresent();
+        assertThat(auth.getNamedInterfaces().getByName("auth-api-result")).isPresent();
+        assertThat(auth.getNamedInterfaces().getByName("auth-api-exception")).isPresent();
+        assertThat(auth.getNamedInterfaces().getByName("auth-adapter-in-web-request")).isEmpty();
+    }
+
+    @Test
     void placesSharedCrossCuttingComponentsInResponsibilityPackages() throws Exception {
         var shared = MODULES.getModuleByName("shared").orElseThrow();
 

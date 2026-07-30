@@ -2,6 +2,13 @@
 |===
 |Base package
 |`com.clara.insurancequotes.auth`
+|Spring components
+|_Services_
+
+* `c.c.i.a.api.usecase.LoginUseCase` (via `c.c.i.a.application.service.LoginService`)
+* `c.c.i.a.api.usecase.LogoutUseCase` (via `c.c.i.a.application.service.LogoutService`)
+* `c.c.i.a.api.usecase.RefreshTokenUseCase` (via `c.c.i.a.application.service.RefreshAccessTokenService`)
+* `c.c.i.a.api.usecase.StartPasskeyAssertionUseCase`, `c.c.i.a.api.usecase.AssertPasskeyUseCase`, `c.c.i.a.api.usecase.StartPasskeyRegistrationUseCase`, `c.c.i.a.api.usecase.RegisterPasskeyUseCase` (via `c.c.i.a.application.service.WebAuthnService`)
 |Properties
 |* `auth.demo.users` -- `java.util.List<com.clara.insurancequotes.auth.configuration.DemoUserProperties$User>`
 |===

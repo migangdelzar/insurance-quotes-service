@@ -1,18 +1,21 @@
 package com.clara.insurancequotes.auth.adapter.in.web.controller;
 
-import com.clara.insurancequotes.auth.api.exception.InvalidRefreshTokenException;
-import com.clara.insurancequotes.auth.api.request.WebAuthnAssertRequest;
-import com.clara.insurancequotes.auth.api.request.WebAuthnRegisterRequest;
-import com.clara.insurancequotes.auth.api.result.LoginResponse;
-import com.clara.insurancequotes.auth.api.result.TokenPairResponse;
-import com.clara.insurancequotes.auth.api.result.WebAuthnChallengeResponse;
-import com.clara.insurancequotes.auth.application.port.out.UserRepository;
-import com.clara.insurancequotes.auth.application.service.LoginService;
-import com.clara.insurancequotes.auth.application.service.RefreshTokenService;
-import com.clara.insurancequotes.auth.application.service.TokenService;
-import com.clara.insurancequotes.auth.application.service.WebAuthnService;
+import com.clara.insurancequotes.auth.adapter.in.web.request.AssertionOptionsRequest;
+import com.clara.insurancequotes.auth.adapter.in.web.request.LoginRequest;
+import com.clara.insurancequotes.auth.adapter.in.web.request.RefreshRequest;
+import com.clara.insurancequotes.auth.adapter.in.web.request.WebAuthnAssertRequest;
+import com.clara.insurancequotes.auth.adapter.in.web.request.WebAuthnRegisterRequest;
+import com.clara.insurancequotes.auth.api.result.LoginResult;
+import com.clara.insurancequotes.auth.api.result.TokenPair;
+import com.clara.insurancequotes.auth.api.result.WebAuthnChallenge;
+import com.clara.insurancequotes.auth.api.usecase.AssertPasskeyUseCase;
+import com.clara.insurancequotes.auth.api.usecase.LoginUseCase;
+import com.clara.insurancequotes.auth.api.usecase.LogoutUseCase;
+import com.clara.insurancequotes.auth.api.usecase.RefreshTokenUseCase;
+import com.clara.insurancequotes.auth.api.usecase.RegisterPasskeyUseCase;
+import com.clara.insurancequotes.auth.api.usecase.StartPasskeyAssertionUseCase;
+import com.clara.insurancequotes.auth.api.usecase.StartPasskeyRegistrationUseCase;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,58 +29,51 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final LoginService loginService;
-    private final RefreshTokenService refreshTokenService;
-    private final TokenService tokenService;
-    private final UserRepository users;
-    private final WebAuthnService webAuthnService;
-
-    public record LoginRequest(@NotBlank String username, @NotBlank String password) {}
-
-    public record RefreshRequest(@NotBlank String refreshToken) {}
-
-    public record AssertionOptionsRequest(String username) {}
+    private final LoginUseCase loginUseCase;
+    private final RefreshTokenUseCase refreshTokenUseCase;
+    private final LogoutUseCase logoutUseCase;
+    private final AssertPasskeyUseCase assertPasskeyUseCase;
+    private final RegisterPasskeyUseCase registerPasskeyUseCase;
+    private final StartPasskeyAssertionUseCase startPasskeyAssertionUseCase;
+    private final StartPasskeyRegistrationUseCase startPasskeyRegistrationUseCase;
 
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        return loginService.login(request.username(), request.password());
+    public LoginResult login(@Valid @RequestBody LoginRequest request) {
+        return loginUseCase.login(request.username(), request.password());
     }
 
     @PostMapping("/refresh")
-    public TokenPairResponse refresh(@Valid @RequestBody RefreshRequest request) {
-        var rotation = refreshTokenService.rotate(request.refreshToken());
-        var user = users.findById(rotation.userId()).orElseThrow(InvalidRefreshTokenException::new);
-        var access = tokenService.issueApiToken(user);
-        return new TokenPairResponse(access.accessToken(), rotation.rawToken(), access.expiresInSeconds());
+    public TokenPair refresh(@Valid @RequestBody RefreshRequest request) {
+        return refreshTokenUseCase.refresh(request.refreshToken());
     }
 
     @PostMapping("/logout")
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(@Valid @RequestBody RefreshRequest request) {
-        refreshTokenService.revoke(request.refreshToken());
+        logoutUseCase.logout(request.refreshToken());
     }
 
     @PostMapping("/webauthn/assertion-options")
-    public WebAuthnChallengeResponse assertionOptions(@RequestBody(required = false) AssertionOptionsRequest request) {
+    public WebAuthnChallenge assertionOptions(@RequestBody(required = false) AssertionOptionsRequest request) {
         var username = Optional.ofNullable(request).map(AssertionOptionsRequest::username);
-        return webAuthnService.startAssertion(username);
+        return startPasskeyAssertionUseCase.startAssertion(username.orElse(null));
     }
 
     @PostMapping("/webauthn/assert")
-    public TokenPairResponse assertPasskey(@Valid @RequestBody WebAuthnAssertRequest request) {
-        return webAuthnService.finishAssertion(request.challengeId(), request.credentialJson(), request.mfaToken());
+    public TokenPair assertPasskey(@Valid @RequestBody WebAuthnAssertRequest request) {
+        return assertPasskeyUseCase.assertPasskey(request.challengeId(), request.credentialJson(), request.mfaToken());
     }
 
     @PostMapping("/webauthn/register-options")
-    public WebAuthnChallengeResponse registerOptions(
+    public WebAuthnChallenge registerOptions(
             @org.springframework.security.core.annotation.AuthenticationPrincipal
                     org.springframework.security.oauth2.jwt.Jwt jwt) {
-        return webAuthnService.startRegistration(jwt.getSubject());
+        return startPasskeyRegistrationUseCase.startRegistration(jwt.getSubject());
     }
 
     @PostMapping("/webauthn/register")
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.NO_CONTENT)
     public void register(@Valid @RequestBody WebAuthnRegisterRequest request) {
-        webAuthnService.finishRegistration(request.challengeId(), request.credentialJson());
+        registerPasskeyUseCase.register(request.challengeId(), request.credentialJson());
     }
 }
