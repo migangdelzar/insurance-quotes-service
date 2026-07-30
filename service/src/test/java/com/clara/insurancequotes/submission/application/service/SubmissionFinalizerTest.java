@@ -5,7 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.clara.insurancequotes.config.BusinessMetrics;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.quote.api.result.QuoteView;
 import com.clara.insurancequotes.quote.api.usecase.QuoteApi;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

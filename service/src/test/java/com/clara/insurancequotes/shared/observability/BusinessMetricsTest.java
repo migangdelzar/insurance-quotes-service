@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.config;
+package com.clara.insurancequotes.shared.observability;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

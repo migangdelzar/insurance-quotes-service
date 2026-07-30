@@ -7,7 +7,7 @@
 
 * `c.c.i.q.api.usecase.QuoteApi` (via `c.c.i.q.application.service.QuoteService`)
 |Bean references
-|* `c.c.i.c.BusinessMetrics` (in Config)
+|* `c.c.i.s.observability.BusinessMetrics` (in Shared)
 * `c.c.i.p.api.usecase.PremiumCalculator` (in Pricing)
 |Aggregate roots
 |* `c.c.i.q.domain.model.Quote`

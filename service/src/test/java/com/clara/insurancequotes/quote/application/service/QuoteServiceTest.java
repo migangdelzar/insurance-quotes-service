@@ -3,7 +3,7 @@ package com.clara.insurancequotes.quote.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.clara.insurancequotes.config.BusinessMetrics;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.pricing.api.result.Premium;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;

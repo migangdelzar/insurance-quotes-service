@@ -1,6 +1,7 @@
 package com.clara.insurancequotes;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,28 @@ class ModularityTest {
     }
 
     @Test
+    void placesSharedCrossCuttingComponentsInResponsibilityPackages() throws Exception {
+        var shared = MODULES.getModuleByName("shared").orElseThrow();
+
+        assertThat(shared.getNamedInterfaces().getByName("shared-observability")).isPresent();
+        assertThat(Class.forName("com.clara.insurancequotes.shared.observability.BusinessMetrics"))
+                .isNotNull();
+        assertThat(Class.forName(
+                        "com.clara.insurancequotes.shared.adapter.in.web.filter.CorrelationIdFilter"))
+                .isNotNull();
+        assertThat(Class.forName("com.clara.insurancequotes.shared.configuration.OpenApiConfiguration"))
+                .isNotNull();
+        assertThat(Class.forName(
+                        "com.clara.insurancequotes.shared.configuration.WebVersioningConfiguration"))
+                .isNotNull();
+
+        assertLegacyConfigClassIsAbsent("BusinessMetrics");
+        assertLegacyConfigClassIsAbsent("CorrelationIdFilter");
+        assertLegacyConfigClassIsAbsent("OpenApiConfig");
+        assertLegacyConfigClassIsAbsent("WebVersioningConfig");
+    }
+
+    @Test
     void generateModuleDocumentation() {
         new org.springframework.modulith.docs.Documenter(
                         MODULES,
@@ -48,5 +71,10 @@ class ModularityTest {
         ApplicationModule module = MODULES.getModuleByName(name).orElseThrow();
 
         assertThat(module.getDisplayName()).isEqualTo(displayName);
+    }
+
+    private static void assertLegacyConfigClassIsAbsent(String simpleName) {
+        assertThatThrownBy(() -> Class.forName("com.clara.insurancequotes.config." + simpleName))
+                .isInstanceOf(ClassNotFoundException.class);
     }
 }

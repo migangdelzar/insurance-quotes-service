@@ -83,7 +83,7 @@ mvn -pl service -Dtest=ModularityTest test
 Expected: PASS and regenerated module documentation reflects the same package
 names.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add service/src/main/java service/src/test/java/com/clara/insurancequotes/ModularityTest.java
@@ -106,13 +106,13 @@ git commit -m "docs(modulith): document module package responsibilities"
 - Consumes: existing Spring beans and public module contracts.
 - Produces: the same beans under responsibility-based packages.
 
-- [ ] **Step 1: Update package-level regression checks**
+- [x] **Step 1: Update package-level regression checks**
 
 Extend architecture tests to reject `com.clara.insurancequotes.config` and to
 require `BusinessMetrics` under `shared.observability` and web filtering under
 `shared.adapter.in.web.filter`.
 
-- [ ] **Step 2: Run the focused test and verify it fails**
+- [x] **Step 2: Run the focused test and verify it fails**
 
 Run:
 
@@ -122,13 +122,13 @@ mvn -pl service -Dtest=ModularityTest,BusinessMetricsTest,CorrelationIdFilterTes
 
 Expected: failure because the old packages still exist.
 
-- [ ] **Step 3: Move and rename the classes**
+- [x] **Step 3: Move and rename the classes**
 
 Update package declarations, imports, Spring annotations, test package names,
 and generated documentation references. Do not change bean names, metric names,
 filter behavior, or configuration properties.
 
-- [ ] **Step 4: Run focused tests**
+- [x] **Step 4: Run focused tests**
 
 Run the command from Step 2 and expect all tests to pass.
 

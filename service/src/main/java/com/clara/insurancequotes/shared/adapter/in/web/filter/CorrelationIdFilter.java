@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.config;
+package com.clara.insurancequotes.shared.adapter.in.web.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

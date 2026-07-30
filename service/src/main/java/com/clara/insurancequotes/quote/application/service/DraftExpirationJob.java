@@ -1,6 +1,6 @@
 package com.clara.insurancequotes.quote.application.service;
 
-import com.clara.insurancequotes.config.BusinessMetrics;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
 import com.clara.insurancequotes.quote.application.port.out.StaleQuoteRef;
 import com.clara.insurancequotes.quote.domain.event.QuoteExpired;

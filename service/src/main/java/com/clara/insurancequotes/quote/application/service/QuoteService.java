@@ -1,6 +1,6 @@
 package com.clara.insurancequotes.quote.application.service;
 
-import com.clara.insurancequotes.config.BusinessMetrics;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.pricing.api.command.PricingInput;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.pricing.api.usecase.PremiumCalculator;

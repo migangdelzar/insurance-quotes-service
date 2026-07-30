@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.config;
+package com.clara.insurancequotes.shared.observability;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

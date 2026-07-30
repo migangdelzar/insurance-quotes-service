@@ -1,10 +1,6 @@
 == Application
 plantuml::components.puml[,,format=svg]
 
-== Config
-plantuml::module-config.puml[,,format=svg]
-include::module-config.adoc[]
-
 == Pricing
 plantuml::module-pricing.puml[,,format=svg]
 include::module-pricing.adoc[]

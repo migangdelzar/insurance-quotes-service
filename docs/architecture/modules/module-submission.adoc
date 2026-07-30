@@ -8,5 +8,5 @@
 * `c.c.i.s.api.usecase.SubmissionApi` (via `c.c.i.s.application.service.SubmissionService`)
 |Bean references
 |* `c.c.i.q.api.usecase.QuoteApi` (in Quote)
-* `c.c.i.c.BusinessMetrics` (in Config)
+* `c.c.i.s.observability.BusinessMetrics` (in Shared)
 |===

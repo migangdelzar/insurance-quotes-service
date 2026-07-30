@@ -1,11 +1,11 @@
-package com.clara.insurancequotes.config;
+package com.clara.insurancequotes.shared.configuration;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ApiVersionConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
-public class WebVersioningConfig implements WebMvcConfigurer {
+@Configuration("webVersioningConfig")
+public class WebVersioningConfiguration implements WebMvcConfigurer {
 
     @Override
     public void configureApiVersioning(ApiVersionConfigurer configurer) {

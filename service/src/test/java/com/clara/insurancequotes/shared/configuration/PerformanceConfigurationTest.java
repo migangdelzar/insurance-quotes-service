@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.config;
+package com.clara.insurancequotes.shared.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,8 +11,18 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.env.MockEnvironment;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 class PerformanceConfigurationTest {
+
+    @Test
+    void retainsConfigurationBeanNamesWhileClassesUseConsistentNames() {
+        try (var context = new AnnotationConfigApplicationContext(
+                OpenApiConfiguration.class, WebVersioningConfiguration.class)) {
+            assertThat(context.containsBean("openApiConfig")).isTrue();
+            assertThat(context.containsBean("webVersioningConfig")).isTrue();
+        }
+    }
 
     @Test
     void definesBoundedDatabaseAndTomcatRuntimeDefaults() {
