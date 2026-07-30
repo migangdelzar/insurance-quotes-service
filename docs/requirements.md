@@ -39,130 +39,76 @@ submit attempt (BR-017).
 
 ## Functional Requirements
 
-| ID     | Title | User Story | Priority | Status |
-|--------|-------|-------------|----------|--------|
-| FR-001 | Create Quote Draft | As an Applicant, I want to submit my name, email, age, and zip code so that a draft quote is created for me to continue. | High | Verified |
-| FR-002 | Validate Personal Info Client-Side | As an Applicant, I want the personal info form to validate before I proceed so that I don't submit incomplete or invalid data. | High | Verified |
-| FR-003 | Select Coverage Type | As an Applicant, I want to choose Basic, Standard, or Premium coverage so that my quote reflects the plan I want. | High | Verified |
-| FR-004 | Answer Senior Health Questions | As an Applicant older than 65, I want to answer pre-existing conditions, prescription medication, tobacco use, and spouse coverage questions so that my premium reflects my health profile. | High | Verified |
-| FR-005 | View Dynamically Updated Premium | As an Applicant, I want to see my estimated monthly premium update as I change coverage or health selections so that I understand the cost impact before submitting. | High | Verified |
-| FR-006 | Recalculate Premium Server-Side on Coverage Update | As a System, I want `PATCH /quotes/{id}/coverage` to recalculate and persist the premium so that pricing is never trusted from the client. | High | Verified |
-| FR-007 | Enforce Age-Gated Health Data Rule Server-Side | As a System, I want to reject health data submitted for applicants aged 65 or under so that the conditional rule cannot be bypassed by a malicious or buggy client. | High | Verified |
-| FR-008 | Review Quote Summary | As an Applicant, I want a read-only summary of everything I entered plus my calculated premium so that I can confirm before submitting. | High | Verified |
-| FR-009 | Submit Quote to Insurer | As an Applicant, I want to submit my finished quote to the insurer so that my application is formally filed. | High | Verified |
-| FR-010 | Idempotent Resubmission | As an Applicant, I want resubmitting an already-submitted quote to succeed without side effects so that accidental double-clicks don't trigger duplicate insurer calls. | High | Verified |
-| FR-011 | Retry After Submission Failure | As an Applicant, I want a failed submission to leave my quote resubmittable so that I can retry after a transient insurer or network failure. | High | Verified |
-| FR-012 | Retrieve a Single Quote | As an Applicant, I want to fetch a specific quote by id so that I can see its current status and premium. | Medium | Verified |
-| FR-013 | List All Quotes | As an Admin, I want to list all quotes so that I can review submission activity across applicants. | Medium | Verified |
-| FR-014 | Expire Stale Draft Quotes | As a System, I want a scheduled job to transition drafts older than a configurable window to `EXPIRED` in one batch so that abandoned quotes don't linger indefinitely. | Medium | Verified |
-| FR-015 | Block Actions on Expired Quotes | As a System, I want `EXPIRED` quotes to be rejected from submission like any other invalid state so that stale data can never be finalized. | High | Verified |
-| FR-016 | Invalidate Cache on Expiration | As a System, I want a quote's cache entry evicted the moment it expires so that cached reads never return stale data for an `EXPIRED` quote. | Medium | Implemented |
-| FR-017 | Authenticate Before Any Quote Action | As an Applicant, I want to log in before I can create, update, or submit a quote so that my data stays private to me. | High | Verified |
-| FR-018 | Handle Failed or Timed-Out Submission in the UI | As an Applicant, I want clear feedback — and, on a timeout, an automatic status recheck — when submission fails so that I know whether to retry or wait. | High | Verified |
-| FR-019 | Passwordless / Passkey Login | As an Applicant, I want to enroll and sign in with a passkey so that I can access my quotes without typing a password. | Low | Verified |
-| FR-020 | View Paginated Quote History | As an Applicant, I want to filter, sort, and page through my past quotes so that I can find a specific one quickly. | Low | Verified |
-| FR-021 | View Business Analytics on Home | As an Admin, I want summary analytics (status distribution, submission rate, etc.) on the home dashboard so that I can gauge overall quote activity at a glance. | Low | Verified |
-| FR-022 | Localized UI | As an Applicant, I want the app in my browser's language (en-US or es-MX) so that I can use it comfortably. | Low | Verified |
+| ID     | Title | User Story | Priority | Status | Evidence |
+|--------|-------|-------------|----------|--------|----------|
+| FR-001 | Create Quote Draft | As an Applicant, I want to submit my name, email, age, and zip code so that a draft quote is created for me to continue. | High | Verified | [→](requirements-traceability.md#fr-001) |
+| FR-002 | Validate Personal Info Client-Side | As an Applicant, I want the personal info form to validate before I proceed so that I don't submit incomplete or invalid data. | High | Verified | [→](requirements-traceability.md#fr-002) |
+| FR-003 | Select Coverage Type | As an Applicant, I want to choose Basic, Standard, or Premium coverage so that my quote reflects the plan I want. | High | Verified | [→](requirements-traceability.md#fr-003) |
+| FR-004 | Answer Senior Health Questions | As an Applicant older than 65, I want to answer pre-existing conditions, prescription medication, tobacco use, and spouse coverage questions so that my premium reflects my health profile. | High | Verified | [→](requirements-traceability.md#fr-004) |
+| FR-005 | View Dynamically Updated Premium | As an Applicant, I want to see my estimated monthly premium update as I change coverage or health selections so that I understand the cost impact before submitting. | High | Verified | [→](requirements-traceability.md#fr-005) |
+| FR-006 | Recalculate Premium Server-Side on Coverage Update | As a System, I want `PATCH /quotes/{id}/coverage` to recalculate and persist the premium so that pricing is never trusted from the client. | High | Verified | [→](requirements-traceability.md#fr-006) |
+| FR-007 | Enforce Age-Gated Health Data Rule Server-Side | As a System, I want to reject health data submitted for applicants aged 65 or under so that the conditional rule cannot be bypassed by a malicious or buggy client. | High | Verified | [→](requirements-traceability.md#fr-007) |
+| FR-008 | Review Quote Summary | As an Applicant, I want a read-only summary of everything I entered plus my calculated premium so that I can confirm before submitting. | High | Verified | [→](requirements-traceability.md#fr-008) |
+| FR-009 | Submit Quote to Insurer | As an Applicant, I want to submit my finished quote to the insurer so that my application is formally filed. | High | Verified | [→](requirements-traceability.md#fr-009) |
+| FR-010 | Idempotent Resubmission | As an Applicant, I want resubmitting an already-submitted quote to succeed without side effects so that accidental double-clicks don't trigger duplicate insurer calls. | High | Verified | [→](requirements-traceability.md#fr-010) |
+| FR-011 | Retry After Submission Failure | As an Applicant, I want a failed submission to leave my quote resubmittable so that I can retry after a transient insurer or network failure. | High | Verified | [→](requirements-traceability.md#fr-011) |
+| FR-012 | Retrieve a Single Quote | As an Applicant, I want to fetch a specific quote by id so that I can see its current status and premium. | Medium | Verified | [→](requirements-traceability.md#fr-012) |
+| FR-013 | List All Quotes | As an Admin, I want to list all quotes so that I can review submission activity across applicants. | Medium | Verified | [→](requirements-traceability.md#fr-013) |
+| FR-014 | Expire Stale Draft Quotes | As a System, I want a scheduled job to transition drafts older than a configurable window to `EXPIRED` in one batch so that abandoned quotes don't linger indefinitely. | Medium | Verified | [→](requirements-traceability.md#fr-014) |
+| FR-015 | Block Actions on Expired Quotes | As a System, I want `EXPIRED` quotes to be rejected from submission like any other invalid state so that stale data can never be finalized. | High | Verified | [→](requirements-traceability.md#fr-015) |
+| FR-016 | Invalidate Cache on Expiration | As a System, I want a quote's cache entry evicted the moment it expires so that cached reads never return stale data for an `EXPIRED` quote. | Medium | Implemented | [→](requirements-traceability.md#fr-016) |
+| FR-017 | Authenticate Before Any Quote Action | As an Applicant, I want to log in before I can create, update, or submit a quote so that my data stays private to me. | High | Verified | [→](requirements-traceability.md#fr-017) |
+| FR-018 | Handle Failed or Timed-Out Submission in the UI | As an Applicant, I want clear feedback — and, on a timeout, an automatic status recheck — when submission fails so that I know whether to retry or wait. | High | Verified | [→](requirements-traceability.md#fr-018) |
+| FR-019 | Passwordless / Passkey Login | As an Applicant, I want to enroll and sign in with a passkey so that I can access my quotes without typing a password. | Low | Verified | [→](requirements-traceability.md#fr-019) |
+| FR-020 | View Paginated Quote History | As an Applicant, I want to filter, sort, and page through my past quotes so that I can find a specific one quickly. | Low | Verified | [→](requirements-traceability.md#fr-020) |
+| FR-021 | View Business Analytics on Home | As an Admin, I want summary analytics (status distribution, submission rate, etc.) on the home dashboard so that I can gauge overall quote activity at a glance. | Low | Verified | [→](requirements-traceability.md#fr-021) |
+| FR-022 | Localized UI | As an Applicant, I want the app in my browser's language (en-US or es-MX) so that I can use it comfortably. | Low | Verified | [→](requirements-traceability.md#fr-022) |
 
 FR-019 through FR-022 are beyond the challenge brief; they're tracked because they're
 real, shipped, tested capabilities, not because the brief requires them.
 
 ## Non-Functional Requirements
 
-| ID      | Title | Requirement | Category | Priority | Status |
-|---------|-------|-------------|----------|----------|--------|
-| NFR-001 | Cached Quote Read Latency | `GET /quotes/{id}` responses must be served from a 10-minute TTL Redis cache to avoid repeat DB reads for an unchanged quote. | Performance | Medium | Verified |
-| NFR-002 | Insurer Call Timeout Budget | Outbound insurer submission calls must fail within a 2s connect / 5s read timeout so a slow third party cannot hang a request indefinitely. | Performance | High | Verified |
-| NFR-003 | Backend Test Coverage Gate | Backend line coverage must remain at or above 80% (JaCoCo `COVEREDRATIO` rule), enforced at build time. | Maintainability | High | Verified |
-| NFR-004 | Unauthenticated Request Rejection | Every non-public endpoint must return HTTP 401 with a structured JSON error, never a stack trace, for unauthenticated requests. | Security | High | Verified |
-| NFR-005 | No Leaked Internals in Errors | All error responses must use the shared `ApiError` shape and never leak stack traces or raw exception messages to the client. | Security | High | Verified |
-| NFR-006 | Rate-Limited Mutation Endpoints | Quote-mutating endpoints must be capped at a configurable rate (default 30 requests/minute per client) to blunt retry storms and abuse. | Scalability | Medium | Verified |
-| NFR-007 | Draft Retention Window | Draft quotes must expire after a configurable TTL (default 30 minutes) rather than persisting indefinitely. | Scalability | Medium | Verified |
-| NFR-008 | Responsive Layout | The web app must render usable layouts at mobile (<600px) and desktop (≥900px) breakpoints without horizontal scrolling or overlapping controls. | Usability | High | Verified |
-| NFR-009 | Accessible Interaction | Interactive wizard controls must expose ARIA roles/labels and move focus to each step's heading on navigation so screen-reader users can follow progress. | Usability | Medium | Verified |
-| NFR-010 | One-Command Local Deployment | The full backend stack (API + PostgreSQL + dependencies) must start with a single Compose command for local review. | Portability | High | Verified |
-| NFR-011 | Structured, Correlated Logs | Application logs must be emitted as JSON with `correlationId`/`traceId`/`spanId` so a single request can be traced end-to-end. | Maintainability | Low | Verified |
+| ID      | Title | Requirement | Category | Priority | Status | Evidence |
+|---------|-------|-------------|----------|----------|--------|----------|
+| NFR-001 | Cached Quote Read Latency | `GET /quotes/{id}` responses must be served from a 10-minute TTL Redis cache to avoid repeat DB reads for an unchanged quote. | Performance | Medium | Verified | [→](requirements-traceability.md#nfr-001) |
+| NFR-002 | Insurer Call Timeout Budget | Outbound insurer submission calls must fail within a 2s connect / 5s read timeout so a slow third party cannot hang a request indefinitely. | Performance | High | Verified | [→](requirements-traceability.md#nfr-002) |
+| NFR-003 | Backend Test Coverage Gate | Backend line coverage must remain at or above 80% (JaCoCo `COVEREDRATIO` rule), enforced at build time. | Maintainability | High | Verified | [→](requirements-traceability.md#nfr-003) |
+| NFR-004 | Unauthenticated Request Rejection | Every non-public endpoint must return HTTP 401 with a structured JSON error, never a stack trace, for unauthenticated requests. | Security | High | Verified | [→](requirements-traceability.md#nfr-004) |
+| NFR-005 | No Leaked Internals in Errors | All error responses must use the shared `ApiError` shape and never leak stack traces or raw exception messages to the client. | Security | High | Verified | [→](requirements-traceability.md#nfr-005) |
+| NFR-006 | Rate-Limited Mutation Endpoints | Quote-mutating endpoints must be capped at a configurable rate (default 30 requests/minute per client) to blunt retry storms and abuse. | Scalability | Medium | Verified | [→](requirements-traceability.md#nfr-006) |
+| NFR-007 | Draft Retention Window | Draft quotes must expire after a configurable TTL (default 30 minutes) rather than persisting indefinitely. | Scalability | Medium | Verified | [→](requirements-traceability.md#nfr-007) |
+| NFR-008 | Responsive Layout | The web app must render usable layouts at mobile (<600px) and desktop (≥900px) breakpoints without horizontal scrolling or overlapping controls. | Usability | High | Verified | [→](requirements-traceability.md#nfr-008) |
+| NFR-009 | Accessible Interaction | Interactive wizard controls must expose ARIA roles/labels and move focus to each step's heading on navigation so screen-reader users can follow progress. | Usability | Medium | Verified | [→](requirements-traceability.md#nfr-009) |
+| NFR-010 | One-Command Local Deployment | The full backend stack (API + PostgreSQL + dependencies) must start with a single Compose command for local review. | Portability | High | Verified | [→](requirements-traceability.md#nfr-010) |
+| NFR-011 | Structured, Correlated Logs | Application logs must be emitted as JSON with `correlationId`/`traceId`/`spanId` so a single request can be traced end-to-end. | Maintainability | Low | Verified | [→](requirements-traceability.md#nfr-011) |
 
 ## Constraints
 
-| ID    | Title | Constraint | Category | Priority | Status |
-|-------|-------|------------|----------|----------|--------|
-| C-001 | Backend Runtime | Backend must run on Java 17. | Technical | High | Verified |
-| C-002 | Backend Framework | Backend must use Spring Boot. | Technical | High | Verified |
-| C-003 | Backend Build Tool | Backend must build with Maven. | Technical | High | Verified |
-| C-004 | Backend Persistence | Backend must persist quotes via Spring Data JPA + PostgreSQL. | Technical | High | Verified |
-| C-005 | Frontend Language | Frontend must be written in TypeScript. | Technical | High | Verified |
-| C-006 | Frontend Framework | Frontend must use React. | Technical | High | Verified |
-| C-007 | Frontend Component Library | Frontend must use Material UI (MUI). | Technical | High | Verified |
-| C-008 | Frontend Form Handling | Frontend forms must use React Hook Form with Yup schema validation. | Technical | High | Verified |
-| C-009 | Cross-Repo Delivery | Backend and frontend must be delivered as two separate public GitHub repositories that link to each other. | Business | High | Verified |
-| C-010 | No Hand-Rolled Insurer Fake | The Step 3 insurer call must hit a real, free, public API rather than an internally simulated response. | Technical | High | Verified |
-| C-011 | Fixed Premium Formula | The monthly premium formula and its constants (base $50/$100/$200; multipliers ×1.5/×1.3/×1.2/×1.4) must be implemented exactly as specified, not redesigned. | Technical | High | Verified |
-| C-012 | README Submission Narrative | Each repository's README must cover: setup/test instructions, pre-coding thought process, design-decision rationale, unfinished work or challenges encountered, and a link to the sibling repo. | Business | High | Verified |
-| C-013 | Default Branch Currency | Each repository's default branch (`main`) must reflect the current state of the work, not an older snapshot. | Operational | High | Verified |
+| ID    | Title | Constraint | Category | Priority | Status | Evidence |
+|-------|-------|------------|----------|----------|--------|----------|
+| C-001 | Backend Runtime | Backend must run on Java 17. | Technical | High | Verified | [→](requirements-traceability.md#c-001) |
+| C-002 | Backend Framework | Backend must use Spring Boot. | Technical | High | Verified | [→](requirements-traceability.md#c-002) |
+| C-003 | Backend Build Tool | Backend must build with Maven. | Technical | High | Verified | [→](requirements-traceability.md#c-002) |
+| C-004 | Backend Persistence | Backend must persist quotes via Spring Data JPA + PostgreSQL. | Technical | High | Verified | [→](requirements-traceability.md#c-002) |
+| C-005 | Frontend Language | Frontend must be written in TypeScript. | Technical | High | Verified | [→](requirements-traceability.md#c-005) |
+| C-006 | Frontend Framework | Frontend must use React. | Technical | High | Verified | [→](requirements-traceability.md#c-005) |
+| C-007 | Frontend Component Library | Frontend must use Material UI (MUI). | Technical | High | Verified | [→](requirements-traceability.md#c-005) |
+| C-008 | Frontend Form Handling | Frontend forms must use React Hook Form with Yup schema validation. | Technical | High | Verified | [→](requirements-traceability.md#c-005) |
+| C-009 | Cross-Repo Delivery | Backend and frontend must be delivered as two separate public GitHub repositories that link to each other. | Business | High | Verified | [→](requirements-traceability.md#c-009) |
+| C-010 | No Hand-Rolled Insurer Fake | The Step 3 insurer call must hit a real, free, public API rather than an internally simulated response. | Technical | High | Verified | [→](requirements-traceability.md#c-010) |
+| C-011 | Fixed Premium Formula | The monthly premium formula and its constants (base $50/$100/$200; multipliers ×1.5/×1.3/×1.2/×1.4) must be implemented exactly as specified, not redesigned. | Technical | High | Verified | [→](requirements-traceability.md#c-011) |
+| C-012 | README Submission Narrative | Each repository's README must cover: setup/test instructions, pre-coding thought process, design-decision rationale, unfinished work or challenges encountered, and a link to the sibling repo. | Business | High | Verified | [→](requirements-traceability.md#c-012) |
+| C-013 | Default Branch Currency | Each repository's default branch (`main`) must reflect the current state of the work, not an older snapshot. | Operational | High | Verified | [→](requirements-traceability.md#c-013) |
 
 ## Evidence
 
-Per CodeRabbit review feedback on this document, every `Verified` row is backed by
-the implementation path and/or test named below rather than the status word alone.
-
-### Functional Requirements
-
-| ID | Implementation | Test evidence |
-|----|-----------------|----------------|
-| FR-001 | `service/.../quote/adapter/in/web/controller/QuoteController.java:39` (`POST /quotes`) → `QuoteService.create()` | `QuoteControllerTest`, `QuoteServiceTest` |
-| FR-002 | `apps/web/src/features/quote-wizard/steps/personal/personalSchema.ts:3-21` (yup, all fields required) | `apps/web/src/features/quote-wizard/steps/personal/PersonalInfoStep.test.tsx` |
-| FR-003 | `apps/web/src/features/quote-wizard/steps/coverage/CoverageStep.tsx` (radio group BASIC/STANDARD/PREMIUM) | `apps/web/src/features/quote-wizard/steps/coverage/CoverageStep.test.tsx` |
-| FR-004 | `apps/web/src/features/quote-wizard/steps/coverage/HealthQuestionsSection.tsx:11-25` (conditions multiselect, prescription, tobacco, spouse) | `apps/web/src/features/quote-wizard/steps/coverage/HealthQuestionsSection.test.tsx` |
-| FR-005 | `apps/web/src/features/quote-wizard/steps/coverage/useDebouncedCoverageSync.ts` (400ms debounce → `PATCH /quotes/{id}/coverage`) | `apps/web/src/features/quote-wizard/steps/coverage/useDebouncedCoverageSync.test.tsx`, `apps/web/src/features/quote-wizard/components/PremiumDisplay.test.tsx` |
-| FR-006 | `service/.../quote/application/service/QuoteService.java:63-80` (`updateCoverage`) → `service/.../pricing/application/service/DefaultPremiumCalculator.java` | `DefaultPremiumCalculatorTest.specWorkedExample_age70StandardOneConditionSmokerWithSpouse_is327_60` (reproduces the brief's $327.60 example exactly) |
-| FR-007 | `QuoteService.java:179-183` (`rejectHealthDataForNonSeniors`) → `HealthDataNotAllowedException` | `QuoteServiceTest` (rejection case) |
-| FR-008 | `apps/web/src/features/quote-wizard/steps/summary/SummaryStep.tsx` (read-only review + `PremiumDisplay`) | No dedicated component unit test exists for `SummaryStep.tsx` (confirmed: no `SummaryStep.test.tsx`). Exercised end-to-end by the Playwright suite's "standard adult quote and successful submission" journey (`insurance-quotes-web` README, Test matrix), which renders and submits from the real summary screen — a direct check per this catalog's own `Verified` definition, in place of a component-level unit test. |
-| FR-009 | `service/.../submission/adapter/in/web/controller/SubmissionController.java:21` (`POST /quotes/{id}/submit`) → `SubmissionService.submit()` → `HttpInsurerClient` (`insurer.base-url` default `https://httpbin.org/status/200`, confirmed reachable with `curl -X POST https://httpbin.org/status/200` → `200`) | `SubmissionControllerTest`, `SubmissionServiceTest.submit_insurerAccepts_finalizes` |
-| FR-010 | `SubmissionService.java:26-31` (already-`SUBMITTED` short-circuit) | `SubmissionServiceTest.submit_alreadySubmitted_isIdempotentAndSkipsInsurer` |
-| FR-011 | `SubmissionService.java:39-50` (`markSubmissionFailed` on `InsurerUnavailableException`) | `SubmissionServiceTest.submit_insurerFails_marksFailedAndRethrows`, `QuoteTest.markSubmissionFailed_thenSubmittable_again` |
-| FR-012 | `QuoteController.java:55` (`GET /quotes/{id}`), `@Cacheable` in `QuoteService.getQuote` | `QuoteControllerTest` |
-| FR-013 | `QuoteController.java:60` (`GET /quotes`) | `QuoteControllerTest` |
-| FR-014 | `service/.../quote/application/service/DraftExpirationJob.java` (`expireStaleDrafts`), `ExpirationScheduleConfig.java`, `quote.expiration.draft-ttl` in `application.yml:99-102` | `DraftExpirationJobTest.expiresOnlyDraftsOlderThanTtl_andPublishesOneEventPerQuote`, `.noStaleDrafts_returnsZeroAndPublishesNothing` |
-| FR-015 | `QuoteTest.expiredQuote_isNeverSubmittable` | same |
-| FR-016 | `service/.../quote/adapter/in/messaging/consumer/QuoteCacheEvictionListener.java:18-25` (`@EventListener` on `QuoteExpired`) evicts the cache entry when the job's event fires (proven by `DraftExpirationJobTest.expiresOnlyDraftsOlderThanTtl_andPublishesOneEventPerQuote`) | No dedicated unit test exists for `QuoteCacheEvictionListener` itself — the listener's behavior is verified by code inspection only, not by a direct test. Downgrading confidence accordingly — see note below the table. |
-| FR-017 | `service/.../auth/configuration/SecurityConfig.java:28-46` (`anyRequest().hasAuthority("SCOPE_api")`, 401 entry point) | `QuoteControllerTest.getQuotes_withoutJwt_returns401` |
-| FR-018 | `apps/web/src/features/quote-wizard/steps/summary/useSubmitQuote.ts` (timeout → `getQuote` recheck), `SubmissionResult.tsx` | `apps/web/.../summary/useSubmitQuote.test.tsx`, `apps/web/.../summary/SubmissionResult.test.tsx` |
-| FR-019 | `service/.../auth/adapter/in/web/controller/AuthController.java:60-78` (WebAuthn endpoints) | `WebAuthnServiceTest.assertionWithValidCeremonyIssuesTokenPair`, `.assertionForKnownUserWithoutPasskeyRequiresPasswordSetup`, `.assertionMfaTokenMustCarryMfaPendingScope` |
-| FR-020 | `apps/web/src/pages/QuotesListPage.tsx` (pagination/filter/sort) | `apps/web/src/pages/QuotesListPage.test.tsx` |
-| FR-021 | `service/.../quote/application/service/QuoteService.java:103-139` (`getSummary`) | `QuoteServiceTest.getSummary_returnsAggregateMetricsAndSevenDayTrend` |
-| FR-022 | `packages/app-i18n` (`t()`/`tid()`), browser locale detection | `packages/app-i18n/src/index.test.ts` |
-
-FR-016 is marked `Implemented` rather than `Verified`: the cache-eviction listener it depends on has no dedicated test, only an inference from the job that publishes the event it consumes, so it does not meet this catalog's own `Verified` bar of a passing direct check. FR-008 is `Verified` on the strength of the Playwright e2e journey, which — unlike FR-016's case — actually exercises the component in question end-to-end.
-
-### Non-Functional Requirements
-
-| ID | Evidence |
-|----|----------|
-| NFR-001 | `application.yml:32-38` — `spring.cache.redis.time-to-live: 10m` |
-| NFR-002 | `application.yml:59-62` — `insurer.connect-timeout: 2s`, `read-timeout: 5s`; enforced in `InsurerClientConfig.java` |
-| NFR-003 | `pom.xml:278-292` — JaCoCo `COVEREDRATIO` rule, `minimum: 0.80` |
-| NFR-004 | `SecurityConfig.java:57-65` — `restAuthenticationEntryPoint` returns 401 + `ApiError` JSON |
-| NFR-005 | `service/src/main/java/com/clara/insurancequotes/shared/error/GlobalExceptionHandler.java`, plus module advices: `quote/adapter/in/web/advice/QuoteExceptionHandler.java`, `submission/adapter/in/web/advice/SubmissionExceptionHandler.java`, `auth/adapter/in/web/advice/AuthExceptionHandler.java` |
-| NFR-006 | `application.yml:92-97` — `web.rate-limit.quote-mutation.limit: 30`, `window: 1m` |
-| NFR-007 | `application.yml:99-102` — `quote.expiration.draft-ttl: 30m` |
-| NFR-008 | `apps/web/src/shared/components/AppNavigation.tsx:50` (`useMediaQuery(theme.breakpoints.up('md'))`), `apps/web/src/shared/components/AppShell.tsx` breakpoint `sx` props |
-| NFR-009 | `packages/build-config/eslint.config.js` (`jsx-a11y` recommended ruleset), `apps/web/src/shared/hooks/useFocusHeading.ts`, `apps/web/src/features/quote-wizard/components/WizardProgress.tsx` (`aria-current="step"`) |
-| NFR-010 | `deployment/compose/docker-compose.yml` + `mise run demo` (verified: this catalog's own PR #4/#5 CI runs exercised the Compose config successfully) |
-| NFR-011 | `insurance-quotes-service/README.md`, "Reading logs and traces" section (line 298) — JSON stdout → Alloy → Loki pipeline |
-
-### Constraints
-
-| ID | Evidence |
-|----|----------|
-| C-001 | `platform/pom.xml:18` — `<java.version>17</java.version>` |
-| C-002–C-004 | `platform/pom.xml` (Spring Boot parent), Maven reactor build, Flyway migrations under `service/src/main/resources/db/migration` |
-| C-005–C-008 | `insurance-quotes-web/apps/web/package.json` — `react ^19`, `typescript ~5.7.2`, `@mui/material ^6.3.0`, `react-hook-form ^7.54.0`, `yup ^1.6.0` |
-| C-009 | `gh repo view migangdelzar/insurance-quotes-service --json visibility` → `PUBLIC`; same for `insurance-quotes-web`; each README links the other |
-| C-010 | `application.yml:60` — `INSURER_BASE_URL` default `https://httpbin.org/status/200`, confirmed reachable via direct `curl -X POST` |
-| C-011 | `AgeFactor.java`, `ConditionsFactor.java`, `TobaccoFactor.java`, `SpouseFactor.java` (constants `1.5`/`1.3`/`1.2`/`1.4`), `CoverageType` base premiums; `DefaultPremiumCalculatorTest.specWorkedExample_...` reproduces the brief's $327.60 worked example exactly |
-| C-012 | `insurance-quotes-service/README.md`, "Approach and challenges" section; `insurance-quotes-web/README.md`, "Approach and challenges" section — both cover thought process, design rationale, and challenges/open items, and link the sibling repo |
-| C-013 | `gh pr view` on `insurance-quotes-service#4` and `insurance-quotes-web#4` — both `MERGED` into `main` |
+Every `Verified`/`Implemented` row above has an `Evidence` column linking straight
+to the exact file (and, where practical, line) that backs it, resolved in
+[docs/requirements-traceability.md](requirements-traceability.md). Splitting the
+evidence into its own file keeps this catalog matching the standard
+requirements-catalog format (FR/NFR/Constraint tables only) while still giving
+each row a genuine, clickable link to GitHub instead of unclickable inline paths.
 
 ## Gaps & Recommendations
 
