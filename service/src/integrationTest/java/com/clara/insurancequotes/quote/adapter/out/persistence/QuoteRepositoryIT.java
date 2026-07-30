@@ -28,7 +28,7 @@ import org.springframework.test.context.DynamicPropertySource;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(JpaQuoteRepository.class)
+@Import(QuotePersistenceAdapter.class)
 class QuoteRepositoryIT {
 
     @DynamicPropertySource
@@ -38,7 +38,7 @@ class QuoteRepositoryIT {
     }
 
     @Autowired
-    private JpaQuoteRepository repository;
+    private QuotePersistenceAdapter repository;
 
     @Autowired
     private UserRepository users;

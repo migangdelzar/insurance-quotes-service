@@ -29,7 +29,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class JpaQuoteRepository implements QuoteRepository {
+public class QuotePersistenceAdapter implements QuoteRepository {
 
     private final SpringDataQuoteRepository delegate;
 

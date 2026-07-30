@@ -156,11 +156,16 @@ exist after implementation.
 | `quote.application.exception.QuoteNotFoundException` | `quote.api.exception.QuoteNotFoundException` | A stable expected failure belongs to the public contract |
 | `quote.application.service.QuoteService` | Focused `<Verb>QuoteService` classes | Aligns one application service with one use case |
 | `quote.adapter.out.persistence.JpaQuoteRepository` | `QuotePersistenceAdapter` | Distinguishes the port implementation from Spring Data |
+| `auth.adapter.out.persistence.JpaUserRepository` | `SpringDataUserRepository` + `UserPersistenceAdapter` | Separates the Spring Data repository from the application-port adapter |
+| `auth.adapter.out.persistence.JpaRefreshTokenRepository` | `SpringDataRefreshTokenRepository` + `RefreshTokenPersistenceAdapter` | Keeps token persistence technology-specific behind the port |
+| `auth.adapter.out.persistence.JpaPasskeyCredentialRepository` | `SpringDataPasskeyCredentialRepository` + `PasskeyCredentialPersistenceAdapter` | Keeps passkey persistence technology-specific behind the port |
 | `auth.api.request.*` | `auth.adapter.in.web.request.*` | HTTP DTOs are inbound adapter details |
 | controller-nested `LoginRequest`, `RefreshRequest`, `AssertionOptionsRequest` | `auth.adapter.in.web.request.*Request` | Keeps transport models out of controllers and API contracts |
 | concrete auth services injected into `AuthController` | focused `auth.api.usecase.*UseCase` interfaces | Controllers depend on public capabilities, not implementations |
 | `submission.api.usecase.SubmissionApi` | `SubmitQuoteUseCase` | Uses the standard use-case suffix and business verb |
 | `submission.adapter.out.client.insurer.HttpInsurerClient` | `InsurerHttpClient` | Provider first, technology second |
+| `submission.adapter.out.client.insurer.InsurerClientConfig` | `InsurerClientConfiguration` | Configuration names describe their Spring wiring responsibility |
+| `submission.application.service.SubmissionFinalizer` | `FinalizeQuoteSubmissionService` | Application services use a verb-plus-capability name |
 | `config.BusinessMetrics` | `shared.observability.BusinessMetrics` | Metrics are cross-cutting observability, not a business module |
 | `config.CorrelationIdFilter` | `shared.adapter.in.web.filter.CorrelationIdFilter` | A servlet entry adapter, not generic configuration |
 | `config.OpenApiConfig` | `shared.configuration.OpenApiConfiguration` | Consistent configuration suffix |
