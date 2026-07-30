@@ -144,6 +144,71 @@ contract, an application implementation, or a technical adapter.
   `Processor` unless the surrounding package makes the exact responsibility
   unambiguous. `ExceptionHandler` is the intentional HTTP-advice exception.
 
+## HTTP API versioning and transport contracts
+
+The service uses Spring MVC's native API-versioning support with the
+`API-Version` request header. Controllers declare the supported mapping version
+with `@RequestMapping(..., version = "1.0")` or the equivalent method-level
+mapping, while `shared.configuration.WebVersioningConfiguration` resolves and
+validates the request version.
+
+Header versioning is the selected convention for this application because it
+keeps resource URLs stable, avoids duplicating every route under `/v1`, and
+allows Spring to select a newer mapping without changing the resource identity.
+The gateway/BFF must forward the header and any cache that varies by API version
+must include `API-Version` in its `Vary` key. Do not mix header and path
+versioning for the same endpoint family.
+
+Path-segment versioning is also supported by Spring, but adopting it here would
+be a public route change requiring coordinated frontend, BFF, OpenAPI, and E2E
+updates. It remains a future migration option, not a second active convention.
+
+Versioning belongs to the inbound web adapter, not to the module's application
+commands, queries, use cases, domain objects, or events. Those contracts should
+remain version-neutral whenever their business meaning is unchanged:
+
+```text
+HTTP request (versioned transport DTO)
+        ↓
+adapter.in.web.mapper
+        ↓
+api.command / api.query
+        ↓
+api.usecase
+        ↓
+api.result
+        ↓
+HTTP response (versioned transport DTO, when needed)
+```
+
+For a compatible version, reuse the same request/response model. When a wire
+shape must diverge, keep the `Request`/`Response` suffix and isolate the new
+contract under a versioned web-adapter package, for example
+`adapter.in.web.v2.request.CreateQuoteRequest` and
+`adapter.in.web.v2.response.QuoteResponse`. Both versions may delegate to the
+same use case through separate mappers; version-specific branching must not
+leak into the domain.
+
+### OpenAPI and enums
+
+The generated OpenAPI contract is authoritative for the HTTP adapter. Public
+enums used by request or response models, such as `CoverageType`,
+`HealthCondition`, and `QuoteStatusView`, are intentionally emitted as
+`type: string` schemas with their allowed `enum` values. This keeps the valid
+wire vocabulary visible to Swagger UI and generated clients.
+
+Enums may be repeated inline by the generator; that still preserves the
+contract. Extracting them into reusable `components/schemas` with `$ref` is
+optional and should only be introduced when a contract-generation or client
+reuse requirement justifies the additional customization. Internal domain
+enums must not be exposed directly when their persistence or business values
+differ from the public API vocabulary.
+
+Authentication transport results intentionally retain the `Response` suffix:
+`LoginResponse`, `TokenPairResponse`, and `WebAuthnChallengeResponse`. This
+describes their wire role and is consistent with the version-neutral module API
+rule above.
+
 ### Current-to-target naming map
 
 The following names are part of this refactor. They change Java ownership and

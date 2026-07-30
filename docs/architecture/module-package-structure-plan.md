@@ -13,6 +13,11 @@
 ## Global Constraints
 
 - Preserve all existing HTTP paths, API version values, JSON property names, validation behavior, and status codes.
+- Keep Spring MVC native header-based versioning through `API-Version`; do not
+  introduce path-versioned routes as a second convention. Version-specific
+  request/response DTOs belong under the inbound web adapter and retain their
+  `Request`/`Response` suffixes; application and domain contracts remain
+  version-neutral.
 - Preserve PostgreSQL tables/migrations, Kafka event payloads, Redis keys, cache names, and environment-variable names.
 - Domain behavior must not depend on Spring MVC, Kafka, Redis, HTTP clients, JSON, persistence repositories, or actuator classes. Existing JPA annotations on aggregate classes are an explicit compatibility exception so this package refactor does not alter the current schema; a pure-domain/entity split is out of scope.
 - Other modules may use only named API packages or explicitly public shared contracts; never another module's `application`, `domain`, or `adapter` package.
