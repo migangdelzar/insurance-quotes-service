@@ -11,6 +11,4 @@
 * `c.c.i.p.api.usecase.PremiumCalculator` (in Pricing)
 |Aggregate roots
 |* `c.c.i.q.domain.model.Quote`
-|Events listened to
-|* `c.c.i.q.domain.event.QuoteExpired` 
 |===

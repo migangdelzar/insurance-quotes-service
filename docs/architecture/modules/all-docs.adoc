@@ -13,7 +13,7 @@ include::module-pricing.adoc[]
 plantuml::module-shared.puml[,,format=svg]
 include::module-shared.adoc[]
 
-== Auth
+== Authentication
 plantuml::module-auth.puml[,,format=svg]
 include::module-auth.adoc[]
 
