@@ -17,7 +17,7 @@
 - [x] Task 3 — pricing naming (`dc3a172`, follow-up naming/docs fixes in this commit).
 - [x] Task 4 — quote API split and public result naming (`4da421e`).
 - [x] Task 5 — authentication transport boundary (`d5a7e80`).
-- [ ] Task 6 — submission naming.
+- [x] Task 6 — submission naming (`1c32cbb`; formatting follow-up `d7edb33`).
 - [ ] Task 7 — persistence/client/mapper naming.
 - [ ] Task 8 — architecture enforcement and generated docs.
 - [ ] Task 9 — full verification and PR handoff.
@@ -51,3 +51,8 @@ application services. Quote results use business names, and Submission consumes
 only public Quote API models and use cases; it no longer depends on Quote domain
 status types. Controller JSON fields, caching, metrics, pricing, ownership, and
 administrator behavior are covered by focused regression tests.
+
+Task 6 standardizes Submission capabilities and adapter names without changing
+the HTTPBin insurer boundary. The real integration test requires a working
+Docker/Testcontainers runtime; its local attempt reported the missing Docker
+socket, while all focused submission and Modulith tests pass.

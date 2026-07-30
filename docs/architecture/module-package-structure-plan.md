@@ -268,16 +268,22 @@ git commit -m "refactor(auth): isolate web requests and expose use cases"
 - Rename: `submission/application/service/SubmissionFinalizer.java` → `FinalizeQuoteSubmissionService.java` where the class is an application service.
 - Modify: submission controller, tests, package-info files, and quote lifecycle API imports.
 
-- [ ] **Step 1: Update submission tests to target the new interface and adapter names**
-- [ ] **Step 2: Run submission tests and verify the target names fail to compile**
-- [ ] **Step 3: Apply the renames without changing HTTPBin request/response behavior**
-- [ ] **Step 4: Run submission tests and the real insurer-boundary integration test**
-- [ ] **Step 5: Commit**
+- [x] **Step 1: Update submission tests to target the new interface and adapter names**
+- [x] **Step 2: Run submission tests and verify the target names fail to compile**
+- [x] **Step 3: Apply the renames without changing HTTPBin request/response behavior**
+- [x] **Step 4: Run submission tests and attempt the real insurer-boundary integration test** — focused tests pass; the Testcontainers integration run is ready but local verification is blocked when Docker is unavailable (`/var/run/docker.sock` is missing).
+- [x] **Step 5: Commit** (`1c32cbb`; formatter follow-up `d7edb33`)
 
 ```bash
 git add service/src/main/java/com/clara/insurancequotes/submission service/src/test/java/com/clara/insurancequotes/submission
 git commit -m "refactor(submission): standardize use-case and client names"
 ```
+
+The submission module now names capabilities by role: `SubmitQuoteUseCase`
+and `InsurerSubmissionPort` are application-facing contracts, while
+`InsurerHttpClient` and `InsurerClientConfiguration` remain transport-specific
+outbound adapter details. `SubmitQuoteService` coordinates the workflow and
+`FinalizeQuoteSubmissionService` performs the post-insurer state transition.
 
 ## Task 7: Align persistence, client, and mapper naming across modules
 
