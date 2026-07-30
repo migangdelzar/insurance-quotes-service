@@ -77,6 +77,66 @@ real, shipped, tested capabilities, not because the brief requires them.
 | C-012 | README Submission Narrative | Each repository's README must cover: setup/test instructions, pre-coding thought process, design-decision rationale, AI-tool usage disclosure (which parts, how directed/reviewed), unfinished work or challenges encountered, and a link to the sibling repo. | Business | High | **Open** |
 | C-013 | Default Branch Currency | Each repository's default branch (`main`) must reflect the current state of the work, not an older snapshot. | Operational | High | Verified |
 
+## Evidence
+
+Per CodeRabbit review feedback on this document, every `Verified` row is backed by
+the implementation path and/or test named below rather than the status word alone.
+
+### Functional Requirements
+
+| ID | Implementation | Test evidence |
+|----|-----------------|----------------|
+| FR-001 | `QuoteController.java:39` (`POST /quotes`) → `QuoteService.create()` | `QuoteControllerTest`, `QuoteServiceTest` |
+| FR-002 | `apps/web/src/features/quote-wizard/steps/personal/personalSchema.ts:3-21` (yup, all fields required) | `PersonalInfoStep.test.tsx` |
+| FR-003 | `apps/web/.../CoverageStep.tsx` (radio group BASIC/STANDARD/PREMIUM) | `CoverageStep.test.tsx` |
+| FR-004 | `apps/web/.../HealthQuestionsSection.tsx:11-25` (conditions multiselect, prescription, tobacco, spouse) | `HealthQuestionsSection.test.tsx` |
+| FR-005 | `apps/web/.../useDebouncedCoverageSync.ts` (400ms debounce → `PATCH /quotes/{id}/coverage`) | `useDebouncedCoverageSync.test.tsx`, `PremiumDisplay.test.tsx` |
+| FR-006 | `QuoteService.java:63-80` (`updateCoverage`) → `DefaultPremiumCalculator.java` | `DefaultPremiumCalculatorTest.specWorkedExample_age70StandardOneConditionSmokerWithSpouse_is327_60` |
+| FR-007 | `QuoteService.java:179-183` (`rejectHealthDataForNonSeniors`) → `HealthDataNotAllowedException` | `QuoteServiceTest` |
+| FR-008 | `apps/web/.../SummaryStep.tsx` (read-only review + `PremiumDisplay`) | covered via wizard integration tests |
+| FR-009 | `SubmissionController.java:21` (`POST /quotes/{id}/submit`) → `SubmissionService.submit()` → `HttpInsurerClient` (`https://httpbin.org/status/200`, confirmed reachable via curl) | `SubmissionControllerTest`, `SubmissionServiceTest.submit_insurerAccepts_finalizes` |
+| FR-010 | `SubmissionService.java:26-31` (already-`SUBMITTED` short-circuit) | `SubmissionServiceTest.submit_alreadySubmitted_isIdempotentAndSkipsInsurer` |
+| FR-011 | `SubmissionService.java:39-50` (`markSubmissionFailed` on `InsurerUnavailableException`) | `SubmissionServiceTest.submit_insurerFails_marksFailedAndRethrows`, `QuoteTest.markSubmissionFailed_thenSubmittable_again` |
+| FR-012 | `QuoteController.java:55` (`GET /quotes/{id}`), `@Cacheable` in `QuoteService.getQuote` | `QuoteControllerTest` |
+| FR-013 | `QuoteController.java:60` (`GET /quotes`) | `QuoteControllerTest` |
+| FR-014 | `DraftExpirationJob.java` (`expireStaleDrafts`), `ExpirationScheduleConfig.java`, `quote.expiration.draft-ttl` in `application.yml` | job unit coverage under `quote.application.service` test package |
+| FR-015 | `QuoteTest.expiredQuote_isNeverSubmittable` | same |
+| FR-016 | `QuoteCacheEvictionListener.java:18-25` (`@EventListener` on `QuoteExpired`) | — |
+| FR-017 | `SecurityConfig.java:28-46` (`anyRequest().hasAuthority("SCOPE_api")`, 401 entry point) | — |
+| FR-018 | `apps/web/.../useSubmitQuote.ts` (timeout → `getQuote` recheck), `SubmissionResult.tsx` | `useSubmitQuote.test.tsx`, `SubmissionResult.test.tsx` |
+| FR-019 | `AuthController.java:60-78` (WebAuthn endpoints), `UC-002-enroll-a-passkey.md` | — |
+| FR-020 | `apps/web/.../QuotesListPage.tsx` (pagination/filter/sort) | `QuotesListPage.test.tsx` |
+| FR-021 | `QuoteService.java:103-139` (`getSummary`) | — |
+| FR-022 | `packages/app-i18n` (`t()`/`tid()`), browser locale detection | — |
+
+### Non-Functional Requirements
+
+| ID | Evidence |
+|----|----------|
+| NFR-001 | `application.yml:32-38` — `spring.cache.redis.time-to-live: 10m` |
+| NFR-002 | `application.yml:59-62` — `insurer.connect-timeout: 2s`, `read-timeout: 5s`; enforced in `InsurerClientConfig.java` |
+| NFR-003 | `pom.xml:278-292` — JaCoCo `COVEREDRATIO` rule, `minimum: 0.80` |
+| NFR-004 | `SecurityConfig.java:57-65` — `restAuthenticationEntryPoint` returns 401 + `ApiError` JSON |
+| NFR-005 | `GlobalExceptionHandler.java`, plus module advices (`QuoteExceptionHandler`, `SubmissionExceptionHandler`, `AuthExceptionHandler`) |
+| NFR-006 | `application.yml:92-97` — `web.rate-limit.quote-mutation.limit: 30`, `window: 1m` |
+| NFR-007 | `application.yml:99-102` — `quote.expiration.draft-ttl: 30m` |
+| NFR-008 | `apps/web/.../AppNavigation.tsx:50` (`useMediaQuery`), `AppShell.tsx` breakpoint `sx` props |
+| NFR-009 | `packages/build-config/eslint.config.js` (`jsx-a11y` recommended), `useFocusHeading.ts`, `WizardProgress.tsx` (`aria-current="step"`) |
+| NFR-010 | `deployment/compose/docker-compose.yml` + `mise run demo` |
+| NFR-011 | README "Reading logs and traces" section; JSON stdout → Alloy → Loki pipeline |
+
+### Constraints
+
+| ID | Evidence |
+|----|----------|
+| C-001–C-004 | `pom.xml` (`java.version`, Spring Boot parent, Maven build), Flyway migrations under `service/src/main/resources/db/migration` |
+| C-005–C-008 | `apps/web/package.json` — `react`, `typescript`, `@mui/material`, `react-hook-form`, `yup` |
+| C-009 | `gh repo view migangdelzar/insurance-quotes-service --json visibility` → `PUBLIC`; same for `insurance-quotes-web`; each README links the other |
+| C-010 | `application.yml:60` — `INSURER_BASE_URL` default `https://httpbin.org/status/200`, confirmed reachable via direct `curl -X POST` |
+| C-011 | `AgeFactor.java`, `ConditionsFactor.java`, `TobaccoFactor.java`, `SpouseFactor.java` (constants `1.5`/`1.3`/`1.2`/`1.4`), `CoverageType` base premiums; `DefaultPremiumCalculatorTest.specWorkedExample_...` reproduces the brief's $327.60 worked example exactly |
+| C-012 | Absence confirmed via `grep -ni "AI tool\|thought process\|challenges I ran" README.md` on both repos — no matches |
+| C-013 | `gh pr view` on `insurance-quotes-service#4` and `insurance-quotes-web#4` — both `MERGED` into `main` |
+
 ## Gaps & Recommendations
 
 Everything technical in the challenge brief — both endpoints, the fixed pricing
