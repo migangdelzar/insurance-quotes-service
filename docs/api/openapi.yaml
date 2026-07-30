@@ -15,6 +15,47 @@ paths:
       - quote-controller
       operationId: listQuotes
       parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: coverage
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: sortBy
+        in: query
+        required: false
+        schema:
+          type: string
+          default: createdAt
+      - name: direction
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
       - name: API-Version
         in: header
         schema:
@@ -22,61 +63,6 @@ paths:
           default: 1.0.0
           enum:
           - "1.0"
-      - name: page
-        in: query
-        schema:
-          type: integer
-          format: int32
-          default: 0
-          minimum: 0
-      - name: size
-        in: query
-        schema:
-          type: integer
-          format: int32
-          default: 20
-          minimum: 1
-          maximum: 100
-      - name: search
-        in: query
-        schema:
-          type: string
-      - name: status
-        in: query
-        schema:
-          type: string
-          enum:
-          - DRAFT
-          - SUBMITTED
-          - SUBMISSION_FAILED
-          - EXPIRED
-      - name: coverage
-        in: query
-        schema:
-          type: string
-          enum:
-          - BASIC
-          - STANDARD
-          - PREMIUM
-      - name: sortBy
-        in: query
-        schema:
-          type: string
-          default: createdAt
-          enum:
-          - createdAt
-          - updatedAt
-          - name
-          - monthlyPremium
-          - status
-      - name: direction
-        in: query
-        schema:
-          type: string
-          default: desc
-          enum:
-          - asc
-          - desc
       responses:
         "200":
           description: OK
@@ -135,26 +121,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/QuoteDetails"
-  /quotes/summary:
-    get:
-      tags:
-      - quote-controller
-      operationId: getSummary
-      parameters:
-      - name: API-Version
-        in: header
-        schema:
-          type: string
-          default: 1.0.0
-          enum:
-          - "1.0"
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/QuoteSummary"
   /auth/webauthn/register:
     post:
       tags:
@@ -380,6 +346,26 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/QuoteDetails"
+  /quotes/summary:
+    get:
+      tags:
+      - quote-controller
+      operationId: getSummary
+      parameters:
+      - name: API-Version
+        in: header
+        schema:
+          type: string
+          default: 1.0.0
+          enum:
+          - "1.0"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuoteSummary"
 components:
   schemas:
     CreateQuoteRequest:
@@ -406,120 +392,6 @@ components:
       - email
       - name
       - zipCode
-    QuotePage:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: "#/components/schemas/QuoteDetails"
-        page:
-          type: integer
-          format: int32
-        size:
-          type: integer
-          format: int32
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
-          type: integer
-          format: int32
-        hasNext:
-          type: boolean
-        hasPrevious:
-          type: boolean
-      required:
-      - content
-      - page
-      - size
-      - totalElements
-      - totalPages
-      - hasNext
-      - hasPrevious
-    QuoteDistribution:
-      type: object
-      properties:
-        key:
-          type: string
-        count:
-          type: integer
-          format: int64
-      required:
-      - key
-      - count
-    QuoteTrendPoint:
-      type: object
-      properties:
-        date:
-          type: string
-          format: date
-        created:
-          type: integer
-          format: int64
-        submitted:
-          type: integer
-          format: int64
-        failed:
-          type: integer
-          format: int64
-      required:
-      - date
-      - created
-      - submitted
-      - failed
-    QuoteSummary:
-      type: object
-      properties:
-        totalQuotes:
-          type: integer
-          format: int64
-        draftQuotes:
-          type: integer
-          format: int64
-        submittedQuotes:
-          type: integer
-          format: int64
-        submissionFailedQuotes:
-          type: integer
-          format: int64
-        expiredQuotes:
-          type: integer
-          format: int64
-        pricedQuotes:
-          type: integer
-          format: int64
-        totalMonthlyPremium:
-          type: number
-        averageMonthlyPremium:
-          type: number
-        submissionRate:
-          type: number
-        statusDistribution:
-          type: array
-          items:
-            $ref: "#/components/schemas/QuoteDistribution"
-        coverageDistribution:
-          type: array
-          items:
-            $ref: "#/components/schemas/QuoteDistribution"
-        trend:
-          type: array
-          items:
-            $ref: "#/components/schemas/QuoteTrendPoint"
-      required:
-      - totalQuotes
-      - draftQuotes
-      - submittedQuotes
-      - submissionFailedQuotes
-      - expiredQuotes
-      - pricedQuotes
-      - totalMonthlyPremium
-      - averageMonthlyPremium
-      - submissionRate
-      - statusDistribution
-      - coverageDistribution
-      - trend
     QuoteDetails:
       type: object
       properties:
@@ -682,6 +554,91 @@ components:
           type: boolean
       required:
       - coverageType
+    QuotePage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteDetails"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+    QuoteDistribution:
+      type: object
+      properties:
+        key:
+          type: string
+        count:
+          type: integer
+          format: int64
+    QuoteSummary:
+      type: object
+      properties:
+        totalQuotes:
+          type: integer
+          format: int64
+        draftQuotes:
+          type: integer
+          format: int64
+        submittedQuotes:
+          type: integer
+          format: int64
+        submissionFailedQuotes:
+          type: integer
+          format: int64
+        expiredQuotes:
+          type: integer
+          format: int64
+        pricedQuotes:
+          type: integer
+          format: int64
+        totalMonthlyPremium:
+          type: number
+        averageMonthlyPremium:
+          type: number
+        submissionRate:
+          type: number
+        statusDistribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteDistribution"
+        coverageDistribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteDistribution"
+        trend:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteTrendPoint"
+    QuoteTrendPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        created:
+          type: integer
+          format: int64
+        submitted:
+          type: integer
+          format: int64
+        failed:
+          type: integer
+          format: int64
   securitySchemes:
     bearerAuth:
       type: http
