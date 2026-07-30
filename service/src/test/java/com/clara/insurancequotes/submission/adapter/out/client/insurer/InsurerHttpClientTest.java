@@ -15,18 +15,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
-class HttpInsurerClientTest {
+class InsurerHttpClientTest {
 
     private static final String BASE_URL = "https://insurer.test/submit";
 
     private MockRestServiceServer server;
-    private HttpInsurerClient client;
+    private InsurerHttpClient client;
 
     @BeforeEach
     void setUp() {
         var builder = RestClient.builder();
         server = MockRestServiceServer.bindTo(builder).build();
-        client = new HttpInsurerClient(builder.baseUrl(BASE_URL).build());
+        client = new InsurerHttpClient(builder.baseUrl(BASE_URL).build());
     }
 
     @Test

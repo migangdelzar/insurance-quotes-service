@@ -1,8 +1,8 @@
 package com.clara.insurancequotes.submission.application.service;
 
-import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.quote.api.usecase.MarkQuoteSubmittedUseCase;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.submission.api.event.QuoteSubmitted;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SubmissionFinalizer {
+public class FinalizeQuoteSubmissionService {
 
     private final MarkQuoteSubmittedUseCase markQuoteSubmittedUseCase;
     private final ApplicationEventPublisher events;

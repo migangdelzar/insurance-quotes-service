@@ -5,7 +5,7 @@
 |Spring components
 |_Services_
 
-* `c.c.i.s.api.usecase.SubmissionApi` (via `c.c.i.s.application.service.SubmissionService`)
+* `c.c.i.s.api.usecase.SubmitQuoteUseCase` (via `c.c.i.s.application.service.SubmitQuoteService`)
 |Bean references
 |* `c.c.i.q.api.usecase.MarkQuoteSubmittedUseCase` (in Quote)
 * `c.c.i.s.observability.BusinessMetrics` (in Shared)

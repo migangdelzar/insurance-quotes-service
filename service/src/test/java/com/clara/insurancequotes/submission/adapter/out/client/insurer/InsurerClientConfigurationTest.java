@@ -13,11 +13,11 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
-class InsurerClientConfigTest {
+class InsurerClientConfigurationTest {
 
     @Test
     void exposesRestClientBuilderForSpringBootFour() {
-        assertThat(new InsurerClientConfig().restClientBuilder()).isNotNull();
+        assertThat(new InsurerClientConfiguration().restClientBuilder()).isNotNull();
     }
 
     @Test
@@ -28,7 +28,7 @@ class InsurerClientConfigTest {
         when(builder.requestFactory(any(ClientHttpRequestFactory.class))).thenReturn(builder);
         when(builder.build()).thenReturn(client);
 
-        var result = new InsurerClientConfig()
+        var result = new InsurerClientConfiguration()
                 .insurerRestClient(builder, "http://insurer", Duration.ofSeconds(2), Duration.ofSeconds(5));
 
         var factory = ArgumentCaptor.forClass(ClientHttpRequestFactory.class);

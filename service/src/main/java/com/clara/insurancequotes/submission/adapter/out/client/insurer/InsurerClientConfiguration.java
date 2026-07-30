@@ -9,7 +9,7 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-public class InsurerClientConfig {
+public class InsurerClientConfiguration {
 
     @Bean
     public RestClient.Builder restClientBuilder() {

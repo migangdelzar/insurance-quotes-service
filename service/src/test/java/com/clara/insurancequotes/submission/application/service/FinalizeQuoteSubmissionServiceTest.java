@@ -5,16 +5,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.quote.api.usecase.MarkQuoteSubmittedUseCase;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 
-class SubmissionFinalizerTest {
+class FinalizeQuoteSubmissionServiceTest {
 
     private static final UUID QUOTE_ID = UUID.randomUUID();
     private static final UUID OWNER_ID = UUID.randomUUID();
@@ -22,8 +22,8 @@ class SubmissionFinalizerTest {
     private final MarkQuoteSubmittedUseCase markQuoteSubmittedUseCase = mock(MarkQuoteSubmittedUseCase.class);
     private final ApplicationEventPublisher events = mock(ApplicationEventPublisher.class);
     private final SimpleMeterRegistry registry = new SimpleMeterRegistry();
-    private final SubmissionFinalizer finalizer =
-            new SubmissionFinalizer(markQuoteSubmittedUseCase, events, new BusinessMetrics(registry));
+    private final FinalizeQuoteSubmissionService finalizer =
+            new FinalizeQuoteSubmissionService(markQuoteSubmittedUseCase, events, new BusinessMetrics(registry));
 
     @Test
     void completeSubmission_publishesDurableBusinessEventAndRecordsMetric() {

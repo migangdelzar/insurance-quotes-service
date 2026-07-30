@@ -15,7 +15,7 @@ import com.clara.insurancequotes.quote.api.usecase.CreateQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetOwnedQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
 import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableException;
-import com.clara.insurancequotes.submission.api.usecase.SubmissionApi;
+import com.clara.insurancequotes.submission.api.usecase.SubmitQuoteUseCase;
 import com.clara.insurancequotes.testsupport.Containers;
 import com.clara.insurancequotes.testsupport.TestUsers;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -73,7 +73,7 @@ class SubmissionFlowIT {
     private GetOwnedQuoteUseCase getOwnedQuoteUseCase;
 
     @Autowired
-    private SubmissionApi submissionApi;
+    private SubmitQuoteUseCase submitQuoteUseCase;
 
     @Autowired
     private UserRepository users;
@@ -86,7 +86,8 @@ class SubmissionFlowIT {
     }
 
     private UUID submittableQuote() {
-        var id = createQuoteUseCase.create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
+        var id = createQuoteUseCase
+                .create(new CreateQuoteCommand("Jane Roe", "jane@example.com", 34, "06600"), ownerId)
                 .id();
         updateCoverageUseCase.updateCoverage(
                 id, new UpdateCoverageCommand(CoverageType.STANDARD, null, null, null, null, null), ownerId);
@@ -98,7 +99,7 @@ class SubmissionFlowIT {
         INSURER.stubFor(post(urlEqualTo("/submit")).willReturn(aResponse().withStatus(200)));
         var id = submittableQuote();
 
-        var view = submissionApi.submit(id, ownerId);
+        var view = submitQuoteUseCase.submit(id, ownerId);
 
         assertThat(view.status()).isEqualTo(QuoteStatusView.SUBMITTED);
         try (var consumer = newConsumer()) {
@@ -116,11 +117,13 @@ class SubmissionFlowIT {
         INSURER.stubFor(post(urlEqualTo("/submit")).willReturn(aResponse().withStatus(500)));
         var id = submittableQuote();
 
-        assertThatThrownBy(() -> submissionApi.submit(id, ownerId)).isInstanceOf(InsurerUnavailableException.class);
-        assertThat(getOwnedQuoteUseCase.getOwnedQuote(id, ownerId).status()).isEqualTo(QuoteStatusView.SUBMISSION_FAILED);
+        assertThatThrownBy(() -> submitQuoteUseCase.submit(id, ownerId))
+                .isInstanceOf(InsurerUnavailableException.class);
+        assertThat(getOwnedQuoteUseCase.getOwnedQuote(id, ownerId).status())
+                .isEqualTo(QuoteStatusView.SUBMISSION_FAILED);
 
         INSURER.stubFor(post(urlEqualTo("/submit")).willReturn(aResponse().withStatus(200)));
-        assertThat(submissionApi.submit(id, ownerId).status()).isEqualTo(QuoteStatusView.SUBMITTED);
+        assertThat(submitQuoteUseCase.submit(id, ownerId).status()).isEqualTo(QuoteStatusView.SUBMITTED);
     }
 
     @Test
@@ -128,8 +131,8 @@ class SubmissionFlowIT {
         INSURER.stubFor(post(urlEqualTo("/submit")).willReturn(aResponse().withStatus(200)));
         var id = submittableQuote();
 
-        submissionApi.submit(id, ownerId);
-        var second = submissionApi.submit(id, ownerId);
+        submitQuoteUseCase.submit(id, ownerId);
+        var second = submitQuoteUseCase.submit(id, ownerId);
 
         assertThat(second.status()).isEqualTo(QuoteStatusView.SUBMITTED);
         assertThat(INSURER.getAllServeEvents()).hasSize(1);

@@ -1,13 +1,13 @@
 package com.clara.insurancequotes.submission.application.service;
 
-import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.quote.api.usecase.EnsureQuoteSubmittableUseCase;
 import com.clara.insurancequotes.quote.api.usecase.GetOwnedQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.MarkQuoteSubmissionFailedUseCase;
+import com.clara.insurancequotes.shared.observability.BusinessMetrics;
 import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableException;
-import com.clara.insurancequotes.submission.api.usecase.SubmissionApi;
-import com.clara.insurancequotes.submission.application.port.out.InsurerGateway;
+import com.clara.insurancequotes.submission.api.usecase.SubmitQuoteUseCase;
+import com.clara.insurancequotes.submission.application.port.out.InsurerSubmissionPort;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +17,13 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SubmissionService implements SubmissionApi {
+public class SubmitQuoteService implements SubmitQuoteUseCase {
 
     private final GetOwnedQuoteUseCase getOwnedQuoteUseCase;
     private final EnsureQuoteSubmittableUseCase ensureQuoteSubmittableUseCase;
     private final MarkQuoteSubmissionFailedUseCase markQuoteSubmissionFailedUseCase;
-    private final InsurerGateway insurerGateway;
-    private final SubmissionFinalizer finalizer;
+    private final InsurerSubmissionPort insurerSubmissionPort;
+    private final FinalizeQuoteSubmissionService finalizer;
     private final BusinessMetrics metrics;
 
     @Override
@@ -43,7 +43,7 @@ public class SubmissionService implements SubmissionApi {
     private void callInsurerRecordingFailure(UUID quoteId, UUID ownerId) {
         try {
             metrics.timeInsurerCall(() -> {
-                insurerGateway.submit(quoteId);
+                insurerSubmissionPort.submit(quoteId);
                 return null;
             });
         } catch (InsurerUnavailableException exception) {

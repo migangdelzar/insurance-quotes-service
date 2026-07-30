@@ -1,7 +1,7 @@
 package com.clara.insurancequotes.submission.adapter.out.client.insurer;
 
 import com.clara.insurancequotes.submission.api.exception.InsurerUnavailableException;
-import com.clara.insurancequotes.submission.application.port.out.InsurerGateway;
+import com.clara.insurancequotes.submission.application.port.out.InsurerSubmissionPort;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import org.springframework.web.client.RestClientException;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class HttpInsurerClient implements InsurerGateway {
+public class InsurerHttpClient implements InsurerSubmissionPort {
 
     private final RestClient restClient;
 
