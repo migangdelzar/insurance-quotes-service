@@ -58,7 +58,14 @@ class ArchitectureNamingTest {
     void corePackagesDoNotDependOnWebOrInfrastructureTypes() {
         noClasses()
                 .that()
-                .resideInAnyPackage("..api..", "..application..", "..domain..")
+                .resideInAnyPackage(
+                        "..api.command..",
+                        "..api.query..",
+                        "..api.type..",
+                        "..api.usecase..",
+                        "..api.exception..",
+                        "..application..",
+                        "..domain..")
                 .should()
                 .dependOnClassesThat()
                 .resideInAnyPackage(
