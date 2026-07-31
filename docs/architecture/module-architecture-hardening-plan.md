@@ -198,6 +198,7 @@ class ArchitectureNamingTest {
                 .resideInAnyPackage(
                         "..api.command..",
                         "..api.query..",
+                        "..api.result..",
                         "..api.type..",
                         "..api.usecase..",
                         "..api.exception..",

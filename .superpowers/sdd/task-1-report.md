@@ -64,6 +64,20 @@ Command:
 mise exec -- mvn -pl service -Dtest=ArchitectureNamingTest test
 ```
 
+## Review Correction: Align Plan With Implementation
+
+The Task 1 plan snippet now matches `ArchitectureNamingTest.java`: the
+guarded package list includes `..api.result..`, followed by the three exact
+compatibility exclusions:
+
+- `com.clara.insurancequotes.auth.api.result.LoginResponse`
+- `com.clara.insurancequotes.auth.api.result.TokenPairResponse`
+- `com.clara.insurancequotes.auth.api.result.WebAuthnChallengeResponse`
+
+Verification note: `rg -n '\.\.api\.result|LoginResponse|TokenPairResponse|WebAuthnChallengeResponse'`
+was run against the plan and test implementation; both contain the same
+guarded package and all three exact FQNs.
+
 Result: expected red state; Maven exited with status 1.
 
 Surefire reported 5 tests run, 1 failure, and 0 errors. The sole failure was
