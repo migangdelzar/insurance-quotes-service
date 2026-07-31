@@ -1,7 +1,6 @@
-package com.clara.insurancequotes.auth.application.service;
+package com.clara.insurancequotes.auth.configuration;
 
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
-import com.clara.insurancequotes.auth.configuration.DemoUserProperties;
 import com.clara.insurancequotes.auth.domain.model.User;
 import java.time.Clock;
 import org.springframework.boot.ApplicationRunner;
@@ -12,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableConfigurationProperties(DemoUserProperties.class)
-public class DemoUserSeeder {
+public class DemoUserSeedingConfiguration {
 
     @Bean
     public ApplicationRunner seedDemoUsers(

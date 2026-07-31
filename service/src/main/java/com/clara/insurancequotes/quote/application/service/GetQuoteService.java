@@ -6,7 +6,7 @@ import com.clara.insurancequotes.quote.api.type.RequestingUser;
 import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
 import com.clara.insurancequotes.quote.application.mapper.QuoteApplicationMapper;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
-import com.clara.insurancequotes.quote.configuration.CacheConfig;
+import com.clara.insurancequotes.quote.configuration.QuoteCacheConfiguration;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,7 +22,7 @@ public class GetQuoteService implements GetQuoteUseCase {
     @Override
     @Transactional(readOnly = true)
     @Cacheable(
-            cacheNames = CacheConfig.QUOTES_CACHE,
+            cacheNames = QuoteCacheConfiguration.QUOTES_CACHE,
             key = "#id + '|' + #requester.id()",
             condition = "!#requester.admin()")
     public QuoteDetails getQuote(UUID id, RequestingUser requester) {

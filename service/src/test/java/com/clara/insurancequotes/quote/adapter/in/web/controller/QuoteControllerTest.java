@@ -12,8 +12,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.clara.insurancequotes.auth.configuration.JwtConfig;
-import com.clara.insurancequotes.auth.configuration.SecurityConfig;
+import com.clara.insurancequotes.auth.configuration.JwtConfiguration;
+import com.clara.insurancequotes.auth.configuration.SecurityConfiguration;
 import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.quote.adapter.in.web.advice.QuoteExceptionHandler;
 import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
@@ -28,7 +28,7 @@ import com.clara.insurancequotes.quote.api.usecase.GetQuoteUseCase;
 import com.clara.insurancequotes.quote.api.usecase.SearchQuotesUseCase;
 import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
-import com.clara.insurancequotes.shared.configuration.I18nConfig;
+import com.clara.insurancequotes.shared.configuration.I18nConfiguration;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -47,9 +47,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(QuoteController.class)
 @Import({
-    SecurityConfig.class,
-    JwtConfig.class,
-    I18nConfig.class,
+    SecurityConfiguration.class,
+    JwtConfiguration.class,
+    I18nConfiguration.class,
     GlobalExceptionHandler.class,
     QuoteExceptionHandler.class
 })

@@ -1,4 +1,4 @@
-package com.clara.insurancequotes.auth.application.service;
+package com.clara.insurancequotes.auth.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.clara.insurancequotes.auth.application.port.out.UserRepository;
-import com.clara.insurancequotes.auth.configuration.DemoUserProperties;
 import com.clara.insurancequotes.auth.domain.model.User;
 import java.time.Clock;
 import java.time.Instant;
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-class DemoUserSeederTest {
+class DemoUserSeedingConfigurationTest {
 
     private final UserRepository users = mock(UserRepository.class);
     private final PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
@@ -35,7 +34,7 @@ class DemoUserSeederTest {
         when(users.findByUsername(anyString())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenAnswer(invocation -> "hash-" + invocation.getArgument(0));
 
-        new DemoUserSeeder()
+        new DemoUserSeedingConfiguration()
                 .seedDemoUsers(users, passwordEncoder, clock, properties)
                 .run(new DefaultApplicationArguments());
 
@@ -59,7 +58,7 @@ class DemoUserSeederTest {
                         com.clara.insurancequotes.auth.domain.model.UserRole.USER,
                         clock.instant())));
 
-        new DemoUserSeeder()
+        new DemoUserSeedingConfiguration()
                 .seedDemoUsers(users, passwordEncoder, clock, properties)
                 .run(new DefaultApplicationArguments());
 

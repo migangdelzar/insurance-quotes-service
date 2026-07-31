@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class WebAuthnConfig {
+public class WebAuthnConfiguration {
 
     @Bean
     public RelyingParty relyingParty(

@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 @RequiredArgsConstructor
 @Slf4j
-public class ExpirationScheduleConfig {
+public class QuoteExpirationConfiguration {
 
     private final DraftExpirationJob job;
 

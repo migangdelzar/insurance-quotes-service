@@ -6,11 +6,11 @@ import java.math.RoundingMode;
 import java.util.List;
 
 /** Applies pricing factors and owns premium arithmetic and rounding rules. */
-public final class PremiumCalculator {
+public final class PremiumCalculationPolicy {
 
     private final List<PremiumFactor> factors;
 
-    public PremiumCalculator(List<PremiumFactor> factors) {
+    public PremiumCalculationPolicy(List<PremiumFactor> factors) {
         this.factors = List.copyOf(factors);
     }
 

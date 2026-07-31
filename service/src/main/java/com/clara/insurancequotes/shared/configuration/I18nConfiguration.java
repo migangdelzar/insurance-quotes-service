@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 @Configuration
-public class I18nConfig {
+public class I18nConfiguration {
 
     @Bean
     public MessageSource messageSource() {

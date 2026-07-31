@@ -2,7 +2,7 @@ package com.clara.insurancequotes.pricing.configuration;
 
 import com.clara.insurancequotes.pricing.domain.service.AgeFactor;
 import com.clara.insurancequotes.pricing.domain.service.ConditionsFactor;
-import com.clara.insurancequotes.pricing.domain.service.PremiumCalculator;
+import com.clara.insurancequotes.pricing.domain.service.PremiumCalculationPolicy;
 import com.clara.insurancequotes.pricing.domain.service.PremiumFactor;
 import com.clara.insurancequotes.pricing.domain.service.SpouseFactor;
 import com.clara.insurancequotes.pricing.domain.service.TobaccoFactor;
@@ -35,7 +35,7 @@ public class PricingConfiguration {
     }
 
     @Bean
-    PremiumCalculator premiumCalculator(List<PremiumFactor> factors) {
-        return new PremiumCalculator(factors);
+    PremiumCalculationPolicy premiumCalculator(List<PremiumFactor> factors) {
+        return new PremiumCalculationPolicy(factors);
     }
 }

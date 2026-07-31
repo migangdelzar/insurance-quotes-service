@@ -8,7 +8,7 @@ import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.quote.api.usecase.UpdateCoverageUseCase;
 import com.clara.insurancequotes.quote.application.mapper.QuoteApplicationMapper;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
-import com.clara.insurancequotes.quote.configuration.CacheConfig;
+import com.clara.insurancequotes.quote.configuration.QuoteCacheConfiguration;
 import com.clara.insurancequotes.quote.domain.exception.HealthDataNotAllowedException;
 import com.clara.insurancequotes.quote.domain.model.HealthProfile;
 import com.clara.insurancequotes.quote.domain.model.Quote;
@@ -31,7 +31,7 @@ public class UpdateCoverageService implements UpdateCoverageUseCase {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
+    @CacheEvict(cacheNames = QuoteCacheConfiguration.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
     public QuoteDetails updateCoverage(UUID id, UpdateCoverageCommand command, UUID ownerId) {
         try {
             var quote = load(id, ownerId);
