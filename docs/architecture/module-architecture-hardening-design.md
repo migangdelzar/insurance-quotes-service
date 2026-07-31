@@ -98,7 +98,12 @@ not need one.
 | Configuration | `<Module><Concern>Configuration` | `QuoteCacheConfiguration` |
 
 `Request` and `Response` remain transport suffixes by design. They are not
-used for domain objects or application results. API versioning remains in the
+used for domain objects or ordinary application results. HTTP-only request and
+response DTOs live under the inbound web adapter. The authentication result
+types `LoginResponse`, `TokenPairResponse`, and
+`WebAuthnChallengeResponse` remain public API results because their names are
+part of the existing generated contract; this is an explicit compatibility
+exception, not a pattern for new domain results. API versioning remains in the
 web adapter and continues to use Spring's `API-Version` header convention.
 
 ## Dependency rules
@@ -139,7 +144,9 @@ adapter.out.persistence/client/messaging/cache ───────▶ applicat
 - `ApplicationModules.verify()` passes for all documented modules.
 - Architecture tests reject cross-module implementation imports and adapter
   dependencies from API/application/domain packages.
-- Every `Request` and `Response` type is located in an inbound web adapter.
+- Every HTTP-only `Request` and `Response` type is located in an inbound web
+  adapter; the three documented authentication response contracts remain in
+  `api.result` for compatibility.
 - Every `*UseCase` is a public API interface and every corresponding
   application implementation uses the `<Verb><Noun>Service` convention.
 - Persistence adapters implement application ports and framework repositories
