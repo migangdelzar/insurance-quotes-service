@@ -71,3 +71,36 @@ Surefire reported 5 tests run, 1 failure, and 0 errors. The sole failure was
 configuration-suffix violations listed above. The infrastructure dependency
 rule passed, so the prior Jackson failure from `auth.api.result.LoginResponse`
 is gone. The other three naming and placement rules also passed.
+
+## Fix: Restrict response compatibility exception
+
+The infrastructure dependency guardrail again includes `..api.result..`.
+It now excludes only these fully qualified compatibility contracts using
+ArchUnit's `doNotHaveFullyQualifiedName` predicate:
+
+- `com.clara.insurancequotes.auth.api.result.LoginResponse`
+- `com.clara.insurancequotes.auth.api.result.TokenPairResponse`
+- `com.clara.insurancequotes.auth.api.result.WebAuthnChallengeResponse`
+
+This preserves enforcement for every other API result class. The identical
+class-level predicate chain is documented in the Task 1 plan snippet. No
+production classes or user-owned diagram edits were modified.
+
+## Fix Test Evidence: Restricted response compatibility exception
+
+Red verification first restored `..api.result..` without the compatibility
+predicates. The targeted test then reported the expected infrastructure
+violation from `LoginResponse` (in addition to the intentional configuration
+suffix failure), demonstrating that API results are guarded.
+
+After the three exact predicates were added, the command below returned the
+expected intentional red state: only
+`springConfigurationClassesUseConfigurationSuffix` failed. The infrastructure
+dependency rule and the three remaining naming/placement rules passed.
+Surefire reported 5 tests run, 1 failure, 0 errors, and 0 skipped; Maven exited
+with status 1 solely because Task 1 intentionally retains the eight
+configuration-suffix violations.
+
+```text
+mise exec -- mvn -pl service -Dtest=ArchitectureNamingTest test
+```

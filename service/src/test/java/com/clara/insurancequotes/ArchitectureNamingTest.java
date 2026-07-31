@@ -61,11 +61,21 @@ class ArchitectureNamingTest {
                 .resideInAnyPackage(
                         "..api.command..",
                         "..api.query..",
+                        "..api.result..",
                         "..api.type..",
                         "..api.usecase..",
                         "..api.exception..",
                         "..application..",
                         "..domain..")
+                .and()
+                .doNotHaveFullyQualifiedName(
+                        "com.clara.insurancequotes.auth.api.result.LoginResponse")
+                .and()
+                .doNotHaveFullyQualifiedName(
+                        "com.clara.insurancequotes.auth.api.result.TokenPairResponse")
+                .and()
+                .doNotHaveFullyQualifiedName(
+                        "com.clara.insurancequotes.auth.api.result.WebAuthnChallengeResponse")
                 .should()
                 .dependOnClassesThat()
                 .resideInAnyPackage(
