@@ -5,7 +5,7 @@ import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.quote.api.usecase.MarkQuoteSubmissionFailedUseCase;
 import com.clara.insurancequotes.quote.application.mapper.QuoteApplicationMapper;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
-import com.clara.insurancequotes.quote.configuration.CacheConfig;
+import com.clara.insurancequotes.quote.configuration.QuoteCacheConfiguration;
 import java.time.Clock;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class MarkQuoteSubmissionFailedService implements MarkQuoteSubmissionFail
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
+    @CacheEvict(cacheNames = QuoteCacheConfiguration.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
     public QuoteDetails markSubmissionFailed(UUID id, UUID ownerId) {
         var quote = repository.findById(id, ownerId).orElseThrow(() -> new QuoteNotFoundException(id));
         quote.markSubmissionFailed(clock.instant());

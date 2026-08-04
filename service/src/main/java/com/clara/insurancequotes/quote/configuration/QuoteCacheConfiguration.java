@@ -10,7 +10,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 @Configuration
 @EnableCaching
-public class CacheConfig {
+public class QuoteCacheConfiguration {
 
     public static final String QUOTES_CACHE = "quotes";
 

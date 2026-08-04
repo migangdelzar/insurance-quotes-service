@@ -7,7 +7,7 @@ import com.clara.insurancequotes.pricing.api.type.CoverageType;
 import com.clara.insurancequotes.pricing.api.usecase.CalculatePremiumUseCase;
 import com.clara.insurancequotes.pricing.domain.service.AgeFactor;
 import com.clara.insurancequotes.pricing.domain.service.ConditionsFactor;
-import com.clara.insurancequotes.pricing.domain.service.PremiumCalculator;
+import com.clara.insurancequotes.pricing.domain.service.PremiumCalculationPolicy;
 import com.clara.insurancequotes.pricing.domain.service.SpouseFactor;
 import com.clara.insurancequotes.pricing.domain.service.TobaccoFactor;
 import java.math.BigDecimal;
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class CalculatePremiumServiceTest {
 
-    private final CalculatePremiumUseCase calculator = new CalculatePremiumService(new PremiumCalculator(
+    private final CalculatePremiumUseCase calculator = new CalculatePremiumService(new PremiumCalculationPolicy(
             List.of(new AgeFactor(), new ConditionsFactor(), new TobaccoFactor(), new SpouseFactor())));
 
     @Test

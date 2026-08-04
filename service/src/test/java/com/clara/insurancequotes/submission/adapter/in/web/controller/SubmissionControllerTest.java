@@ -7,10 +7,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.clara.insurancequotes.auth.configuration.JwtConfig;
-import com.clara.insurancequotes.auth.configuration.SecurityConfig;
+import com.clara.insurancequotes.auth.configuration.JwtConfiguration;
+import com.clara.insurancequotes.auth.configuration.SecurityConfiguration;
 import com.clara.insurancequotes.quote.api.exception.QuoteNotFoundException;
-import com.clara.insurancequotes.shared.configuration.I18nConfig;
+import com.clara.insurancequotes.shared.configuration.I18nConfiguration;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import com.clara.insurancequotes.submission.adapter.in.web.advice.SubmissionExceptionHandler;
 import com.clara.insurancequotes.submission.api.usecase.SubmitQuoteUseCase;
@@ -26,9 +26,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(SubmissionController.class)
 @Import({
-    SecurityConfig.class,
-    JwtConfig.class,
-    I18nConfig.class,
+    SecurityConfiguration.class,
+    JwtConfiguration.class,
+    I18nConfiguration.class,
     GlobalExceptionHandler.class,
     SubmissionExceptionHandler.class
 })

@@ -5,7 +5,7 @@ import com.clara.insurancequotes.quote.api.result.QuoteDetails;
 import com.clara.insurancequotes.quote.api.usecase.MarkQuoteSubmittedUseCase;
 import com.clara.insurancequotes.quote.application.mapper.QuoteApplicationMapper;
 import com.clara.insurancequotes.quote.application.port.out.QuoteRepository;
-import com.clara.insurancequotes.quote.configuration.CacheConfig;
+import com.clara.insurancequotes.quote.configuration.QuoteCacheConfiguration;
 import java.time.Clock;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class MarkQuoteSubmittedService implements MarkQuoteSubmittedUseCase {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = CacheConfig.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
+    @CacheEvict(cacheNames = QuoteCacheConfiguration.QUOTES_CACHE, key = "#id + '|' + #ownerId", beforeInvocation = true)
     public QuoteDetails markSubmitted(UUID id, UUID ownerId) {
         var quote = repository.findById(id, ownerId).orElseThrow(() -> new QuoteNotFoundException(id));
         quote.markSubmitted(clock.instant());

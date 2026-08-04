@@ -22,9 +22,9 @@ import com.clara.insurancequotes.auth.api.usecase.RefreshTokenUseCase;
 import com.clara.insurancequotes.auth.api.usecase.RegisterPasskeyUseCase;
 import com.clara.insurancequotes.auth.api.usecase.StartPasskeyAssertionUseCase;
 import com.clara.insurancequotes.auth.api.usecase.StartPasskeyRegistrationUseCase;
-import com.clara.insurancequotes.auth.configuration.JwtConfig;
-import com.clara.insurancequotes.auth.configuration.SecurityConfig;
-import com.clara.insurancequotes.shared.configuration.I18nConfig;
+import com.clara.insurancequotes.auth.configuration.JwtConfiguration;
+import com.clara.insurancequotes.auth.configuration.SecurityConfiguration;
+import com.clara.insurancequotes.shared.configuration.I18nConfiguration;
 import com.clara.insurancequotes.shared.error.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +36,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AuthController.class)
 @Import({
-    SecurityConfig.class,
-    JwtConfig.class,
-    I18nConfig.class,
+    SecurityConfiguration.class,
+    JwtConfiguration.class,
+    I18nConfiguration.class,
     GlobalExceptionHandler.class,
     AuthExceptionHandler.class
 })

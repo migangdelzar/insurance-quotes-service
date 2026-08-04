@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 @Configuration
-public class JwtConfig {
+public class JwtConfiguration {
 
     private static final String HMAC_ALGORITHM = "HmacSHA256";
 
